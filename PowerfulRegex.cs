@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RT.Util.ExtensionMethods;
+using System.Text.RegularExpressions;
 
 namespace RT.Util.PowerfulRegex
 {
@@ -35,9 +36,9 @@ namespace RT.Util.PowerfulRegex
         /// </summary>
         public PRegex(IEqualityComparer<T> comparer, params T[] elements) { _matcher = elementsMatcher(elements, comparer); }
         /// <summary>
-        /// Instantiates a regular expression that matches a single element that satisfies the given predicate.
+        /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. "[...]" in standard regular expression syntax).
         /// </summary>
-        public PRegex(Predicate<T> predicate) { _matcher = (input, startIndex) => startIndex >= input.Length || !predicate(input[startIndex]) ? new PRegexMatch<T>[0] : new PRegexMatch<T>[] { new PRegexMatch<T>(input, startIndex, 1) }; }
+        public PRegex(Predicate<T> predicate) { _matcher = (input, startIndex) => startIndex >= input.Length || !predicate(input[startIndex]) ? new PRegexMatch<T>[0] : new PRegexMatch<T>[] { new PRegexMatch<T>(input, startIndex, 1, null) }; }
 
         private PRegex(matcher matcher) { _matcher = matcher; }
 
@@ -50,7 +51,7 @@ namespace RT.Util.PowerfulRegex
                 for (int i = 0; i < elements.Length; i++)
                     if (!comparer.Equals(input[i + startIndex], elements[i]))
                         return new PRegexMatch<T>[0];
-                return new PRegexMatch<T>[] { new PRegexMatch<T>(input, startIndex, elements.Length) };
+                return new PRegexMatch<T>[] { new PRegexMatch<T>(input, startIndex, elements.Length, null) };
             };
         }
 
@@ -64,12 +65,14 @@ namespace RT.Util.PowerfulRegex
         /// <summary>
         /// Determines whether the given input sequence matches this regular expression, and if so, returns information about the first match.
         /// </summary>
-        /// <returns>A <see cref="RegexMatchResult&lt;T&gt;"/> object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>A <see cref="PRegexMatch&lt;T&gt;"/> object describing a regular expression match in case of success; null if no match.</returns>
         public PRegexMatch<T> Match(T[] input) { return getMatches(input).FirstOrDefault(); }
 
         /// <summary>
         /// Returns a sequence of non-overlapping regular expression matches.
         /// </summary>
+        /// <remarks>The behaviour is the same as <see cref="Regex.Matches(string,string)"/>.
+        /// The documentation for that method lies when it claims that it returns "all occurrences of the regular expression".</remarks>
         public IEnumerable<PRegexMatch<T>> Matches(T[] input)
         {
             int i = 0;
@@ -91,12 +94,12 @@ namespace RT.Util.PowerfulRegex
         /// </summary>
         public static PRegex<T> Any
         {
-            get { return new PRegex<T>((input, startIndex) => startIndex >= input.Length ? new PRegexMatch<T>[0] : new PRegexMatch<T>[] { new PRegexMatch<T>(input, startIndex, 1) }); }
+            get { return new PRegex<T>((input, startIndex) => startIndex >= input.Length ? new PRegexMatch<T>[0] : new PRegexMatch<T>[] { new PRegexMatch<T>(input, startIndex, 1, null) }); }
         }
 
         private matcher thenMatcher(IEnumerable<PRegex<T>> other)
         {
-            return (input, startIndex) => other.Aggregate(_matcher(input, startIndex), (acc, pre) => acc.SelectMany(m => pre._matcher(input, startIndex + m.Length).Select(m2 => new PRegexMatch<T>(input, m.Index, m.Length + m2.Length))));
+            return (input, startIndex) => other.Aggregate(_matcher(input, startIndex), (acc, pre) => acc.SelectMany(m => pre._matcher(input, startIndex + m.Length).Select(m2 => new PRegexMatch<T>(input, m.Index, m.Length + m2.Length, m.Groups, m2.Groups))));
         }
 
         /// <summary>
@@ -123,11 +126,11 @@ namespace RT.Util.PowerfulRegex
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or any one of the specified elements (cf. "|" in standard regular expression syntax).
         /// </summary>
-        public PRegex<T> Or(params T[] elements) { return Or(elements.Select(e => new PRegex<T>(e)).ToArray()); }
+        public PRegex<T> Or(params T[] elements) { return Or(new PRegex<T>((input, startIndex) => elements.Where(el => EqualityComparer<T>.Default.Equals(el, input[startIndex])).Take(1).Select(el => new PRegexMatch<T>(input, startIndex, 1, null)))); }
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or any of the specified elements using the specified equality comparer (cf. "|" in standard regular expression syntax).
         /// </summary>
-        public PRegex<T> Or(IEqualityComparer<T> comparer, params T[] elements) { return Or(elements.Select(e => new PRegex<T>(comparer, e)).ToArray()); }
+        public PRegex<T> Or(IEqualityComparer<T> comparer, params T[] elements) { return Or(new PRegex<T>((input, startIndex) => elements.Where(el => comparer.Equals(el, input[startIndex])).Take(1).Select(el => new PRegexMatch<T>(input, startIndex, 1, null)))); }
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or a single element that satisfies the specified predicate (cf. "|" in standard regular expression syntax).
         /// </summary>
@@ -140,50 +143,53 @@ namespace RT.Util.PowerfulRegex
         /// <summary>
         /// Returns a regular expression that matches any one of the specified elements (cf. "|" in standard regular expression syntax).
         /// </summary>
-        public static PRegex<T> Ors(params T[] elements) { return Ors(elements.Select(e => new PRegex<T>(e)).ToArray()); }
+        public static PRegex<T> Ors(params T[] elements) { return new PRegex<T>((input, startIndex) => elements.Where(el => EqualityComparer<T>.Default.Equals(el, input[startIndex])).Take(1).Select(el => new PRegexMatch<T>(input, startIndex, 1, null))); }
         /// <summary>
         /// Returns a regular expression that matches any one of the specified elements using the specified equality comparer (cf. "|" in standard regular expression syntax).
         /// </summary>
-        public static PRegex<T> Ors(IEqualityComparer<T> comparer, params T[] elements) { return Ors(elements.Select(e => new PRegex<T>(comparer, e)).ToArray()); }
+        public static PRegex<T> Ors(IEqualityComparer<T> comparer, params T[] elements) { return new PRegex<T>((input, startIndex) => elements.Where(el => comparer.Equals(el, input[startIndex])).Take(1).Select(el => new PRegexMatch<T>(input, startIndex, 1, null))); }
 
         /// <summary>
-        /// Returns a regular expression that matches the beginning of the input collection. Successful matches are always zero length.
+        /// Returns a regular expression that matches the beginning of the input collection (cf. "^" in standard regular expression syntax). Successful matches are always zero length.
         /// </summary>
-        public static PRegex<T> Start { get { return new PRegex<T>((input, startIndex) => startIndex != 0 ? new PRegexMatch<T>[0] : new PRegexMatch<T>[] { new PRegexMatch<T>(input, 0, 0) }); } }
+        public static PRegex<T> Start { get { return new PRegex<T>((input, startIndex) => startIndex != 0 ? new PRegexMatch<T>[0] : new PRegexMatch<T>[] { new PRegexMatch<T>(input, 0, 0, null) }); } }
         /// <summary>
-        /// Returns a regular expression that matches the end of the input collection. Successful matches are always zero length.
+        /// Returns a regular expression that matches the end of the input collection (cf. "$" in standard regular expression syntax). Successful matches are always zero length.
         /// </summary>
-        public static PRegex<T> End { get { return new PRegex<T>((input, startIndex) => startIndex != input.Length ? new PRegexMatch<T>[0] : new PRegexMatch<T>[] { new PRegexMatch<T>(input, startIndex, 0) }); } }
+        public static PRegex<T> End { get { return new PRegex<T>((input, startIndex) => startIndex != input.Length ? new PRegexMatch<T>[0] : new PRegexMatch<T>[] { new PRegexMatch<T>(input, startIndex, 0, null) }); } }
 
         /// <summary>
-        /// Returns a regular expression that matches this regular expression zero or more times. More times are prioritised.
+        /// Returns a regular expression that matches this regular expression zero or more times. More times are prioritised (cf. "*" in standard regular expression syntax).
         /// </summary>
         public PRegex<T> GreedyStar() { return star(true); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression zero or more times. Fewer times are prioritised.
+        /// Returns a regular expression that matches this regular expression zero or more times. Fewer times are prioritised (cf. "*?" in standard regular expression syntax).
         /// </summary>
         public PRegex<T> NonGreedyStar() { return star(false); }
+
         private PRegex<T> star(bool greedy)
         {
             matcher newMatcher = null;
-            newMatcher = new matcher((input, startIndex) => addOrPrependEmptyMatch(_matcher(input, startIndex).SelectMany(m => newMatcher(input, startIndex + m.Length).Select(m2 => new PRegexMatch<T>(input, startIndex, m2.Index + m2.Length - startIndex))), greedy, input, startIndex));
+            newMatcher = new matcher((input, startIndex) => addOrPrependEmptyMatch(
+                _matcher(input, startIndex).SelectMany(m => newMatcher(input, startIndex + m.Length).Select(m2 => new PRegexMatch<T>(input, startIndex, m2.Index + m2.Length - startIndex, m.Groups, m2.Groups))), greedy, input, startIndex
+            ));
             return new PRegex<T>(newMatcher);
         }
 
         /// <summary>
-        /// Returns a regular expression that matches this regular expression the specified number of times or more. More times are prioritised.
+        /// Returns a regular expression that matches this regular expression the specified number of times or more. More times are prioritised (cf. "{min,}" in standard regular expression syntax).
         /// </summary>
         public PRegex<T> GreedyStar(int min) { return star(min, true); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression the specified number of times or more. Fewer times are prioritised.
+        /// Returns a regular expression that matches this regular expression the specified number of times or more. Fewer times are prioritised (cf. "{min,}?" in standard regular expression syntax).
         /// </summary>
         public PRegex<T> NonGreedyStar(int min) { return star(min, false); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression one or more times. More times are prioritised.
+        /// Returns a regular expression that matches this regular expression one or more times. More times are prioritised (cf. "+" in standard regular expression syntax).
         /// </summary>
         public PRegex<T> GreedyPlus() { return Then(star(true)); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression one or more times. Fewer times are prioritised.
+        /// Returns a regular expression that matches this regular expression one or more times. Fewer times are prioritised (cf. "+?" in standard regular expression syntax).
         /// </summary>
         public PRegex<T> NonGreedyPlus() { return Then(star(false)); }
         private PRegex<T> star(int min, bool greedy)
@@ -192,48 +198,66 @@ namespace RT.Util.PowerfulRegex
                 return star(greedy);
             if (min == 1)
                 return Then(star(greedy));
-            var arr = new PRegex<T>[min - 1];
-            for (int i = 0; i < min - 1; i++)
-                arr[i] = this;
-            return Then(arr).Then(star(greedy));
+            return Then(this.Repeat(min - 1).ToArray()).Then(star(greedy));
         }
 
         /// <summary>
-        /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised.
+        /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. "?" in standard regular expression syntax).
         /// </summary>
         public PRegex<T> GreedyQ() { return q(0, 1, true); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression zero times or once. Zero times is prioritised.
+        /// Returns a regular expression that matches this regular expression zero times or once. Zero times is prioritised (cf. "??" in standard regular expression syntax).
         /// </summary>
         public PRegex<T> NonGreedyQ() { return q(0, 1, false); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. More times are prioritised.
+        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. More times are prioritised (cf. "{min,max}" in standard regular expression syntax).
         /// </summary>
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="max">Maximum number of times to match.</param>
         public PRegex<T> GreedyQ(int min, int max) { return q(min, max, true); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. Fewer times are prioritised.
+        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. Fewer times are prioritised (cf. "{min,max}?" in standard regular expression syntax).
         /// </summary>
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="max">Maximum number of times to match.</param>
         public PRegex<T> NonGreedyQ(int min, int max) { return q(min, max, false); }
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression the specified number of times (cf. "{times}" in standard regular expression syntax).
+        /// </summary>
+        public PRegex<T> Times(int times) { return q(times, times, true); }
         private PRegex<T> q(int min, int max, bool greedy)
         {
             if (min < 0) throw new ArgumentException("'min' cannot be negative.", "min");
             if (max < min) throw new ArgumentException("'max' cannot be smaller than 'min'.", "max");
-            return new PRegex<T>(Enumerable.Range(min, max - min).Aggregate((min == 0) ? emptyMatcher() : (min == 1) ? _matcher : thenMatcher(this.Repeat(min - 1)), (prevMatcher, dummy) => (input, startIndex) => prevMatcher(input, startIndex)
-                .SelectMany(m2 => addOrPrependEmptyMatch(_matcher(input, m2.Index + m2.Length), greedy, input, startIndex)).Select(m2 => new PRegexMatch<T>(input, startIndex, m2.Index + m2.Length - startIndex))));
+            return new PRegex<T>(Enumerable.Range(min, max - min)
+                .Aggregate((min == 0) ? emptyMatcher() : (min == 1) ? _matcher : thenMatcher(this.Repeat(min - 1)),
+                            (prevMatcher, dummy) => (input, startIndex) => prevMatcher(input, startIndex)
+                                .SelectMany(m2 => addOrPrependEmptyMatch(_matcher(input, m2.Index + m2.Length), greedy, input, startIndex))
+                                .Select(m2 => new PRegexMatch<T>(input, startIndex, m2.Index + m2.Length - startIndex, m2.Groups))));
+        }
+
+        /// <summary>
+        /// Returns a regular expression which captures the subsequence matched by this regular expression.
+        /// </summary>
+        /// <param name="name">Name of the capturing group. (Two groups with the same name within the same regular expression will overwrite each other.)</param>
+        public PRegex<T> Capture(string name)
+        {
+            return new PRegex<T>((input, startIndex) => _matcher(input, startIndex).Select(m =>
+            {
+                IDictionary<string, T[]> groups = m.Groups;
+                groups[name] = m.Match.ToArray();
+                return new PRegexMatch<T>(input, m.Index, m.Length, groups);
+            }));
         }
 
         private IEnumerable<PRegexMatch<T>> addOrPrependEmptyMatch(IEnumerable<PRegexMatch<T>> orig, bool add, T[] input, int startIndex)
         {
             return add
-                ? orig.Add(new PRegexMatch<T>(input, startIndex, 0))
-                : orig.Prepend(new PRegexMatch<T>(input, startIndex, 0));
+                ? orig.Add(new PRegexMatch<T>(input, startIndex, 0, null))
+                : orig.Prepend(new PRegexMatch<T>(input, startIndex, 0, null));
         }
 
-        private static matcher emptyMatcher() { return (input, startIndex) => new PRegexMatch<T>[] { new PRegexMatch<T>(input, startIndex, 0) }; }
+        private static matcher emptyMatcher() { return (input, startIndex) => new PRegexMatch<T>[] { new PRegexMatch<T>(input, startIndex, 0, null) }; }
     }
 
     /// <summary>
@@ -245,6 +269,7 @@ namespace RT.Util.PowerfulRegex
         private int _index;
         private int _length;
         private IEnumerable<T> _match;
+        private IDictionary<string, T[]> _groups;
 
         /// <summary>
         /// Gets the index in the original collection at which the match occurred.
@@ -258,12 +283,23 @@ namespace RT.Util.PowerfulRegex
         /// Returns a slice of the original collection which the regular expression matched.
         /// </summary>
         public IEnumerable<T> Match { get { return _match; } }
+        /// <summary>
+        /// Returns a dictionary containing the matches for each captured group (see <see cref="PRegex&lt;T&gt;.Capture(string)"/>).
+        /// </summary>
+        public IDictionary<string, T[]> Groups { get { return _groups ?? new Dictionary<string, T[]>(); } }
 
-        internal PRegexMatch(T[] original, int index, int length)
+        internal PRegexMatch(T[] original, int index, int length, IDictionary<string, T[]> groups)
         {
             _index = index;
             _length = length;
             _match = original.Skip(index).Take(length);
+            _groups = groups;
+        }
+
+        internal PRegexMatch(T[] original, int index, int length, IDictionary<string, T[]> groups1, IDictionary<string, T[]> groups2)
+            : this(original, index, length, null)
+        {
+            _groups = groups1.CopyMerge(groups2);
         }
     }
 }
