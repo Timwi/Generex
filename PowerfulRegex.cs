@@ -37,7 +37,7 @@ namespace RT.Util.PowerfulRegex
         /// <summary>
         /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. "[...]" in standard regular expression syntax).
         /// </summary>
-        public PRegex(Predicate<T> predicate) { _matcher = (input, startIndex) => startIndex >= input.Length || !predicate(input[startIndex]) ? new int[0] : new int[] { 1 }; }
+        public PRegex(Predicate<T> predicate) { _matcher = (input, startIndex) => startIndex >= input.Length || !predicate(input[startIndex]) ? PRegex.Empty : PRegex.One; }
 
         private PRegex(matcher matcher) { _matcher = matcher; }
 
@@ -90,11 +90,11 @@ namespace RT.Util.PowerfulRegex
             return (input, startIndex) =>
             {
                 if (startIndex > input.Length - elements.Length)
-                    return new int[0];
+                    return PRegex.Empty;
                 for (int i = 0; i < elements.Length; i++)
                     if (!comparer.Equals(input[i + startIndex], elements[i]))
-                        return new int[0];
-                return new int[] { elements.Length };
+                        return PRegex.Empty;
+                return elements.Length == 0 ? PRegex.Zero : elements.Length == 1 ? PRegex.One : new int[] { elements.Length };
             };
         }
 
@@ -109,7 +109,7 @@ namespace RT.Util.PowerfulRegex
         /// <summary>
         /// Returns a regular expression that matches a single element, no matter what it is (cf. "." in standard regular expression syntax).
         /// </summary>
-        public static PRegex<T> Any { get { return new PRegex<T>((input, startIndex) => startIndex >= input.Length ? new int[0] : new int[] { 1 }); } }
+        public static PRegex<T> Any { get { return new PRegex<T>((input, startIndex) => startIndex >= input.Length ? PRegex.Empty : PRegex.One); } }
 
         /// <summary>
         /// Returns a regular expression that matches a consecutive sequence of regular expressions, beginning with this one, followed by the specified ones.
@@ -135,11 +135,11 @@ namespace RT.Util.PowerfulRegex
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or any one of the specified elements (cf. "|" or "[...]" in standard regular expression syntax).
         /// </summary>
-        public PRegex<T> Or(params T[] elements) { return Or(new PRegex<T>((input, startIndex) => startIndex >= input.Length ? new int[0] : elements.Where(el => EqualityComparer<T>.Default.Equals(el, input[startIndex])).Take(1).Select(el => 1))); }
+        public PRegex<T> Or(params T[] elements) { return Or(new PRegex<T>((input, startIndex) => startIndex >= input.Length ? PRegex.Empty : elements.Where(el => EqualityComparer<T>.Default.Equals(el, input[startIndex])).Take(1).Select(el => 1))); }
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or any of the specified elements using the specified equality comparer (cf. "|" or "[...]" in standard regular expression syntax).
         /// </summary>
-        public PRegex<T> Or(IEqualityComparer<T> comparer, params T[] elements) { return Or(new PRegex<T>((input, startIndex) => startIndex >= input.Length ? new int[0] : elements.Where(el => comparer.Equals(el, input[startIndex])).Take(1).Select(el => 1))); }
+        public PRegex<T> Or(IEqualityComparer<T> comparer, params T[] elements) { return Or(new PRegex<T>((input, startIndex) => startIndex >= input.Length ? PRegex.Empty : elements.Where(el => comparer.Equals(el, input[startIndex])).Take(1).Select(el => 1))); }
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or a single element that satisfies the specified predicate (cf. "|" in standard regular expression syntax).
         /// </summary>
@@ -156,16 +156,16 @@ namespace RT.Util.PowerfulRegex
         /// <summary>
         /// Returns a regular expression that matches any one of the specified elements using the specified equality comparer (cf. "|" or "[...]" in standard regular expression syntax).
         /// </summary>
-        public static PRegex<T> Ors(IEqualityComparer<T> comparer, params T[] elements) { return new PRegex<T>((input, startIndex) => startIndex >= input.Length ? new int[0] : elements.Where(el => comparer.Equals(el, input[startIndex])).Take(1).Select(el => 1)); }
+        public static PRegex<T> Ors(IEqualityComparer<T> comparer, params T[] elements) { return new PRegex<T>((input, startIndex) => startIndex >= input.Length ? PRegex.Empty : elements.Where(el => comparer.Equals(el, input[startIndex])).Take(1).Select(el => 1)); }
 
         /// <summary>
         /// Returns a regular expression that matches the beginning of the input collection (cf. "^" in standard regular expression syntax). Successful matches are always zero length.
         /// </summary>
-        public static PRegex<T> Start { get { return new PRegex<T>((input, startIndex) => startIndex != 0 ? new int[0] : new int[] { 0 }); } }
+        public static PRegex<T> Start { get { return new PRegex<T>((input, startIndex) => startIndex != 0 ? PRegex.Empty : PRegex.Zero); } }
         /// <summary>
         /// Returns a regular expression that matches the end of the input collection (cf. "$" in standard regular expression syntax). Successful matches are always zero length.
         /// </summary>
-        public static PRegex<T> End { get { return new PRegex<T>((input, startIndex) => startIndex != input.Length ? new int[0] : new int[] { 0 }); } }
+        public static PRegex<T> End { get { return new PRegex<T>((input, startIndex) => startIndex != input.Length ? PRegex.Empty : PRegex.Zero); } }
 
         /// <summary>
         /// Returns a regular expression that matches this regular expression zero or more times. More times are prioritised (cf. "*" in standard regular expression syntax).
@@ -312,7 +312,7 @@ namespace RT.Util.PowerfulRegex
         public PRegex<T> Do(Func<PRegexMatch<T>, bool> code) { return new PRegex<T>((input, startIndex) => _matcher(input, startIndex).Where(m => code(new PRegexMatch<T>(input, startIndex, m)))); }
 
         /// <summary>Generates an always-successful zero-width matcher.</summary>
-        private static matcher emptyMatcher() { return (input, startIndex) => new int[] { 0 }; }
+        private static matcher emptyMatcher() { return (input, startIndex) => PRegex.Zero; }
     }
 
     /// <summary>
@@ -320,6 +320,10 @@ namespace RT.Util.PowerfulRegex
     /// </summary>
     public static class PRegex
     {
+        internal static IEnumerable<int> Empty = new int[0];
+        internal static IEnumerable<int> Zero = new int[] { 0 };
+        internal static IEnumerable<int> One = new int[] { 1 };
+
         /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive elements.
         /// </summary>
