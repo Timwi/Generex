@@ -99,11 +99,11 @@ namespace RT.Util.PowerfulRegex
         }
 
         /// <summary>
-        /// Generates a matcher that matches this regular expression followed by a specified sequence of other regular expressions.
+        /// Generates a matcher that matches this regular expression followed by the specified sequence of other regular expressions.
         /// </summary>
         private matcher thenMatcher(IEnumerable<PRegex<T>> other)
         {
-            return (input, startIndex) => other.Aggregate(_matcher(input, startIndex), (acc, pre) => acc.SelectMany(m => pre._matcher(input, startIndex + m).Select(m2 => m + m2)));
+            return (input, startIndex) => other.Aggregate(_matcher(input, startIndex), (acc, otherPRegex) => acc.SelectMany(m => otherPRegex._matcher(input, startIndex + m).Select(m2 => m + m2)));
         }
 
         /// <summary>
@@ -199,9 +199,10 @@ namespace RT.Util.PowerfulRegex
         private PRegex<T> star(bool greedy)
         {
             matcher newMatcher = null;
-            newMatcher = new matcher((input, startIndex) => addOrPrependZero(
-                _matcher(input, startIndex).SelectMany(m => newMatcher(input, startIndex + m).Select(m2 => m + m2)), greedy
-            ));
+            if (greedy)
+                newMatcher = (input, startIndex) => _matcher(input, startIndex).SelectMany(m => newMatcher(input, startIndex + m).Select(m2 => m + m2)).Add(0);
+            else
+                newMatcher = (input, startIndex) => _matcher(input, startIndex).SelectMany(m => newMatcher(input, startIndex + m).Select(m2 => m + m2)).Prepend(0);
             return new PRegex<T>(newMatcher);
         }
         /// <summary>
@@ -211,13 +212,17 @@ namespace RT.Util.PowerfulRegex
         /// <param name="greedy">If true, more matches are prioritised; otherwise, fewer matches are prioritised.</param>
         private PRegex<T> star(int min, bool greedy)
         {
-            if (min < 0)
-                throw new ArgumentException("'min' cannot be negative.", "min");
-            if (min == 0)
-                return star(greedy);
-            if (min == 1)
-                return Then(star(greedy));
-            return Then(this.Repeat(min - 1).ToArray()).Then(star(greedy));
+            if (min < 0) throw new ArgumentException("'min' cannot be negative.", "min");
+            return q(min, min, true).Then(star(greedy));
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression the specified number of times (cf. "{times}" in standard regular expression syntax).
+        /// </summary>
+        public PRegex<T> Times(int times)
+        {
+            if (times < 0) throw new ArgumentException("'times' cannot be negative.", "times");
+            return q(times, times, true);
         }
 
         /// <summary>
@@ -240,10 +245,6 @@ namespace RT.Util.PowerfulRegex
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="max">Maximum number of times to match.</param>
         public PRegex<T> NonGreedyQ(int min, int max) { return q(min, max, false); }
-        /// <summary>
-        /// Returns a regular expression that matches this regular expression the specified number of times (cf. "{times}" in standard regular expression syntax).
-        /// </summary>
-        public PRegex<T> Times(int times) { return q(times, times, true); }
 
         /// <summary>
         /// Generates a matcher that matches this regular expression at least a minimum number of times and at most a maximum number of times.
@@ -255,10 +256,33 @@ namespace RT.Util.PowerfulRegex
         {
             if (min < 0) throw new ArgumentException("'min' cannot be negative.", "min");
             if (max < min) throw new ArgumentException("'max' cannot be smaller than 'min'.", "max");
-            return new PRegex<T>((input, startIndex) => new int[max - min].Aggregate(
-                (min == 0) ? new int[] { 0 } : (min == 1) ? _matcher(input, startIndex) : thenMatcher(this.Repeat(min - 1))(input, startIndex),
-                (acc, dummy) => acc.SelectMany(m => addOrPrependZero(_matcher(input, startIndex + m), greedy).Select(m2 => m + m2))
-            ));
+            qMatcher qm = new qMatcher { Greedy = greedy, MinTimes = min, MaxTimes = max, OrigMatcher = _matcher };
+            return new PRegex<T>(qm.Matcher);
+        }
+
+        private class qMatcher
+        {
+            public int MinTimes;
+            public int MaxTimes;
+            public bool Greedy;
+            public matcher OrigMatcher;
+            public IEnumerable<int> Matcher(T[] input, int startIndex)
+            {
+                return matcher(input, startIndex, 0);
+            }
+            private IEnumerable<int> matcher(T[] input, int startIndex, int iteration)
+            {
+                if (!Greedy && iteration >= MinTimes)
+                    yield return 0;
+                if (iteration < MaxTimes)
+                {
+                    foreach (var m in OrigMatcher(input, startIndex))
+                        foreach (var m2 in matcher(input, startIndex + m, iteration + 1))
+                            yield return m + m2;
+                }
+                if (Greedy && iteration >= MinTimes)
+                    yield return 0;
+            }
         }
 
         /// <summary>
@@ -286,9 +310,6 @@ namespace RT.Util.PowerfulRegex
         /// Executes the specified code every time the regular expression engine encounters this expression. The return value of the specified code determines whether the expression matches successfully (all matches are zero-length).
         /// </summary>
         public PRegex<T> Do(Func<PRegexMatch<T>, bool> code) { return new PRegex<T>((input, startIndex) => _matcher(input, startIndex).Where(m => code(new PRegexMatch<T>(input, startIndex, m)))); }
-
-        /// <summary>Adds a zero element to the beginning or end of a sequence of integers.</summary>
-        private IEnumerable<int> addOrPrependZero(IEnumerable<int> orig, bool add) { return add ? orig.Add(0) : orig.Prepend(0); }
 
         /// <summary>Generates an always-successful zero-width matcher.</summary>
         private static matcher emptyMatcher() { return (input, startIndex) => new int[] { 0 }; }
