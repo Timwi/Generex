@@ -200,9 +200,9 @@ namespace RT.Util.PowerfulRegex
         {
             matcher newMatcher = null;
             if (greedy)
-                newMatcher = (input, startIndex) => _matcher(input, startIndex).SelectMany(m => newMatcher(input, startIndex + m).Select(m2 => m + m2)).Add(0);
+                newMatcher = (input, startIndex) => _matcher(input, startIndex).SelectMany(m => newMatcher(input, startIndex + m).Select(m2 => m + m2)).Concat(0);
             else
-                newMatcher = (input, startIndex) => _matcher(input, startIndex).SelectMany(m => newMatcher(input, startIndex + m).Select(m2 => m + m2)).Prepend(0);
+                newMatcher = (input, startIndex) => 0.Concat(_matcher(input, startIndex).SelectMany(m => newMatcher(input, startIndex + m).Select(m2 => m + m2)));
             return new PRegex<T>(newMatcher);
         }
         /// <summary>
