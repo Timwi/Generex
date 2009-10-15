@@ -135,11 +135,11 @@ namespace RT.Util.PowerfulRegex
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or any one of the specified elements (cf. "|" or "[...]" in standard regular expression syntax).
         /// </summary>
-        public PRegex<T> Or(params T[] elements) { return Or(new PRegex<T>((input, startIndex) => startIndex >= input.Length ? PRegex.Empty : elements.Where(el => EqualityComparer<T>.Default.Equals(el, input[startIndex])).Take(1).Select(el => 1))); }
+        public PRegex<T> Or(params T[] elements) { return Or(new PRegex<T>((input, startIndex) => startIndex >= input.Length ? PRegex.Empty : elements.Any(el => EqualityComparer<T>.Default.Equals(el, input[startIndex])) ? PRegex.One : PRegex.Empty)); }
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or any of the specified elements using the specified equality comparer (cf. "|" or "[...]" in standard regular expression syntax).
         /// </summary>
-        public PRegex<T> Or(IEqualityComparer<T> comparer, params T[] elements) { return Or(new PRegex<T>((input, startIndex) => startIndex >= input.Length ? PRegex.Empty : elements.Where(el => comparer.Equals(el, input[startIndex])).Take(1).Select(el => 1))); }
+        public PRegex<T> Or(IEqualityComparer<T> comparer, params T[] elements) { return Or(new PRegex<T>((input, startIndex) => startIndex >= input.Length ? PRegex.Empty : elements.Any(el => comparer.Equals(el, input[startIndex])) ? PRegex.One : PRegex.Empty)); }
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or a single element that satisfies the specified predicate (cf. "|" in standard regular expression syntax).
         /// </summary>
@@ -156,7 +156,7 @@ namespace RT.Util.PowerfulRegex
         /// <summary>
         /// Returns a regular expression that matches any one of the specified elements using the specified equality comparer (cf. "|" or "[...]" in standard regular expression syntax).
         /// </summary>
-        public static PRegex<T> Ors(IEqualityComparer<T> comparer, params T[] elements) { return new PRegex<T>((input, startIndex) => startIndex >= input.Length ? PRegex.Empty : elements.Where(el => comparer.Equals(el, input[startIndex])).Take(1).Select(el => 1)); }
+        public static PRegex<T> Ors(IEqualityComparer<T> comparer, params T[] elements) { return new PRegex<T>((input, startIndex) => startIndex >= input.Length ? PRegex.Empty : elements.Any(el => comparer.Equals(el, input[startIndex])) ? PRegex.One : PRegex.Empty); }
 
         /// <summary>
         /// Returns a regular expression that matches the beginning of the input collection (cf. "^" in standard regular expression syntax). Successful matches are always zero length.
