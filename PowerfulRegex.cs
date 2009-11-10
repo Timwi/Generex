@@ -5,7 +5,7 @@ using System.Text;
 using RT.Util.ExtensionMethods;
 using System.Text.RegularExpressions;
 
-namespace RT.Util.PowerfulRegex
+namespace RT.KitchenSink.PowerfulRegex
 {
     /// <summary>
     /// Provides regular-expression functionality for collections of arbitrary objects rather than just strings.
