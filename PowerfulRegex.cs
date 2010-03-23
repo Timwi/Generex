@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using RT.Util.ExtensionMethods;
 using System.Text.RegularExpressions;
+using RT.Util.ExtensionMethods;
 
 namespace RT.KitchenSink.PowerfulRegex
 {
@@ -25,7 +25,7 @@ namespace RT.KitchenSink.PowerfulRegex
         /// <summary>
         /// Instantiates an empty regular expression (always matches).
         /// </summary>
-        public PRegex() { _matcher = emptyMatcher(); }
+        public PRegex() { _matcher = emptyMatch; }
         /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive elements.
         /// </summary>
@@ -311,8 +311,8 @@ namespace RT.KitchenSink.PowerfulRegex
         /// </summary>
         public PRegex<T> Do(Func<PRegexMatch<T>, bool> code) { return new PRegex<T>((input, startIndex) => _matcher(input, startIndex).Where(m => code(new PRegexMatch<T>(input, startIndex, m)))); }
 
-        /// <summary>Generates an always-successful zero-width matcher.</summary>
-        private static matcher emptyMatcher() { return (input, startIndex) => PRegex.Zero; }
+        /// <summary>Returns a successful zero-width match.</summary>
+        private static IEnumerable<int> emptyMatch(T[] input, int startIndex) { return PRegex.Zero; }
     }
 
     /// <summary>
