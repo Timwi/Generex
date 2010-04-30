@@ -17,7 +17,7 @@ namespace RT.KitchenSink.PowerfulRegex
     /// <item><description>Positive/negative zero-width look-ahead/look-behind assertions</description></item>
     /// <item><description>Match backwards (reverse)</description></item>
     /// </list></remarks>
-    public class PRegex<T>
+    public sealed class PRegex<T>
     {
         private delegate IEnumerable<int> matcher(T[] input, int startIndex);
         private matcher _matcher;
@@ -260,7 +260,7 @@ namespace RT.KitchenSink.PowerfulRegex
             return new PRegex<T>(qm.Matcher);
         }
 
-        private class qMatcher
+        private sealed class qMatcher
         {
             public int MinTimes;
             public int MaxTimes;
@@ -351,7 +351,7 @@ namespace RT.KitchenSink.PowerfulRegex
     /// Represents the result of a regular expression match using <see cref="PRegex&lt;T&gt;"/>.
     /// </summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
-    public class PRegexMatch<T>
+    public sealed class PRegexMatch<T>
     {
         private int _index;
         private int _length;
