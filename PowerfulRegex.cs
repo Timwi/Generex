@@ -38,6 +38,18 @@ namespace RT.KitchenSink.PowerfulRegex
         /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. "[...]" in standard regular expression syntax).
         /// </summary>
         public PRegex(Predicate<T> predicate) { _matcher = (input, startIndex) => startIndex >= input.Length || !predicate(input[startIndex]) ? PRegex.Empty : PRegex.One; }
+        /// <summary>
+        /// Instantiates a regular expression that matches a sequence of consecutive regular expressions.
+        /// </summary>
+        public PRegex(params PRegex<T>[] pregexes)
+        {
+            if (pregexes.Length == 0)
+                _matcher = emptyMatch;
+            else if (pregexes.Length == 1)
+                _matcher = pregexes[0]._matcher;
+            else
+                _matcher = pregexes[0].thenMatcher(pregexes.Skip(1));
+        }
 
         private PRegex(matcher matcher) { _matcher = matcher; }
 
@@ -87,15 +99,16 @@ namespace RT.KitchenSink.PowerfulRegex
         /// </summary>
         private static matcher elementsMatcher(T[] elements, IEqualityComparer<T> comparer)
         {
-            return (input, startIndex) =>
+            if (elements.Length == 0)
+                return emptyMatch;
+
+            if (elements.Length == 1)
             {
-                if (startIndex > input.Length - elements.Length)
-                    return PRegex.Empty;
-                for (int i = 0; i < elements.Length; i++)
-                    if (!comparer.Equals(input[i + startIndex], elements[i]))
-                        return PRegex.Empty;
-                return elements.Length == 0 ? PRegex.Zero : elements.Length == 1 ? PRegex.One : new int[] { elements.Length };
-            };
+                var element = elements[0];
+                return (input, startIndex) => startIndex < input.Length && comparer.Equals(input[startIndex], element) ? PRegex.One : PRegex.Empty;
+            }
+
+            return (input, startIndex) => startIndex <= input.Length - elements.Length && input.SubarrayEquals(startIndex, elements, comparer) ? PRegex.One : PRegex.Empty;
         }
 
         /// <summary>
@@ -103,7 +116,7 @@ namespace RT.KitchenSink.PowerfulRegex
         /// </summary>
         private matcher thenMatcher(IEnumerable<PRegex<T>> other)
         {
-            return (input, startIndex) => other.Aggregate(_matcher(input, startIndex), (acc, otherPRegex) => acc.SelectMany(m => otherPRegex._matcher(input, startIndex + m).Select(m2 => m + m2)));
+            return other.Select(pregex => pregex._matcher).Aggregate(_matcher, (acc, otherMatcher) => (input, startIndex) => acc(input, startIndex).SelectMany(m => otherMatcher(input, startIndex + m).Select(m2 => m + m2)));
         }
 
         /// <summary>
@@ -313,6 +326,9 @@ namespace RT.KitchenSink.PowerfulRegex
 
         /// <summary>Returns a successful zero-width match.</summary>
         private static IEnumerable<int> emptyMatch(T[] input, int startIndex) { return PRegex.Zero; }
+
+        public static implicit operator PRegex<T>(T element) { return new PRegex<T>(element); }
+        public static implicit operator PRegex<T>(Predicate<T> predicate) { return new PRegex<T>(predicate); }
     }
 
     /// <summary>
@@ -332,6 +348,14 @@ namespace RT.KitchenSink.PowerfulRegex
         /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified equality comparer.
         /// </summary>
         public static PRegex<T> New<T>(IEqualityComparer<T> comparer, params T[] elements) { return new PRegex<T>(comparer, elements); }
+        /// <summary>
+        /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. "[...]" in standard regular expression syntax).
+        /// </summary>
+        public static PRegex<T> New<T>(Predicate<T> predicate) { return new PRegex<T>(predicate); }
+        /// <summary>
+        /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. "[...]" in standard regular expression syntax).
+        /// </summary>
+        public static PRegex<T> New<T>(params PRegex<T>[] pregexes) { return new PRegex<T>(pregexes); }
 
         /// <summary>
         /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in standard regular expression syntax).
