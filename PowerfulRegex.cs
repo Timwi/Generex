@@ -8,15 +8,9 @@ using RT.Util.ExtensionMethods;
 namespace RT.KitchenSink.PowerfulRegex
 {
     /// <summary>
-    /// Provides regular-expression functionality for collections of arbitrary objects rather than just strings.
-    /// Regular expression trees are generated using successive method calls instead of a (cryptic) string-based syntax.
+    /// Provides regular-expression functionality for collections of arbitrary objects.
     /// </summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
-    /// <remarks><para>To do:</para>
-    /// <list type="bullet">
-    /// <item><description>Positive/negative zero-width look-ahead/look-behind assertions</description></item>
-    /// <item><description>Match backwards (reverse)</description></item>
-    /// </list></remarks>
     public sealed class PRegex<T>
     {
         private delegate IEnumerable<int> matcher(T[] input, int startIndex);
@@ -111,7 +105,7 @@ namespace RT.KitchenSink.PowerfulRegex
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
-        /// <returns>A <see cref="PRegexMatch&lt;T&gt;"/> object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>A <see cref="PRegexMatch{T}"/> object describing a regular expression match in case of success; null if no match.</returns>
         public PRegexMatch<T> Match(T[] input, int startAt = 0)
         {
             return Matches(input, startAt).FirstOrDefault();
@@ -123,7 +117,7 @@ namespace RT.KitchenSink.PowerfulRegex
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included.</param>
-        /// <returns>A <see cref="PRegexMatch&lt;T&gt;"/> object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>A <see cref="PRegexMatch{T}"/> object describing a regular expression match in case of success; null if no match.</returns>
         public PRegexMatch<T> MatchReverse(T[] input, int? endAt = null)
         {
             return MatchesReverse(input, endAt).FirstOrDefault();
@@ -599,7 +593,7 @@ namespace RT.KitchenSink.PowerfulRegex
     }
 
     /// <summary>
-    /// Provides static factory methods to generate <see cref="PRegex&lt;T&gt;"/> objects.
+    /// Provides static factory methods to generate <see cref="PRegex{T}"/> objects.
     /// </summary>
     public static class PRegex
     {
@@ -640,7 +634,7 @@ namespace RT.KitchenSink.PowerfulRegex
     }
 
     /// <summary>
-    /// Represents the result of a regular expression match using <see cref="PRegex&lt;T&gt;"/>.
+    /// Represents the result of a regular expression match using <see cref="PRegex{T}"/>.
     /// </summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
     public sealed class PRegexMatch<T>
