@@ -419,22 +419,10 @@ namespace RT.Generexes
             );
         }
 
-        /// <summary>Turns the current regular expression into a zero-width positive look-ahead assertion.</summary>
-        public Generex<T> LookAhead() { return look(behind: false, negative: false); }
         /// <summary>Turns the current regular expression into a zero-width negative look-ahead assertion.</summary>
-        public Generex<T> LookAheadNegative() { return look(behind: false, negative: true); }
-        /// <summary>Turns the current regular expression into a zero-width positive look-behind assertion.</summary>
-        public Generex<T> LookBehind() { return look(behind: true, negative: false); }
+        public Generex<T> LookAheadNegative() { return lookNegative(behind: false, defaultMatch: Generex.ZeroWidthMatch); }
         /// <summary>Turns the current regular expression into a zero-width negative look-ahead assertion.</summary>
-        public Generex<T> LookBehindNegative() { return look(behind: true, negative: true); }
-
-        private Generex<T> look(bool behind, bool negative)
-        {
-            // In a look-*behind* assertion, both matchers use the _backwardMatcher. Similarly, look-*ahead* assertions always use _forwardMatcher.
-            matcher innerMatcher = behind ? _backwardMatcher : _forwardMatcher;
-            matcher newMatcher = (input, startIndex) => (innerMatcher(input, startIndex).Any() ^ negative) ? Generex.ZeroWidthMatch : Generex.NoMatch;
-            return new Generex<T>(newMatcher, newMatcher);
-        }
+        public Generex<T> LookBehindNegative() { return lookNegative(behind: true, defaultMatch: Generex.ZeroWidthMatch); }
 
         /// <summary>Returns a successful zero-width match.</summary>
         private static IEnumerable<int> emptyMatch(T[] input, int startIndex) { return Generex.ZeroWidthMatch; }

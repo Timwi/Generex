@@ -87,7 +87,7 @@ namespace RT.Generexes
         /// Returns a regular expression that matches this regular expression, followed by the specified ones,
         /// and generates a match object that combines the original two matches.
         /// </summary>
-        public Generex<T, TCombined> Then<TOtherResult, TCombined>(Generex<T, TOtherResult> other, Func<TResult, TOtherResult, TCombined> selector)
+        public Generex<T, TCombined> ThenRaw<TOtherResult, TCombined>(Generex<T, TOtherResult> other, Func<TResult, TOtherResult, TCombined> selector)
         {
             return new Generex<T, TCombined>(
                 (input, startIndex) => _forwardMatcher(input, startIndex).SelectMany(m => other._forwardMatcher(input, startIndex + m.Length)
@@ -101,21 +101,7 @@ namespace RT.Generexes
         /// Returns a regular expression that matches this regular expression, followed by the specified one,
         /// and generates a match object that combines the result of this regular expression with the match of the other.
         /// </summary>
-        public Generex<T, TCombined> ThenMatch<TCombined>(Generex<T> other, Func<TResult, GenerexMatch<T>, TCombined> selector)
-        {
-            return new Generex<T, TCombined>(
-                (input, startIndex) => _forwardMatcher(input, startIndex).SelectMany(m => other._forwardMatcher(input, startIndex + m.Length)
-                    .Select(m2 => new GenerexMatchInfo<TCombined>(selector(m.Result, new GenerexMatch<T>(input, startIndex + m.Length, m2)), m.Length + m2))),
-                (input, startIndex) => other._backwardMatcher(input, startIndex).Select(m2 => new { Match = new GenerexMatch<T>(input, startIndex + m2, -m2), Length = m2 })
-                    .SelectMany(inf => _backwardMatcher(input, startIndex + inf.Length).Select(m => new GenerexMatchInfo<TCombined>(selector(m.Result, inf.Match), m.Length + inf.Length)))
-            );
-        }
-
-        /// <summary>
-        /// Returns a regular expression that matches this regular expression, followed by the specified one,
-        /// and generates a match object that combines the result of this regular expression with the match of the other.
-        /// </summary>
-        public Generex<T, TCombined> ThenMatch<TOtherResult, TCombined>(Generex<T, TOtherResult> other, Func<TResult, GenerexMatch<T, TOtherResult>, TCombined> selector)
+        public Generex<T, TCombined> Then<TOtherResult, TCombined>(Generex<T, TOtherResult> other, Func<TResult, GenerexMatch<T, TOtherResult>, TCombined> selector)
         {
             return new Generex<T, TCombined>(
                 (input, startIndex) => _forwardMatcher(input, startIndex).SelectMany(m => other._forwardMatcher(input, startIndex + m.Length)
@@ -194,11 +180,11 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches this regular expression one or more times, interspersed with a separator. Fewer times are prioritised.
         /// </summary>
-        public Generex<T, IEnumerable<TResult>> RepeatWithSeparator(Generex<T> separator) { return Then(separator.Then(this).Repeat(), (first, rest) => first.Concat(rest)); }
+        public Generex<T, IEnumerable<TResult>> RepeatWithSeparator(Generex<T> separator) { return ThenRaw(separator.Then(this).Repeat(), (first, rest) => first.Concat(rest)); }
         /// <summary>
         /// Returns a regular expression that matches this regular expression one or more times, interspersed with a separator. More times are prioritised.
         /// </summary>
-        public Generex<T, IEnumerable<TResult>> RepeatWithSeparatorGreedy(Generex<T> separator) { return Then(separator.Then(this).RepeatGreedy(), (first, rest) => first.Concat(rest)); }
+        public Generex<T, IEnumerable<TResult>> RepeatWithSeparatorGreedy(Generex<T> separator) { return ThenRaw(separator.Then(this).RepeatGreedy(), (first, rest) => first.Concat(rest)); }
 
         /// <summary>
         /// Generates a matcher that matches this regular expression zero or more times.
@@ -236,7 +222,7 @@ namespace RT.Generexes
         private Generex<T, IEnumerable<TResult>> repeatMin(int min, bool greedy)
         {
             if (min < 0) throw new ArgumentException("'min' cannot be negative.", "min");
-            return repeatBetween(min, min, true).Then(repeatInfinite(greedy), Enumerable.Concat);
+            return repeatBetween(min, min, true).ThenRaw(repeatInfinite(greedy), Enumerable.Concat);
         }
 
         /// <summary>
@@ -340,23 +326,15 @@ namespace RT.Generexes
             );
         }
 
-        /// <summary>Turns the current regular expression into a zero-width positive look-ahead assertion.</summary>
-        public Generex<T, TResult> LookAhead() { return look(behind: false); }
-        /// <summary>Turns the current regular expression into a zero-width positive look-behind assertion.</summary>
-        public Generex<T, TResult> LookBehind() { return look(behind: true); }
-
-        private Generex<T, TResult> look(bool behind)
-        {
-            // In a look-*behind* assertion, both matchers use the _backwardMatcher. Similarly, look-*ahead* assertions always use _forwardMatcher.
-            matcher innerMatcher = behind ? _backwardMatcher : _forwardMatcher;
-            matcher newMatcher = (input, startIndex) => innerMatcher(input, startIndex).Take(1).Select(m => new GenerexMatchInfo<TResult>(m.Result, 0));
-            return new Generex<T, TResult>(newMatcher, newMatcher);
-        }
+        /// <summary>Turns the current regular expression into a zero-width negative look-ahead assertion, which returns the specified default result in case of a match.</summary>
+        public Generex<T, TResult> LookAheadNegative(TResult defaultMatch) { return lookNegative(behind: false, defaultMatch: new[] { new GenerexMatchInfo<TResult>(defaultMatch, 0) }); }
+        /// <summary>Turns the current regular expression into a zero-width negative look-behind assertion, which returns the specified default result in case of a match.</summary>
+        public Generex<T, TResult> LookBehindNegative(TResult defaultMatch) { return lookNegative(behind: true, defaultMatch: new[] { new GenerexMatchInfo<TResult>(defaultMatch, 0) }); }
 
         /// <summary>Processes each match of this regular expression by running it through a provided selector.</summary>
         /// <typeparam name="TOtherResult">Type of the object returned by <paramref name="selector"/>.</typeparam>
         /// <param name="selector">Function to process a regular expression match.</param>
-        public Generex<T, TOtherResult> Process<TOtherResult>(Func<TResult, TOtherResult> selector)
+        public Generex<T, TOtherResult> ProcessRaw<TOtherResult>(Func<TResult, TOtherResult> selector)
         {
             return new Generex<T, TOtherResult>(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => new GenerexMatchInfo<TOtherResult>(selector(m.Result), m.Length)),
@@ -367,7 +345,7 @@ namespace RT.Generexes
         /// <summary>Processes each match of this regular expression by running it through a provided selector.</summary>
         /// <typeparam name="TOtherResult">Type of the object returned by <paramref name="selector"/>.</typeparam>
         /// <param name="selector">Function to process a regular expression match.</param>
-        public Generex<T, TOtherResult> ProcessMatch<TOtherResult>(Func<GenerexMatch<T, TResult>, TOtherResult> selector)
+        public Generex<T, TOtherResult> Process<TOtherResult>(Func<GenerexMatch<T, TResult>, TOtherResult> selector)
         {
             return new Generex<T, TOtherResult>(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => new GenerexMatchInfo<TOtherResult>(selector(new GenerexMatch<T, TResult>(m.Result, input, startIndex, m.Length)), m.Length)),
