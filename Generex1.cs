@@ -229,6 +229,14 @@ namespace RT.Generexes
         }
 
         /// <summary>
+        /// Returns a regular expression that matches either this regular expression or the specified other regular expression (cf. "|" in traditional regular expression syntax).
+        /// </summary>
+        public new Generex<T> Or(Generex<T> other)
+        {
+            return base.Or(other);
+        }
+
+        /// <summary>
         /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. "?" in traditional regular expression syntax).
         /// </summary>
         public Generex<T> OptionalGreedy() { return repeatBetween(0, 1, true); }
@@ -364,59 +372,6 @@ namespace RT.Generexes
                 if (Greedy && iteration >= MinTimes)
                     yield return 0;
             }
-        }
-
-        /// <summary>
-        /// Executes the specified code every time the regular expression engine encounters this expression. (This always matches successfully and all matches are zero-length.)
-        /// </summary>
-        public Generex<T> Do(Action code)
-        {
-            return new Generex<T>(
-                (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => { code(); return m; }),
-                (input, startIndex) => _backwardMatcher(input, startIndex).Select(m => { code(); return m; })
-            );
-        }
-
-        /// <summary>
-        /// Executes the specified code every time the regular expression engine encounters this expression. (This always matches successfully and all matches are zero-length.)
-        /// </summary>
-        /// <example>
-        /// <para>You can use this to capture the match from a subexpression:</para>
-        /// <code>
-        /// string captured = null;
-        /// Generex&lt;char&gt; myRe = someRe.Then(someOtherRe.Do(m => { captured = new string(m.Match.ToArray()); })).Then(yetAnotherRe);
-        /// foreach (var m in myRe.Matches(input))
-        ///     Console.WriteLine("Captured text: {0}", captured);
-        /// </code>
-        /// </example>
-        public Generex<T> Do(Action<GenerexMatch<T>> code)
-        {
-            return new Generex<T>(
-                (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => { code(new GenerexMatch<T>(input, startIndex, m)); return m; }),
-                (input, startIndex) => _backwardMatcher(input, startIndex).Select(m => { code(new GenerexMatch<T>(input, startIndex + m, -m)); return m; })
-            );
-        }
-
-        /// <summary>
-        /// Executes the specified code every time the regular expression engine encounters this expression. The return value of the specified code determines whether the expression matches successfully (all matches are zero-length).
-        /// </summary>
-        public Generex<T> Do(Func<bool> code)
-        {
-            return new Generex<T>(
-                (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => code()),
-                (input, startIndex) => _backwardMatcher(input, startIndex).Where(m => code())
-            );
-        }
-
-        /// <summary>
-        /// Executes the specified code every time the regular expression engine encounters this expression. The return value of the specified code determines whether the expression matches successfully (all matches are zero-length).
-        /// </summary>
-        public Generex<T> Do(Func<GenerexMatch<T>, bool> code)
-        {
-            return new Generex<T>(
-                (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => code(new GenerexMatch<T>(input, startIndex, m))),
-                (input, startIndex) => _backwardMatcher(input, startIndex).Where(m => code(new GenerexMatch<T>(input, startIndex + m, -m)))
-            );
         }
 
         /// <summary>Turns the current regular expression into a zero-width negative look-ahead assertion.</summary>

@@ -194,7 +194,7 @@ namespace RT.Generexes
         public TGenerex Then(Predicate<T> predicate) { return Then(new Generex<T>(predicate)); }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified other regular expressions (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or the specified other regular expression (cf. "|" in traditional regular expression syntax).
         /// </summary>
         public TGenerex Or(TGenerex other)
         {
@@ -321,7 +321,7 @@ namespace RT.Generexes
         /// <para>You can use this to capture the match from a subexpression:</para>
         /// <code>
         /// string captured = null;
-        /// Generex&lt;char&gt; myRe = someRe.Then(someOtherRe.Do(m => { captured = new string(m.Match.ToArray()); })).Then(yetAnotherRe);
+        /// Generex&lt;char&gt; myRe = someRe.Then(someOtherRe.Do(m => { captured = new string(m.Match); })).Then(yetAnotherRe);
         /// foreach (var m in myRe.Matches(input))
         ///     Console.WriteLine("Captured text: {0}", captured);
         /// </code>

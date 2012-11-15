@@ -276,26 +276,6 @@ namespace RT.Generexes
         /// <summary>
         /// Executes the specified code every time the regular expression engine encounters this expression. (This always matches successfully and all matches are zero-length.)
         /// </summary>
-        public Generex<T, TResult> Do(Action code)
-        {
-            return new Generex<T, TResult>(
-                (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => { code(); return m; }),
-                (input, startIndex) => _backwardMatcher(input, startIndex).Select(m => { code(); return m; })
-            );
-        }
-
-        /// <summary>
-        /// Executes the specified code every time the regular expression engine encounters this expression. (This always matches successfully and all matches are zero-length.)
-        /// </summary>
-        /// <example>
-        /// <para>You can use this to capture the match from a subexpression:</para>
-        /// <code>
-        /// string captured = null;
-        /// Generex&lt;char&gt; myRe = someRe.Then(someOtherRe.Do(m => { captured = new string(m.Match.ToArray()); })).Then(yetAnotherRe);
-        /// foreach (var m in myRe.Matches(input))
-        ///     Console.WriteLine("Captured text: {0}", captured);
-        /// </code>
-        /// </example>
         public Generex<T, TResult> DoRaw(Action<TResult> code)
         {
             return new Generex<T, TResult>(
