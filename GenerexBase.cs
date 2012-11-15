@@ -8,7 +8,7 @@ namespace RT.Generexes
     /// <summary>Abstract base class for <see cref="Generex{T}"/> and <see cref="Generex{T,TResult}"/>.</summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
     /// <typeparam name="TMatch">Either int or <see cref="GenerexMatchInfo{TResult}"/>.</typeparam>
-    /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursive.)</typeparam>
+    /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursively.)</typeparam>
     /// <typeparam name="TGenerexMatch">Type describing a match of a regular expression.</typeparam>
     public abstract class GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
         where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
@@ -154,7 +154,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
-        /// <remarks>The behaviour is analogous to <see cref="Regex.Matches(string,string)"/>.
+        /// <remarks>The behaviour is analogous to <see cref="System.Text.RegularExpressions.Regex.Matches(string,string)"/>.
         /// The documentation for that method claims that it returns “all occurrences of the regular expression”, but this is false.</remarks>
         public IEnumerable<TGenerexMatch> Matches(T[] input, int startAt = 0)
         {
@@ -164,11 +164,13 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches a consecutive sequence of regular expressions, beginning with this one, followed by the specified ones.
         /// </summary>
-        public TGenerex Then(params Generex<T>[] other)
+        public TGenerex Then<TGenerex2, TGenerexMatch2>(params GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>[] other)
+            where TGenerex2 : GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>
+            where TGenerexMatch2 : GenerexMatch<T>
         {
             return create(
                 other.Select(o => o._forwardMatcher).Aggregate(_forwardMatcher, then),
-                then(other.Reverse().Select(o => o._backwardMatcher).Aggregate(thenSimple), _backwardMatcher)
+                then(other.Reverse().Select(o => o._backwardMatcher).Aggregate(GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>.thenNoResult), _backwardMatcher)
             );
         }
 
@@ -261,7 +263,7 @@ namespace RT.Generexes
 
         /// <summary>
         /// This class implements the “or” (or alternation) operation without invoking both matchers at the start.
-        /// (This is important in cases involving recursive regular expressions, see <see cref="Recursive"/>.)
+        /// (This is important in cases involving recursive regular expressions, see <see cref="Generex{T}.Recursive"/> and <see cref="Generex{T,TResult}.Recursive"/>.)
         /// </summary>
         private class safeOrMatcher
         {
@@ -281,7 +283,9 @@ namespace RT.Generexes
         /// Generates a matcher that matches the <paramref name="first"/> regular expression followed by the <paramref name="second"/> regular expression
         /// while retaining the result object of the first one.
         /// </summary>
-        internal matcher then(matcher first, Generex<T>.matcher second)
+        internal matcher then<TGenerex2, TGenerexMatch2>(matcher first, GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>.matcher second)
+            where TGenerex2 : GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>
+            where TGenerexMatch2 : GenerexMatch<T>
         {
             return (input, startIndex) => first(input, startIndex).SelectMany(m => second(input, startIndex + getLength(m)).Select(m2 => add(m, m2)));
         }
@@ -290,17 +294,11 @@ namespace RT.Generexes
         /// Generates a matcher that matches the <paramref name="first"/> regular expression followed by the <paramref name="second"/> regular expression
         /// while retaining the result object of the second one.
         /// </summary>
-        internal matcher then(Generex<T>.matcher first, matcher second)
+        internal matcher then<TGenerex2, TGenerexMatch2>(GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>.matcher first, matcher second)
+            where TGenerex2 : GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>
+            where TGenerexMatch2 : GenerexMatch<T>
         {
             return (input, startIndex) => first(input, startIndex).SelectMany(m => second(input, startIndex + m).Select(m2 => add(m2, m)));
-        }
-
-        /// <summary>
-        /// Generates a matcher that matches the <paramref name="first"/> regular expression followed by the <paramref name="second"/> regular expression.
-        /// </summary>
-        internal static Generex<T>.matcher thenSimple(Generex<T>.matcher first, Generex<T>.matcher second)
-        {
-            return (input, startIndex) => first(input, startIndex).SelectMany(m => second(input, startIndex + m).Select(m2 => m + m2));
         }
 
         /// <summary>
@@ -369,7 +367,7 @@ namespace RT.Generexes
             return create(newMatcher, newMatcher);
         }
 
-        protected TGenerex lookNegative(bool behind, IEnumerable<TMatch> defaultMatch)
+        internal TGenerex lookNegative(bool behind, IEnumerable<TMatch> defaultMatch)
         {
             // In a look-*behind* assertion, both matchers use the _backwardMatcher. Similarly, look-*ahead* assertions always use _forwardMatcher.
             matcher innerMatcher = behind ? _backwardMatcher : _forwardMatcher;

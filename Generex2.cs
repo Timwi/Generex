@@ -21,7 +21,11 @@ namespace RT.Generexes
         internal override GenerexMatch<T, TResult> createMatch(T[] input, int index, GenerexMatchInfo<TResult> match) { return new GenerexMatch<T, TResult>(match.Result, input, index, match.Length); }
         internal override GenerexMatch<T, TResult> createBackwardsMatch(T[] input, int index, GenerexMatchInfo<TResult> match) { return new GenerexMatch<T, TResult>(match.Result, input, index + match.Length, -match.Length); }
 
+        /// <summary>
+        /// Instantiates an empty regular expression which always matches and returns the specified result object.
+        /// </summary>
         public Generex(TResult result) : this(new[] { new GenerexMatchInfo<TResult>(result, 0) }) { }
+
         private Generex(GenerexMatchInfo<TResult>[] emptyMatch) : this((input, startIndex) => emptyMatch) { }
         private Generex(matcher bothMatcher) : base(bothMatcher, bothMatcher) { }
 
@@ -113,7 +117,7 @@ namespace RT.Generexes
 
         /// <summary>
         /// Returns a regular expression that matches this regular expression, followed by the specified ones,
-        /// and generates a match object that combines the original two matches.
+        /// and generates a match object that combines the result of this regular expression with the match of the other.
         /// </summary>
         public Generex<T, TCombined> Then<TCombined>(Generex<T> other, Func<TResult, GenerexMatch<T>, TCombined> selector)
         {
