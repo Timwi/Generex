@@ -19,8 +19,10 @@ namespace RT.Generexes
 
         internal abstract int getLength(TMatch match);
         internal abstract TMatch add(TMatch match, int extra);
+        internal abstract TMatch setZero(TMatch match);
         internal abstract TGenerex create(matcher forward, matcher backward);
         internal abstract TGenerexMatch createMatch(T[] input, int index, TMatch match);
+        internal abstract TGenerexMatch createBackwardsMatch(T[] input, int index, TMatch match);
 
         internal GenerexBase(matcher forward, matcher backward)
         {
@@ -204,6 +206,11 @@ namespace RT.Generexes
         /// </summary>
         public static TGenerex Ors(params TGenerex[] other) { return other.Aggregate((a, b) => a.Or(b)); }
 
+        /// <summary>
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// </summary>
+        public static TGenerex Ors(IEnumerable<TGenerex> other) { return other.Aggregate((a, b) => a.Or(b)); }
+
         /// <summary>Matches this regular expression atomically (without backtracking into it) (cf. "(?>...)" in traditional regular expression syntax).</summary>
         public TGenerex Atomic()
         {
@@ -249,7 +256,25 @@ namespace RT.Generexes
 
         internal static matcher or(matcher one, matcher two)
         {
-            return (input, startIndex) => one(input, startIndex).Concat(new[] { 0 }.SelectMany(x => two(input, startIndex)));
+            return new safeOrMatcher(one, two).Matcher;
+        }
+
+        /// <summary>
+        /// This class implements the “or” (or alternation) operation without invoking both matchers at the start.
+        /// (This is important in cases involving recursive regular expressions, see <see cref="Recursive"/>.)
+        /// </summary>
+        private class safeOrMatcher
+        {
+            public matcher One { get; private set; }
+            public matcher Two { get; private set; }
+            public safeOrMatcher(matcher one, matcher two) { One = one; Two = two; }
+            public IEnumerable<TMatch> Matcher(T[] input, int startIndex)
+            {
+                foreach (var match in One(input, startIndex))
+                    yield return match;
+                foreach (var match in Two(input, startIndex))
+                    yield return match;
+            }
         }
 
         /// <summary>
@@ -276,6 +301,80 @@ namespace RT.Generexes
         internal static Generex<T>.matcher thenSimple(Generex<T>.matcher first, Generex<T>.matcher second)
         {
             return (input, startIndex) => first(input, startIndex).SelectMany(m => second(input, startIndex + m).Select(m2 => m + m2));
+        }
+
+        /// <summary>
+        /// Executes the specified code every time the regular expression engine encounters this expression. (This always matches successfully and all matches are zero-length.)
+        /// </summary>
+        public TGenerex Do(Action code)
+        {
+            return create(
+                (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => { code(); return m; }),
+                (input, startIndex) => _backwardMatcher(input, startIndex).Select(m => { code(); return m; })
+            );
+        }
+
+        /// <summary>
+        /// Executes the specified code every time the regular expression engine encounters this expression. (This always matches successfully and all matches are zero-length.)
+        /// </summary>
+        /// <example>
+        /// <para>You can use this to capture the match from a subexpression:</para>
+        /// <code>
+        /// string captured = null;
+        /// Generex&lt;char&gt; myRe = someRe.Then(someOtherRe.Do(m => { captured = new string(m.Match.ToArray()); })).Then(yetAnotherRe);
+        /// foreach (var m in myRe.Matches(input))
+        ///     Console.WriteLine("Captured text: {0}", captured);
+        /// </code>
+        /// </example>
+        public TGenerex Do(Action<TGenerexMatch> code)
+        {
+            return create(
+                (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => { code(createMatch(input, startIndex, m)); return m; }),
+                (input, startIndex) => _backwardMatcher(input, startIndex).Select(m => { code(createBackwardsMatch(input, startIndex, m)); return m; })
+            );
+        }
+
+        /// <summary>
+        /// Executes the specified code every time the regular expression engine encounters this expression. The return value of the specified code determines whether the expression matches successfully (all matches are zero-length).
+        /// </summary>
+        public TGenerex Do(Func<bool> code)
+        {
+            return create(
+                (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => code()),
+                (input, startIndex) => _backwardMatcher(input, startIndex).Where(m => code())
+            );
+        }
+
+        /// <summary>
+        /// Executes the specified code every time the regular expression engine encounters this expression. The return value of the specified code determines whether the expression matches successfully (all matches are zero-length).
+        /// </summary>
+        public TGenerex Do(Func<TGenerexMatch, bool> code)
+        {
+            return create(
+                (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => code(createMatch(input, startIndex, m))),
+                (input, startIndex) => _backwardMatcher(input, startIndex).Where(m => code(createBackwardsMatch(input, startIndex, m)))
+            );
+        }
+
+        /// <summary>Turns the current regular expression into a zero-width positive look-ahead assertion.</summary>
+        public TGenerex LookAhead() { return look(behind: false); }
+        /// <summary>Turns the current regular expression into a zero-width positive look-behind assertion.</summary>
+        public TGenerex LookBehind() { return look(behind: true); }
+
+        private TGenerex look(bool behind)
+        {
+            // In a look-*behind* assertion, both matchers use the _backwardMatcher. Similarly, look-*ahead* assertions always use _forwardMatcher.
+            matcher innerMatcher = behind ? _backwardMatcher : _forwardMatcher;
+            matcher newMatcher = (input, startIndex) => innerMatcher(input, startIndex).Take(1).Select(setZero);
+            return create(newMatcher, newMatcher);
+        }
+
+        protected TGenerex lookNegative(bool behind, IEnumerable<TMatch> defaultMatch)
+        {
+            // In a look-*behind* assertion, both matchers use the _backwardMatcher. Similarly, look-*ahead* assertions always use _forwardMatcher.
+            matcher innerMatcher = behind ? _backwardMatcher : _forwardMatcher;
+            matcher newMatcher = (input, startIndex) => innerMatcher(input, startIndex).Any() ? Enumerable.Empty<TMatch>() : defaultMatch;
+            return create(newMatcher, newMatcher);
         }
     }
 }

@@ -16,8 +16,10 @@ namespace RT.Generexes
         internal Generex(matcher forward, matcher backward) : base(forward, backward) { }
         internal override int getLength(GenerexMatchInfo<TResult> match) { return match.Length; }
         internal override GenerexMatchInfo<TResult> add(GenerexMatchInfo<TResult> match, int extra) { return match.Add(extra); }
+        internal override GenerexMatchInfo<TResult> setZero(GenerexMatchInfo<TResult> match) { return new GenerexMatchInfo<TResult>(match.Result, 0); }
         internal override Generex<T, TResult> create(matcher forward, matcher backward) { return new Generex<T, TResult>(forward, backward); }
         internal override GenerexMatch<T, TResult> createMatch(T[] input, int index, GenerexMatchInfo<TResult> match) { return new GenerexMatch<T, TResult>(match.Result, input, index, match.Length); }
+        internal override GenerexMatch<T, TResult> createBackwardsMatch(T[] input, int index, GenerexMatchInfo<TResult> match) { return new GenerexMatch<T, TResult>(match.Result, input, index + match.Length, -match.Length); }
 
         public Generex(TResult result) : this(new[] { new GenerexMatchInfo<TResult>(result, 0) }) { }
         private Generex(GenerexMatchInfo<TResult>[] emptyMatch) : this((input, startIndex) => emptyMatch) { }
@@ -96,8 +98,22 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches this regular expression, followed by the specified ones,
-        /// and generates a match object that combines the original two matches.
+        /// Returns a regular expression that matches this regular expression, followed by the specified one,
+        /// and generates a match object that combines the result of this regular expression with the match of the other.
+        /// </summary>
+        public Generex<T, TCombined> ThenMatch<TCombined>(Generex<T> other, Func<TResult, GenerexMatch<T>, TCombined> selector)
+        {
+            return new Generex<T, TCombined>(
+                (input, startIndex) => _forwardMatcher(input, startIndex).SelectMany(m => other._forwardMatcher(input, startIndex + m.Length)
+                    .Select(m2 => new GenerexMatchInfo<TCombined>(selector(m.Result, new GenerexMatch<T>(input, startIndex + m.Length, m2)), m.Length + m2))),
+                (input, startIndex) => other._backwardMatcher(input, startIndex).Select(m2 => new { Match = new GenerexMatch<T>(input, startIndex + m2, -m2), Length = m2 })
+                    .SelectMany(inf => _backwardMatcher(input, startIndex + inf.Length).Select(m => new GenerexMatchInfo<TCombined>(selector(m.Result, inf.Match), m.Length + inf.Length)))
+            );
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression, followed by the specified one,
+        /// and generates a match object that combines the result of this regular expression with the match of the other.
         /// </summary>
         public Generex<T, TCombined> ThenMatch<TOtherResult, TCombined>(Generex<T, TOtherResult> other, Func<TResult, GenerexMatch<T, TOtherResult>, TCombined> selector)
         {
@@ -294,7 +310,7 @@ namespace RT.Generexes
         ///     Console.WriteLine("Captured text: {0}", captured);
         /// </code>
         /// </example>
-        public Generex<T, TResult> Do(Action<TResult> code)
+        public Generex<T, TResult> DoRaw(Action<TResult> code)
         {
             return new Generex<T, TResult>(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => { code(m.Result); return m; }),
@@ -305,7 +321,7 @@ namespace RT.Generexes
         /// <summary>
         /// Executes the specified code every time the regular expression engine encounters this expression. The return value of the specified code determines whether the expression matches successfully (all matches are zero-length).
         /// </summary>
-        public Generex<T, TResult> Do(Func<bool> code)
+        public Generex<T, TResult> DoRaw(Func<bool> code)
         {
             return new Generex<T, TResult>(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => code()),
@@ -316,7 +332,7 @@ namespace RT.Generexes
         /// <summary>
         /// Executes the specified code every time the regular expression engine encounters this expression. The return value of the specified code determines whether the expression matches successfully (all matches are zero-length).
         /// </summary>
-        public Generex<T, TResult> Do(Func<TResult, bool> code)
+        public Generex<T, TResult> DoRaw(Func<TResult, bool> code)
         {
             return new Generex<T, TResult>(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => code(m.Result)),

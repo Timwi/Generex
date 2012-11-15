@@ -36,7 +36,15 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
         /// </summary>
+        public static Generex<T> Ors<T>(IEnumerable<Generex<T>> generexes) { return Generex<T>.Ors(generexes); }
+        /// <summary>
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// </summary>
         public static Generex<T> Ors<T>(params Generex<T>[] generexes) { return Generex<T>.Ors(generexes); }
+        /// <summary>
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// </summary>
+        public static Generex<T, TResult> Ors<T, TResult>(IEnumerable<Generex<T, TResult>> generexes) { return Generex<T, TResult>.Ors(generexes); }
         /// <summary>
         /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
         /// </summary>
