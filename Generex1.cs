@@ -48,10 +48,10 @@ namespace RT.Generexes
         /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive regular expressions.
         /// </summary>
-        public Generex(params Generex<T>[] generexes)
+        public Generex(params GenerexNoResultBase<T, Generex<T>, GenerexMatch<T>>[] generexSequence)
             : base(
-                generexes.Length == 0 ? emptyMatch : generexes.Select(p => p._forwardMatcher).Aggregate(thenNoResult),
-                generexes.Length == 0 ? emptyMatch : generexes.Reverse().Select(p => p._backwardMatcher).Aggregate(thenNoResult)) { }
+                sequenceMatcher(generexSequence, backward: false),
+                sequenceMatcher(generexSequence, backward: true)) { }
 
         private Generex(matcher forward, matcher backward) : base(forward, backward) { }
 

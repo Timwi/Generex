@@ -5,7 +5,7 @@ using RT.Util.ExtensionMethods;
 
 namespace RT.Generexes
 {
-    /// <summary>Abstract base class for <see cref="Generex{T}"/> and <see cref="Generex{T,TResult}"/>.</summary>
+    /// <summary>Abstract base class for all Generex regular expressions.</summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
     /// <typeparam name="TMatch">Either int or <see cref="GenerexMatchInfo{TResult}"/>.</typeparam>
     /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursively.)</typeparam>
@@ -168,9 +168,10 @@ namespace RT.Generexes
             where TGenerex2 : GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>
             where TGenerexMatch2 : GenerexMatch<T>
         {
+            var backwardFirst = other.Reverse().Select(o => o._backwardMatcher).Aggregate(GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>.then);
             return create(
-                other.Select(o => o._forwardMatcher).Aggregate(_forwardMatcher, then),
-                then(other.Reverse().Select(o => o._backwardMatcher).Aggregate(GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>.thenNoResult), _backwardMatcher)
+                other.Select(o => o._forwardMatcher).Aggregate(_forwardMatcher, (prev, next) => (input, startIndex) => prev(input, startIndex).SelectMany(m => next(input, startIndex + getLength(m)).Select(m2 => add(m, m2)))),
+                (input, startIndex) => backwardFirst(input, startIndex).SelectMany(m => _backwardMatcher(input, startIndex + m).Select(m2 => add(m2, m)))
             );
         }
 
@@ -277,28 +278,6 @@ namespace RT.Generexes
                 foreach (var match in Two(input, startIndex))
                     yield return match;
             }
-        }
-
-        /// <summary>
-        /// Generates a matcher that matches the <paramref name="first"/> regular expression followed by the <paramref name="second"/> regular expression
-        /// while retaining the result object of the first one.
-        /// </summary>
-        internal matcher then<TGenerex2, TGenerexMatch2>(matcher first, GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>.matcher second)
-            where TGenerex2 : GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>
-            where TGenerexMatch2 : GenerexMatch<T>
-        {
-            return (input, startIndex) => first(input, startIndex).SelectMany(m => second(input, startIndex + getLength(m)).Select(m2 => add(m, m2)));
-        }
-
-        /// <summary>
-        /// Generates a matcher that matches the <paramref name="first"/> regular expression followed by the <paramref name="second"/> regular expression
-        /// while retaining the result object of the second one.
-        /// </summary>
-        internal matcher then<TGenerex2, TGenerexMatch2>(GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>.matcher first, matcher second)
-            where TGenerex2 : GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>
-            where TGenerexMatch2 : GenerexMatch<T>
-        {
-            return (input, startIndex) => first(input, startIndex).SelectMany(m => second(input, startIndex + m).Select(m2 => add(m2, m)));
         }
 
         /// <summary>

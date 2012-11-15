@@ -10,6 +10,10 @@ using System.Reflection;
 
 namespace RT.Generexes
 {
+    /// <summary>Abstract base class for <see cref="Generex{T}"/> and siblings.</summary>
+    /// <typeparam name="T">Type of the objects in the collection.</typeparam>
+    /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursively.)</typeparam>
+    /// <typeparam name="TGenerexMatch">Type describing a match of a regular expression.</typeparam>
     public abstract class GenerexNoResultBase<T, TGenerex, TGenerexMatch> : GenerexBase<T, int, TGenerex, TGenerexMatch>
         where TGenerex : GenerexNoResultBase<T, TGenerex, TGenerexMatch>
         where TGenerexMatch : GenerexMatch<T>
@@ -80,7 +84,7 @@ namespace RT.Generexes
         /// <summary>
         /// Generates a matcher that matches the <paramref name="first"/> regular expression followed by the <paramref name="second"/> regular expression.
         /// </summary>
-        internal static matcher thenNoResult(matcher first, matcher second)
+        internal static matcher then(matcher first, matcher second)
         {
             return (input, startIndex) => first(input, startIndex).SelectMany(m => second(input, startIndex + m).Select(m2 => m + m2));
         }
@@ -88,8 +92,8 @@ namespace RT.Generexes
         internal static matcher sequenceMatcher(GenerexNoResultBase<T, TGenerex, TGenerexMatch>[] generexSequence, bool backward)
         {
             return generexSequence.Length == 0 ? emptyMatch : backward
-                ? generexSequence.Reverse().Select(p => p._backwardMatcher).Aggregate(thenNoResult)
-                : generexSequence.Select(p => p._forwardMatcher).Aggregate(thenNoResult);
+                ? generexSequence.Reverse().Select(p => p._backwardMatcher).Aggregate(then)
+                : generexSequence.Select(p => p._forwardMatcher).Aggregate(then);
         }
 
         private static ConstructorInfo _constructor;
