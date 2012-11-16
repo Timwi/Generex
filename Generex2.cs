@@ -17,6 +17,11 @@ namespace RT.Generexes
             return new GenerexMatch<T, TResult>(result, input, index, length);
         }
 
+        /// <summary>
+        /// Instantiates an empty regular expression which always matches and returns the specified result object.
+        /// </summary>
+        public Generex(TResult result) : base(result) { }
+
         internal Generex(matcher forward, matcher backward) : base(forward, backward) { }
         static Generex() { Constructor = (forward, backward) => new Generex<T, TResult>(forward, backward); }
 

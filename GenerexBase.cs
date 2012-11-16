@@ -228,12 +228,12 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
         /// </summary>
-        public static TGenerex Ors(params TGenerex[] other) { return other.Aggregate((a, b) => a.Or(b)); }
+        public static TGenerex Ors(params TGenerex[] other) { return other.Aggregate((prev, next) => prev.Or(next)); }
 
         /// <summary>
         /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
         /// </summary>
-        public static TGenerex Ors(IEnumerable<TGenerex> other) { return other.Aggregate((a, b) => a.Or(b)); }
+        public static TGenerex Ors(IEnumerable<TGenerex> other) { return other.Aggregate((prev, next) => prev.Or(next)); }
 
         /// <summary>Matches this regular expression atomically (without backtracking into it) (cf. "(?>...)" in traditional regular expression syntax).</summary>
         public TGenerex Atomic()

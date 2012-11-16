@@ -196,19 +196,19 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
         /// </summary>
-        public static Stringerex Ors(IEnumerable<Stringerex> generexes) { return Stringerex.Ors(generexes); }
+        public static Stringerex Ors(IEnumerable<Stringerex> stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
         /// <summary>
         /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
         /// </summary>
-        public static Stringerex Ors(params Stringerex[] generexes) { return Stringerex.Ors(generexes); }
+        public static Stringerex Ors(params Stringerex[] stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
         /// <summary>
         /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
         /// </summary>
-        public static Stringerex<TResult> Ors<TResult>(IEnumerable<Stringerex<TResult>> generexes) { return Stringerex<TResult>.Ors(generexes); }
+        public static Stringerex<TResult> Ors<TResult>(IEnumerable<Stringerex<TResult>> stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
         /// <summary>
         /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
         /// </summary>
-        public static Stringerex<TResult> Ors<TResult>(params Stringerex<TResult>[] generexes) { return Stringerex<TResult>.Ors(generexes); }
+        public static Stringerex<TResult> Ors<TResult>(params Stringerex<TResult>[] stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
 
         /// <summary>Generates a recursive regular expression, i.e. one that can contain itself, allowing the matching of arbitrarily nested expressions.</summary>
         /// <param name="generator">A function that generates the regular expression from an object that recursively represents the result.</param>

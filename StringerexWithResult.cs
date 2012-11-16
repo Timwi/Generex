@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using RT.Util.ExtensionMethods;
 
 namespace RT.Generexes
@@ -15,6 +16,11 @@ namespace RT.Generexes
         {
             return new StringerexMatch<TResult>(result, input, index, length);
         }
+
+        /// <summary>
+        /// Instantiates an empty regular expression which always matches and returns the specified result object.
+        /// </summary>
+        public Stringerex(TResult result) : base(result) { }
 
         internal Stringerex(matcher forward, matcher backward) : base(forward, backward) { }
         static Stringerex() { Constructor = (forward, backward) => new Stringerex<TResult>(forward, backward); }
@@ -203,5 +209,14 @@ namespace RT.Generexes
         {
             return ThenRaw(separator.Then(this).RepeatGreedy(), IEnumerableExtensions.Concat);
         }
+
+        /// <summary>
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// </summary>
+        public static Stringerex<TResult> Ors(IEnumerable<Stringerex<TResult>> stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
+        /// <summary>
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// </summary>
+        public static Stringerex<TResult> Ors(params Stringerex<TResult>[] stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
     }
 }
