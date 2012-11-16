@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using RT.Util;
-using RT.Util.ExtensionMethods;
 
 namespace RT.Generexes
 {
@@ -157,7 +155,7 @@ namespace RT.Generexes
             where TManyGenerex : GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>
             where TManyGenerexMatch : GenerexMatch<T, IEnumerable<TResult>>
         {
-            var createRepeatInfiniteMatcher = Ut.Lambda((matcher inner) =>
+            var createRepeatInfiniteMatcher = Extensions.Lambda((matcher inner) =>
             {
                 GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>.matcher newMatcher = null;
                 if (greedy)

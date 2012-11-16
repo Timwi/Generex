@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using RT.Util.ExtensionMethods;
 
 namespace RT.Generexes
 {
@@ -118,14 +117,14 @@ namespace RT.Generexes
         /// </summary>
         public Generex<T, IEnumerable<TResult>> RepeatWithSeparator(Generex<T> separator)
         {
-            return ThenRaw(separator.Then(this).Repeat(), IEnumerableExtensions.Concat);
+            return ThenRaw(separator.Then(this).Repeat(), Extensions.Concat);
         }
         /// <summary>
         /// Returns a regular expression that matches this regular expression one or more times, interspersed with a separator. More times are prioritised.
         /// </summary>
         public Generex<T, IEnumerable<TResult>> RepeatWithSeparatorGreedy(Generex<T> separator)
         {
-            return ThenRaw(separator.Then(this).RepeatGreedy(), IEnumerableExtensions.Concat);
+            return ThenRaw(separator.Then(this).RepeatGreedy(), Extensions.Concat);
         }
     }
 }

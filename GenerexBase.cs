@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using RT.Util.ExtensionMethods;
 
 namespace RT.Generexes
 {
@@ -27,7 +26,7 @@ namespace RT.Generexes
                     if (typeof(TGenerex).TypeInitializer != null)
                         typeof(TGenerex).TypeInitializer.Invoke(null, null);
                     if (_constructor == null)
-                        throw new InvalidOperationException("The static constructor of {0} didn’t initialize the Constructor field.".Fmt(typeof(TGenerex)));
+                        throw new InvalidOperationException(string.Format("The static constructor of {0} didn’t initialize the Constructor field.", typeof(TGenerex)));
                 }
                 return _constructor;
             }

@@ -38,6 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions.cs" />
     <Compile Include="Generex.cs" />
     <Compile Include="Generex1.cs" />
     <Compile Include="Generex2.cs" />
@@ -49,12 +50,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stringerex.cs" />
     <Compile Include="StringerexWithResult.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\main\common\Util\Util.csproj">
-      <Project>{8D0FE79C-AD8D-475C-9E6F-9CAE85365B5D}</Project>
-      <Name>Util</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

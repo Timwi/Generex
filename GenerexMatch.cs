@@ -1,5 +1,4 @@
-﻿using RT.Util.ExtensionMethods;
-
+﻿
 namespace RT.Generexes
 {
     /// <summary>
