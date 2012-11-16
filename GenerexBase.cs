@@ -7,11 +7,11 @@ namespace RT.Generexes
 {
     /// <summary>Abstract base class for all Generex regular expressions.</summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
-    /// <typeparam name="TMatch">Either int or <see cref="GenerexMatchInfo{TResult}"/>.</typeparam>
+    /// <typeparam name="TMatch">Either int or <see cref="LengthAndResult{TResult}"/>.</typeparam>
     /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursively.)</typeparam>
     /// <typeparam name="TGenerexMatch">Type describing a match of a regular expression.</typeparam>
     public abstract class GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
-        where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>, new()
+        where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
         where TGenerexMatch : GenerexMatch<T>
     {
         internal delegate IEnumerable<TMatch> matcher(T[] input, int startIndex);
@@ -24,9 +24,10 @@ namespace RT.Generexes
             {
                 if (_constructor == null)
                 {
-                    new TGenerex();
+                    if (typeof(TGenerex).TypeInitializer != null)
+                        typeof(TGenerex).TypeInitializer.Invoke(null, null);
                     if (_constructor == null)
-                        throw new InvalidOperationException("The static constructor of {0} didn’t initialize the Constructor field.");
+                        throw new InvalidOperationException("The static constructor of {0} didn’t initialize the Constructor field.".Fmt(typeof(TGenerex)));
                 }
                 return _constructor;
             }
@@ -128,7 +129,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
-        /// <returns>A <see cref="GenerexMatch{T}"/> object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing a regular expression match in case of success; null if no match.</returns>
         public TGenerexMatch Match(T[] input, int startAt = 0)
         {
             return Matches(input, startAt).FirstOrDefault();
@@ -140,7 +141,7 @@ namespace RT.Generexes
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
         /// <param name="mustEndAt">Index at which the match must end (default is the end of the input sequence).</param>
-        /// <returns>A <see cref="GenerexMatch{T}"/> object describing the regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing the regular expression match in case of success; null if no match.</returns>
         public TGenerexMatch MatchExact(T[] input, int mustStartAt = 0, int? mustEndAt = null)
         {
             return matchExact(input, mustStartAt, mustEndAt ?? input.Length, match => createMatch(input, mustStartAt, match));
@@ -152,7 +153,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included.</param>
-        /// <returns>A <see cref="GenerexMatch{T}"/> object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing a regular expression match in case of success; null if no match.</returns>
         public TGenerexMatch MatchReverse(T[] input, int? endAt = null)
         {
             return MatchesReverse(input, endAt).FirstOrDefault();
@@ -185,7 +186,7 @@ namespace RT.Generexes
         /// Returns a regular expression that matches a consecutive sequence of regular expressions, beginning with this one, followed by the specified ones.
         /// </summary>
         public TGenerex Then<TGenerex2, TGenerexMatch2>(params GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>[] other)
-            where TGenerex2 : GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>, new()
+            where TGenerex2 : GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>
             where TGenerexMatch2 : GenerexMatch<T>
         {
             var backwardFirst = other.Reverse().Select(o => o._backwardMatcher).Aggregate(GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>.then);
@@ -372,6 +373,29 @@ namespace RT.Generexes
             matcher innerMatcher = behind ? _backwardMatcher : _forwardMatcher;
             matcher newMatcher = (input, startIndex) => innerMatcher(input, startIndex).Any() ? Enumerable.Empty<TMatch>() : defaultMatch;
             return Constructor(newMatcher, newMatcher);
+        }
+
+        /// <summary>Generates a recursive regular expression, i.e. one that can contain itself, allowing the matching of arbitrarily nested expressions.</summary>
+        /// <param name="generator">A function that generates the regular expression from an object that recursively represents the result.</param>
+        public static TGenerex Recursive(Func<TGenerex, TGenerex> generator)
+        {
+            if (generator == null)
+                throw new ArgumentNullException("generator");
+
+            matcher recursiveForward = null, recursiveBackward = null;
+
+            // Note the following *must* be lambdas so that they capture the above *variables* (which are modified afterwards), not their current value (which would be null)
+            var carrier = Constructor(
+                (input, startIndex) => recursiveForward(input, startIndex),
+                (input, startIndex) => recursiveBackward(input, startIndex)
+            );
+
+            var generated = generator(carrier);
+            if (generated == null)
+                throw new InvalidOperationException("Generator function returned null.");
+            recursiveForward = generated._forwardMatcher;
+            recursiveBackward = generated._backwardMatcher;
+            return generated;
         }
     }
 }

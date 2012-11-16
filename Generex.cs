@@ -48,6 +48,14 @@ namespace RT.Generexes
         /// </summary>
         public static Generex<T, TResult> Ors<T, TResult>(params Generex<T, TResult>[] generexes) { return Generex<T, TResult>.Ors(generexes); }
 
+        /// <summary>Returns a regular expression that matches a single element which is none of the specified elements.</summary>
+        /// <param name="elements">List of elements excluded from matching.</param>
+        public static Generex<T> Not<T>(params T[] elements) { return Generex<T>.Not(EqualityComparer<T>.Default, elements); }
+        /// <summary>Returns a regular expression that matches a single element which is none of the specified elements.</summary>
+        /// <param name="elements">List of elements excluded from matching.</param>
+        /// <param name="comparer">Equality comparer to use.</param>
+        public static Generex<T> Not<T>(IEqualityComparer<T> comparer, params T[] elements) { return Generex<T>.Not(comparer, elements); }
+
         /// <summary>Generates a recursive regular expression, i.e. one that can contain itself, allowing the matching of arbitrarily nested expressions.</summary>
         /// <param name="generator">A function that generates the regular expression from an object that recursively represents the result.</param>
         public static Generex<T> Recursive<T>(Func<Generex<T>, Generex<T>> generator) { return Generex<T>.Recursive(generator); }

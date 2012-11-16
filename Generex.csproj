@@ -43,10 +43,12 @@
     <Compile Include="Generex2.cs" />
     <Compile Include="GenerexBase.cs" />
     <Compile Include="GenerexMatch.cs" />
-    <Compile Include="GenerexMatchInfo.cs" />
+    <Compile Include="LengthAndResult.cs" />
     <Compile Include="GenerexNoResultBase.cs" />
     <Compile Include="GenerexWithResultBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Stringerex.cs" />
+    <Compile Include="StringerexWithResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\main\common\Util\Util.csproj">
