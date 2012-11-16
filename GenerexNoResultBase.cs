@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using RT.Util;
 using RT.Util.ExtensionMethods;
-using System.Reflection;
 
 namespace RT.Generexes
 {
@@ -15,7 +10,7 @@ namespace RT.Generexes
     /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursively.)</typeparam>
     /// <typeparam name="TGenerexMatch">Type describing a match of a regular expression.</typeparam>
     public abstract class GenerexNoResultBase<T, TGenerex, TGenerexMatch> : GenerexBase<T, int, TGenerex, TGenerexMatch>
-        where TGenerex : GenerexNoResultBase<T, TGenerex, TGenerexMatch>
+        where TGenerex : GenerexNoResultBase<T, TGenerex, TGenerexMatch>, new()
         where TGenerexMatch : GenerexMatch<T>
     {
         internal sealed override int getLength(int match) { return match; }
@@ -37,8 +32,8 @@ namespace RT.Generexes
 
         internal GenerexNoResultBase(Predicate<T> predicate)
             : base(
-                predicateMatcher(predicate, backward: false),
-                predicateMatcher(predicate, backward: true)) { }
+                forwardPredicateMatcher(predicate),
+                backwardPredicateMatcher(predicate)) { }
 
         internal GenerexNoResultBase(GenerexNoResultBase<T, TGenerex, TGenerexMatch>[] generexSequence)
             : base(
@@ -73,12 +68,14 @@ namespace RT.Generexes
                 return (input, startIndex) => startIndex <= input.Length - elements.Length && input.SubarrayEquals(startIndex, elements, comparer) ? new int[] { elements.Length } : Generex.NoMatch;
         }
 
-        internal static matcher predicateMatcher(Predicate<T> predicate, bool backward)
+        internal static matcher forwardPredicateMatcher(Predicate<T> predicate)
         {
-            if (backward)
-                return (input, startIndex) => startIndex <= 0 || !predicate(input[startIndex - 1]) ? Generex.NoMatch : Generex.NegativeOneElementMatch;
-            else
-                return (input, startIndex) => startIndex >= input.Length || !predicate(input[startIndex]) ? Generex.NoMatch : Generex.OneElementMatch;
+            return (input, startIndex) => startIndex >= input.Length || !predicate(input[startIndex]) ? Generex.NoMatch : Generex.OneElementMatch;
+        }
+
+        internal static matcher backwardPredicateMatcher(Predicate<T> predicate)
+        {
+            return (input, startIndex) => startIndex <= 0 || !predicate(input[startIndex - 1]) ? Generex.NoMatch : Generex.NegativeOneElementMatch;
         }
 
         /// <summary>
@@ -96,19 +93,6 @@ namespace RT.Generexes
                 : generexSequence.Select(p => p._forwardMatcher).Aggregate(then);
         }
 
-        private static ConstructorInfo _constructor;
-        internal static TGenerex newGenerex(matcher forward, matcher backward)
-        {
-            if (_constructor == null)
-            {
-                var matcherType = typeof(matcher);
-                _constructor = typeof(TGenerex).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { matcherType, matcherType }, null);
-                if (_constructor == null)
-                    throw new InvalidOperationException("The derived type does not declare a constructor with two parameters, each of type matcher.");
-            }
-            return (TGenerex) _constructor.Invoke(new object[] { forward, backward });
-        }
-
         /// <summary>
         /// Returns a regular expression that matches a single element, no matter what it is (cf. "." in traditional regular expression syntax).
         /// </summary>
@@ -117,7 +101,7 @@ namespace RT.Generexes
             get
             {
                 if (_anyCache == null)
-                    _anyCache = newGenerex(
+                    _anyCache = Constructor(
                         (input, startIndex) => startIndex >= input.Length ? Generex.NoMatch : Generex.OneElementMatch,
                         (input, startIndex) => startIndex <= 0 ? Generex.NoMatch : Generex.NegativeOneElementMatch
                     );
@@ -136,7 +120,7 @@ namespace RT.Generexes
                 if (_emptyCache == null)
                 {
                     matcher zeroWidthMatch = (input, startIndex) => Generex.ZeroWidthMatch;
-                    _emptyCache = newGenerex(zeroWidthMatch, zeroWidthMatch);
+                    _emptyCache = Constructor(zeroWidthMatch, zeroWidthMatch);
                 }
                 return _emptyCache;
             }
@@ -153,7 +137,7 @@ namespace RT.Generexes
                 if (_startCache == null)
                 {
                     matcher matcher = (input, startIndex) => startIndex != 0 ? Generex.NoMatch : Generex.ZeroWidthMatch;
-                    _startCache = newGenerex(matcher, matcher);
+                    _startCache = Constructor(matcher, matcher);
                 }
                 return _startCache;
             }
@@ -170,7 +154,7 @@ namespace RT.Generexes
                 if (_endCache == null)
                 {
                     matcher matcher = (input, startIndex) => startIndex != input.Length ? Generex.NoMatch : Generex.ZeroWidthMatch;
-                    _endCache = newGenerex(matcher, matcher);
+                    _endCache = Constructor(matcher, matcher);
                 }
                 return _endCache;
             }
@@ -181,10 +165,11 @@ namespace RT.Generexes
         /// Returns a regular expression that matches this regular expression, followed by the specified other,
         /// and retains the match object generated by each match of the other regular expression.
         /// </summary>
-        public Generex<T, TResult> Then<TResult>(Generex<T, TResult> other)
+        public TGenerexWithResult Then<TGenerexWithResult, TGenerexWithResultMatch, TResult>(TGenerexWithResult other)
+            where TGenerexWithResult : GenerexWithResultBase<T, TResult, TGenerexWithResult, TGenerexWithResultMatch>, new()
+            where TGenerexWithResultMatch : GenerexMatch<T, TResult>
         {
-#warning TODO: This method should return a TGenerexWithResult, not a Generex<T, TResult>
-            return new Generex<T, TResult>(
+            return GenerexWithResultBase<T, TResult, TGenerexWithResult, TGenerexWithResultMatch>.Constructor(
                 (input, startIndex) => _forwardMatcher(input, startIndex).SelectMany(m => other._forwardMatcher(input, startIndex + m).Select(m2 => m2.Add(m))),
                 (input, startIndex) => other._backwardMatcher(input, startIndex).SelectMany(m2 => _backwardMatcher(input, startIndex + m2.Length).Select(m => m2.Add(m)))
             );
@@ -207,7 +192,7 @@ namespace RT.Generexes
         /// <seealso cref="Or(T[])"/>
         public TGenerex Or(IEqualityComparer<T> comparer, params T[] elements)
         {
-            return Or(newGenerex(
+            return Or(Constructor(
                 elementsMatcher(elements, comparer, backward: false),
                 elementsMatcher(elements, comparer, backward: true)
             ));
@@ -227,7 +212,7 @@ namespace RT.Generexes
         /// </summary>
         public TGenerex Or(Predicate<T> predicate)
         {
-            return Or(newGenerex(predicateMatcher(predicate, backward: false), predicateMatcher(predicate, backward: true)));
+            return Or(Constructor(forwardPredicateMatcher(predicate), backwardPredicateMatcher(predicate)));
         }
 
         /// <summary>
@@ -244,7 +229,7 @@ namespace RT.Generexes
                 return (TGenerex) this;
             if (other.Length == 1)
                 return Or(other[0]);
-            return Or(newGenerex(sequenceMatcher(other, backward: false), sequenceMatcher(other, backward: true)));
+            return Or(Constructor(sequenceMatcher(other, backward: false), sequenceMatcher(other, backward: true)));
         }
 
         /// <summary>
@@ -268,11 +253,11 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches this regular expression zero or more times. More times are prioritised (cf. "*" in traditional regular expression syntax).
         /// </summary>
-        public TGenerex RepeatGreedy() { return newGenerex(repeatInfinite(_forwardMatcher, true), repeatInfinite(_backwardMatcher, true)); }
+        public TGenerex RepeatGreedy() { return Constructor(repeatInfinite(_forwardMatcher, true), repeatInfinite(_backwardMatcher, true)); }
         /// <summary>
         /// Returns a regular expression that matches this regular expression zero or more times. Fewer times are prioritised (cf. "*?" in traditional regular expression syntax).
         /// </summary>
-        public TGenerex Repeat() { return newGenerex(repeatInfinite(_forwardMatcher, false), repeatInfinite(_backwardMatcher, false)); }
+        public TGenerex Repeat() { return Constructor(repeatInfinite(_forwardMatcher, false), repeatInfinite(_backwardMatcher, false)); }
         /// <summary>
         /// Returns a regular expression that matches this regular expression the specified number of times or more. More times are prioritised (cf. "{min,}" in traditional regular expression syntax).
         /// </summary>
@@ -336,7 +321,7 @@ namespace RT.Generexes
         /// <param name="greedy">If true, more matches are prioritised; otherwise, fewer matches are prioritised.</param>
         private TGenerex repeatInfinite(bool greedy)
         {
-            return newGenerex(repeatInfinite(_forwardMatcher, greedy), repeatInfinite(_backwardMatcher, greedy));
+            return Constructor(repeatInfinite(_forwardMatcher, greedy), repeatInfinite(_backwardMatcher, greedy));
         }
 
         /// <summary>
@@ -368,7 +353,7 @@ namespace RT.Generexes
                 InnerForwardMatcher = _forwardMatcher,
                 InnerBackwardMatcher = _backwardMatcher
             };
-            return newGenerex(rm.ForwardMatcher, rm.BackwardMatcher);
+            return Constructor(rm.ForwardMatcher, rm.BackwardMatcher);
         }
 
         private sealed class repeatMatcher
@@ -424,7 +409,7 @@ namespace RT.Generexes
             matcher recursiveForward = null, recursiveBackward = null;
 
             // Note the following *must* be lambdas so that they capture the above *variables* (which are modified afterwards), not their current value (which would be null)
-            var carrier = newGenerex(
+            var carrier = Constructor(
                 (input, startIndex) => recursiveForward(input, startIndex),
                 (input, startIndex) => recursiveBackward(input, startIndex)
             );

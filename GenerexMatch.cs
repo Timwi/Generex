@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using RT.Util;
-using RT.Util.ExtensionMethods;
+﻿using RT.Util.ExtensionMethods;
 
 namespace RT.Generexes
 {
@@ -57,7 +50,7 @@ namespace RT.Generexes
     /// </summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
     /// <typeparam name="TResult">Type of objects generated from each match of the regular expression.</typeparam>
-    public sealed class GenerexMatch<T, TResult> : GenerexMatch<T>
+    public class GenerexMatch<T, TResult> : GenerexMatch<T>
     {
         /// <summary>Contains the object generated from this match of the regular expression.</summary>
         public TResult Result { get; private set; }

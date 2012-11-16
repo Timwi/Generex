@@ -11,16 +11,36 @@ namespace RT.Generexes
     /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursively.)</typeparam>
     /// <typeparam name="TGenerexMatch">Type describing a match of a regular expression.</typeparam>
     public abstract class GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
-        where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
+        where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>, new()
         where TGenerexMatch : GenerexMatch<T>
     {
         internal delegate IEnumerable<TMatch> matcher(T[] input, int startIndex);
         internal matcher _forwardMatcher, _backwardMatcher;
 
+        private static Func<matcher, matcher, TGenerex> _constructor;
+        internal static Func<matcher, matcher, TGenerex> Constructor
+        {
+            get
+            {
+                if (_constructor == null)
+                {
+                    new TGenerex();
+                    if (_constructor == null)
+                        throw new InvalidOperationException("The static constructor of {0} didn’t initialize the Constructor field.");
+                }
+                return _constructor;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+                _constructor = value;
+            }
+        }
+
         internal abstract int getLength(TMatch match);
         internal abstract TMatch add(TMatch match, int extra);
         internal abstract TMatch setZero(TMatch match);
-        internal abstract TGenerex create(matcher forward, matcher backward);
         internal abstract TGenerexMatch createMatch(T[] input, int index, TMatch match);
         internal abstract TGenerexMatch createBackwardsMatch(T[] input, int index, TMatch match);
 
@@ -165,11 +185,11 @@ namespace RT.Generexes
         /// Returns a regular expression that matches a consecutive sequence of regular expressions, beginning with this one, followed by the specified ones.
         /// </summary>
         public TGenerex Then<TGenerex2, TGenerexMatch2>(params GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>[] other)
-            where TGenerex2 : GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>
+            where TGenerex2 : GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>, new()
             where TGenerexMatch2 : GenerexMatch<T>
         {
             var backwardFirst = other.Reverse().Select(o => o._backwardMatcher).Aggregate(GenerexNoResultBase<T, TGenerex2, TGenerexMatch2>.then);
-            return create(
+            return Constructor(
                 other.Select(o => o._forwardMatcher).Aggregate(_forwardMatcher, (prev, next) => (input, startIndex) => prev(input, startIndex).SelectMany(m => next(input, startIndex + getLength(m)).Select(m2 => add(m, m2)))),
                 (input, startIndex) => backwardFirst(input, startIndex).SelectMany(m => _backwardMatcher(input, startIndex + m).Select(m2 => add(m2, m)))
             );
@@ -201,7 +221,7 @@ namespace RT.Generexes
         /// </summary>
         public TGenerex Or(TGenerex other)
         {
-            return create(or(_forwardMatcher, other._forwardMatcher), or(_backwardMatcher, other._backwardMatcher));
+            return Constructor(or(_forwardMatcher, other._forwardMatcher), or(_backwardMatcher, other._backwardMatcher));
         }
 
         /// <summary>
@@ -217,7 +237,7 @@ namespace RT.Generexes
         /// <summary>Matches this regular expression atomically (without backtracking into it) (cf. "(?>...)" in traditional regular expression syntax).</summary>
         public TGenerex Atomic()
         {
-            return create(
+            return Constructor(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Take(1),
                 (input, startIndex) => _backwardMatcher(input, startIndex).Take(1)
             );
@@ -257,7 +277,7 @@ namespace RT.Generexes
             return _forwardMatcher(input, mustStartAt).Where(m => getLength(m) == mustHaveLength).Select(selector).FirstOrDefault();
         }
 
-        internal static matcher or(matcher one, matcher two)
+        private static matcher or(matcher one, matcher two)
         {
             return new safeOrMatcher(one, two).Matcher;
         }
@@ -285,7 +305,7 @@ namespace RT.Generexes
         /// </summary>
         public TGenerex Do(Action code)
         {
-            return create(
+            return Constructor(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => { code(); return m; }),
                 (input, startIndex) => _backwardMatcher(input, startIndex).Select(m => { code(); return m; })
             );
@@ -305,7 +325,7 @@ namespace RT.Generexes
         /// </example>
         public TGenerex Do(Action<TGenerexMatch> code)
         {
-            return create(
+            return Constructor(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => { code(createMatch(input, startIndex, m)); return m; }),
                 (input, startIndex) => _backwardMatcher(input, startIndex).Select(m => { code(createBackwardsMatch(input, startIndex, m)); return m; })
             );
@@ -316,7 +336,7 @@ namespace RT.Generexes
         /// </summary>
         public TGenerex Do(Func<bool> code)
         {
-            return create(
+            return Constructor(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => code()),
                 (input, startIndex) => _backwardMatcher(input, startIndex).Where(m => code())
             );
@@ -327,7 +347,7 @@ namespace RT.Generexes
         /// </summary>
         public TGenerex Do(Func<TGenerexMatch, bool> code)
         {
-            return create(
+            return Constructor(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => code(createMatch(input, startIndex, m))),
                 (input, startIndex) => _backwardMatcher(input, startIndex).Where(m => code(createBackwardsMatch(input, startIndex, m)))
             );
@@ -343,7 +363,7 @@ namespace RT.Generexes
             // In a look-*behind* assertion, both matchers use the _backwardMatcher. Similarly, look-*ahead* assertions always use _forwardMatcher.
             matcher innerMatcher = behind ? _backwardMatcher : _forwardMatcher;
             matcher newMatcher = (input, startIndex) => innerMatcher(input, startIndex).Take(1).Select(setZero);
-            return create(newMatcher, newMatcher);
+            return Constructor(newMatcher, newMatcher);
         }
 
         internal TGenerex lookNegative(bool behind, IEnumerable<TMatch> defaultMatch)
@@ -351,7 +371,7 @@ namespace RT.Generexes
             // In a look-*behind* assertion, both matchers use the _backwardMatcher. Similarly, look-*ahead* assertions always use _forwardMatcher.
             matcher innerMatcher = behind ? _backwardMatcher : _forwardMatcher;
             matcher newMatcher = (input, startIndex) => innerMatcher(input, startIndex).Any() ? Enumerable.Empty<TMatch>() : defaultMatch;
-            return create(newMatcher, newMatcher);
+            return Constructor(newMatcher, newMatcher);
         }
     }
 }

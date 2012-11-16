@@ -45,6 +45,7 @@
     <Compile Include="GenerexMatch.cs" />
     <Compile Include="GenerexMatchInfo.cs" />
     <Compile Include="GenerexNoResultBase.cs" />
+    <Compile Include="GenerexWithResultBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
