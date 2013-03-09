@@ -196,14 +196,6 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
         /// </summary>
-        public static Stringerex Ors(IEnumerable<Stringerex> stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
-        /// <summary>
-        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
-        /// </summary>
-        public static Stringerex Ors(params Stringerex[] stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
-        /// <summary>
-        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
-        /// </summary>
         public static Stringerex<TResult> Ors<TResult>(IEnumerable<Stringerex<TResult>> stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
         /// <summary>
         /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).

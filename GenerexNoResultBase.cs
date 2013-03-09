@@ -237,7 +237,7 @@ namespace RT.Generexes
         /// <remarks>
         /// <para>This overload is here even though an equivalent method is inherited from <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}"/> because without it, the following code:</para>
         /// <code>myGenerex.Or(myOtherGenerex);</code>
-        /// <para>would call the <see cref="Or(Generex{T}[])"/> overload instead because method overload resolution prefers direct members over inherited ones.</para>
+        /// <para>would call the <see cref="Or(TGenerex[])"/> overload instead because method overload resolution prefers direct members over inherited ones.</para>
         /// </remarks>
         public new TGenerex Or(TGenerex other) { return base.Or(other); }
 
@@ -388,6 +388,8 @@ namespace RT.Generexes
         internal static IEnumerable<int> emptyMatch(T[] input, int startIndex) { return Generex.ZeroWidthMatch; }
 
         /// <summary>Processes each match of this regular expression by running it through a provided selector.</summary>
+        /// <typeparam name="TGenerexWithResult">Generex type to return (for example, <see cref="Generex{T,TResult}"/>).</typeparam>
+        /// <typeparam name="TGenerexWithResultMatch">Generex match type that corresponds to <typeparamref name="TGenerexWithResult"/></typeparam>
         /// <typeparam name="TResult">Type of the object returned by <paramref name="selector"/>.</typeparam>
         /// <param name="selector">Function to process a regular expression match.</param>
         public TGenerexWithResult Process<TGenerexWithResult, TGenerexWithResultMatch, TResult>(Func<TGenerexMatch, TResult> selector)

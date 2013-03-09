@@ -7,6 +7,7 @@ namespace RT.Generexes
 {
     /// <summary>Abstract base class for <see cref="Generex{T}"/> and siblings.</summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
+    /// <typeparam name="TResult">Type of objects generated from each match of the regular expression.</typeparam>
     /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursively.)</typeparam>
     /// <typeparam name="TGenerexMatch">Type describing a match of a regular expression.</typeparam>
     public abstract class GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch> : GenerexBase<T, LengthAndResult<TResult>, TGenerex, TGenerexMatch>
@@ -86,6 +87,33 @@ namespace RT.Generexes
         public IEnumerable<TResult> RawMatchesReverse(T[] input, int? endAt = null)
         {
             return matches(input, endAt ?? input.Length, (index, resultInfo) => resultInfo.Result, backward: true);
+        }
+
+        /// <summary>
+        /// Replaces each match of this regular expression within the given input sequence with the replacement sequence returned by the given selector.
+        /// </summary>
+        /// <param name="input">Input sequence to match the regular expression against.</param>
+        /// <param name="replaceWithRaw">Selector which, given the result of a match, returns the replacement.</param>
+        /// <param name="startAt">Optional index within the input sequence at which to start matching.</param>
+        /// <param name="maxReplace">Optional maximum number of replacements to make (null for infinite).</param>
+        /// <returns>The resulting sequence containing the replacements.</returns>
+        public T[] Replace(T[] input, Func<TResult, IEnumerable<T>> replaceWithRaw, int startAt = 0, int? maxReplace = null)
+        {
+            return replace(input, startAt, (index, match) => replaceWithRaw(match.Result), maxReplace, backward: false);
+        }
+
+        /// <summary>
+        /// Replaces each match of this regular expression within the given input sequence, matched from the end backwards,
+        /// with the replacement sequence returned by the given selector.
+        /// </summary>
+        /// <param name="input">Input sequence to match the regular expression against.</param>
+        /// <param name="replaceWithRaw">Selector which, given the result of a match, returns the replacement.</param>
+        /// <param name="endAt">Optional index at which to begin the reverse search. Matches that end at or after this index are not included.</param>
+        /// <param name="maxReplace">Optional maximum number of replacements to make (null for infinite).</param>
+        /// <returns>The resulting sequence containing the replacements.</returns>
+        public T[] ReplaceReverse(T[] input, Func<TResult, IEnumerable<T>> replaceWithRaw, int? endAt = null, int? maxReplace = null)
+        {
+            return replace(input, endAt ?? input.Length, (index, match) => replaceWithRaw(match.Result), maxReplace, backward: true);
         }
 
         /// <summary>
@@ -265,6 +293,8 @@ namespace RT.Generexes
         public TGenerex LookBehindNegative(TResult defaultMatch) { return lookNegative(behind: true, defaultMatch: new[] { new LengthAndResult<TResult>(defaultMatch, 0) }); }
 
         /// <summary>Processes each match of this regular expression by running it through a provided selector.</summary>
+        /// <typeparam name="TOtherGenerex">Generex type to return.</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">Generex match type that corresponds to <typeparamref name="TOtherGenerex"/></typeparam>
         /// <typeparam name="TOtherResult">Type of the object returned by <paramref name="selector"/>.</typeparam>
         /// <param name="selector">Function to process a regular expression match.</param>
         public TOtherGenerex Process<TOtherGenerex, TOtherGenerexMatch, TOtherResult>(Func<TGenerexMatch, TOtherResult> selector)
@@ -277,7 +307,9 @@ namespace RT.Generexes
             );
         }
 
-        /// <summary>Processes each match of this regular expression by running it through a provided selector.</summary>
+        /// <summary>Processes each match of this regular expression by running each result object through a provided selector.</summary>
+        /// <typeparam name="TOtherGenerex">Generex type to return.</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">Generex match type that corresponds to <typeparamref name="TOtherGenerex"/></typeparam>
         /// <typeparam name="TOtherResult">Type of the object returned by <paramref name="selector"/>.</typeparam>
         /// <param name="selector">Function to process a regular expression match.</param>
         public TOtherGenerex ProcessRaw<TOtherGenerex, TOtherGenerexMatch, TOtherResult>(Func<TResult, TOtherResult> selector)

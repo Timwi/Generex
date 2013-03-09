@@ -134,6 +134,89 @@ namespace RT.Generexes
             return Matches(input, startAt).FirstOrDefault();
         }
 
+        internal T[] replace(T[] input, int startAt, Func<int, TMatch, IEnumerable<T>> replaceWith, int? maxReplace, bool backward)
+        {
+            var result = new List<T>(backward ? input.Skip(startAt) : input.Take(startAt));
+            var prevIndex = startAt;
+            var matchesIter = matches(input, startAt, (i, match) => new { Index = i, Match = match }, backward);
+            foreach (var match in maxReplace == null ? matchesIter : matchesIter.Take(maxReplace.Value))
+            {
+                if (backward)
+                {
+                    result.InsertRange(0, input.Skip(match.Index).Take(prevIndex - match.Index));
+                    result.InsertRange(0, replaceWith(match.Index, match.Match));
+                }
+                else
+                {
+                    result.AddRange(input.Skip(prevIndex).Take(match.Index - prevIndex));
+                    result.AddRange(replaceWith(match.Index, match.Match));
+                }
+                prevIndex = match.Index + getLength(match.Match);
+            }
+
+            return backward
+                ? input.Take(prevIndex).Concat(result).ToArray()
+                : result.Concat(input.Skip(prevIndex)).ToArray();
+        }
+
+        /// <summary>
+        /// Replaces each match of this regular expression within the given input sequence with the replacement sequence returned by the given selector.
+        /// </summary>
+        /// <param name="input">Input sequence to match the regular expression against.</param>
+        /// <param name="replaceWith">Selector which, given a match within the input sequence, returns the replacement.</param>
+        /// <param name="startAt">Optional index within the input sequence at which to start matching.</param>
+        /// <param name="maxReplace">Optional maximum number of replacements to make (null for infinite).</param>
+        /// <returns>The resulting sequence containing the replacements.</returns>
+        public T[] Replace(T[] input, Func<TGenerexMatch, IEnumerable<T>> replaceWith, int startAt = 0, int? maxReplace = null)
+        {
+            return replace(input, startAt, (index, match) => replaceWith(createMatch(input, index, match)), maxReplace, backward: false);
+        }
+
+        /// <summary>
+        /// Replaces each match of this regular expression within the given input sequence with a replacement sequence.
+        /// </summary>
+        /// <param name="input">Input sequence to match the regular expression against.</param>
+        /// <param name="replaceWith">The sequence to replace each match with.</param>
+        /// <param name="startAt">Optional index within the input sequence at which to start matching.</param>
+        /// <param name="maxReplace">Optional maximum number of replacements to make (null for infinite).</param>
+        /// <returns>The resulting sequence containing the replacements.</returns>
+        public T[] Replace(T[] input, IEnumerable<T> replaceWith, int startAt = 0, int? maxReplace = null)
+        {
+            // evaluate replaceWith only once, and only if necessary
+            T[] replaceWithArray = null;
+            return replace(input, startAt, (index, match) => replaceWithArray ?? (replaceWithArray = replaceWith.ToArray()), maxReplace, backward: false);
+        }
+
+        /// <summary>
+        /// Replaces each match of this regular expression within the given input sequence, matched from the end backwards,
+        /// with the replacement sequence returned by the given selector.
+        /// </summary>
+        /// <param name="input">Input sequence to match the regular expression against.</param>
+        /// <param name="replaceWith">Selector which, given a match within the input sequence, returns the replacement.</param>
+        /// <param name="endAt">Optional index at which to begin the reverse search. Matches that end at or after this index are not included.</param>
+        /// <param name="maxReplace">Optional maximum number of replacements to make (null for infinite).</param>
+        /// <returns>The resulting sequence containing the replacements.</returns>
+        public T[] ReplaceReverse(T[] input, Func<TGenerexMatch, T[]> replaceWith, int? endAt = null, int? maxReplace = null)
+        {
+            return replace(input, endAt ?? input.Length, (index, match) => replaceWith(createBackwardsMatch(input, index, match)), maxReplace, backward: true);
+        }
+
+        /// <summary>
+        /// Replaces each match of this regular expression within the given input sequence, matched from the end backwards,
+        /// with a replacement sequence.
+        /// </summary>
+        /// <param name="input">Input sequence to match the regular expression against.</param>
+        /// <param name="replaceWith">The sequence to replace each match with.</param>
+        /// <param name="endAt">Optional index at which to begin the reverse search. Matches that end at or after this index are not included.</param>
+        /// <param name="maxReplace">Optional maximum number of replacements to make (null for infinite).</param>
+        /// <returns>The resulting sequence containing the replacements.</returns>
+        public T[] ReplaceReverse(T[] input, IEnumerable<T> replaceWith, int? endAt = null, int? maxReplace = null)
+        {
+            // evaluate replaceWith only once, and only if necessary
+            T[] replaceWithArray = null;
+            return replace(input, endAt ?? input.Length, (index, match) => replaceWithArray ?? (replaceWithArray = replaceWith.ToArray()), maxReplace, backward: true);
+        }
+
         /// <summary>
         /// Determines whether the given input sequence matches this regular expression exactly, and if so, returns information about the match.
         /// </summary>
@@ -166,7 +249,7 @@ namespace RT.Generexes
         /// <param name="endAt">Optional index at which to begin the reverse search. Matches that end at or after this index are not included.</param>
         public IEnumerable<TGenerexMatch> MatchesReverse(T[] input, int? endAt = null)
         {
-            return matches(input, endAt ?? input.Length, (index, match) => createMatch(input, index, match), backward: true);
+            return matches(input, endAt ?? input.Length, (index, match) => createBackwardsMatch(input, index, match), backward: true);
         }
 
         /// <summary>
@@ -284,7 +367,7 @@ namespace RT.Generexes
 
         /// <summary>
         /// This class implements the “or” (or alternation) operation without invoking both matchers at the start.
-        /// (This is important in cases involving recursive regular expressions, see <see cref="Generex{T}.Recursive"/> and <see cref="Generex{T,TResult}.Recursive"/>.)
+        /// (This is important in cases involving recursive regular expressions, see e.g. <see cref="Generex.Recursive{T}"/>.)
         /// </summary>
         private class safeOrMatcher
         {

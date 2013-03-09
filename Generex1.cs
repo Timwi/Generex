@@ -43,6 +43,7 @@ namespace RT.Generexes
         /// <summary>
         /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. "[...]" in traditional regular expression syntax).
         /// </summary>
+        /// <param name="predicate">The predicate that identifies matching elements.</param>
         public Generex(Predicate<T> predicate) : base(predicate) { }
 
         /// <summary>
