@@ -167,6 +167,7 @@ namespace RT.Generexes
         /// Returns a regular expression that always matches and returns a zero-width match.
         /// </summary>
         /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
+        /// <seealso cref="GenerexNoResultBase{T,TGenerex,TGenerexMatch}.Empty"/>
         public static Generex<T> CreateEmptyGenerex<T>(this T[] input) { return Generex<T>.Empty; }
 
         /// <summary>
@@ -174,24 +175,28 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
         /// <param name="predicate">The predicate that identifies matching elements.</param>
+        /// <seealso cref="Generex{T}(Predicate{T})"/>
         public static Generex<T> CreateGenerex<T>(this T[] input, Predicate<T> predicate) { return new Generex<T>(predicate); }
 
         /// <summary>
         /// Returns a regular expression that matches a single element, no matter what it is (cf. "." in traditional regular expression syntax).
         /// </summary>
         /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
+        /// <seealso cref="GenerexNoResultBase{T,TGenerex,TGenerexMatch}.Any"/>
         public static Generex<T> CreateAnyGenerex<T>(this T[] input) { return Generex<T>.Any; }
 
         /// <summary>
         /// Returns a regular expression that matches the beginning of the input collection (cf. "^" in traditional regular expression syntax). Successful matches are always zero length.
         /// </summary>
         /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
+        /// <seealso cref="GenerexNoResultBase{T,TGenerex,TGenerexMatch}.Start"/>
         public static Generex<T> CreateStartGenerex<T>(this T[] input) { return Generex<T>.Start; }
 
         /// <summary>
         /// Returns a regular expression that matches the end of the input collection (cf. "$" in traditional regular expression syntax). Successful matches are always zero length.
         /// </summary>
         /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
+        /// <seealso cref="GenerexNoResultBase{T,TGenerex,TGenerexMatch}.End"/>
         public static Generex<T> CreateEndGenerex<T>(this T[] input) { return Generex<T>.End; }
     }
 }

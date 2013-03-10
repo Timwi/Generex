@@ -95,6 +95,7 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches a single element, no matter what it is (cf. "." in traditional regular expression syntax).
         /// </summary>
+        /// <seealso cref="Generex.CreateAnyGenerex"/>
         public static TGenerex Any
         {
             get
@@ -112,6 +113,7 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that always matches and returns a zero-width match.
         /// </summary>
+        /// <seealso cref="Generex.CreateEmptyGenerex"/>
         public static TGenerex Empty
         {
             get
@@ -129,6 +131,7 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches the beginning of the input collection (cf. "^" in traditional regular expression syntax). Successful matches are always zero length.
         /// </summary>
+        /// <seealso cref="Generex.CreateStartGenerex"/>
         public static TGenerex Start
         {
             get
@@ -146,6 +149,7 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches the end of the input collection (cf. "$" in traditional regular expression syntax). Successful matches are always zero length.
         /// </summary>
+        /// <seealso cref="Generex.CreateEndGenerex"/>
         public static TGenerex End
         {
             get
