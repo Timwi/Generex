@@ -9,7 +9,7 @@ namespace RT.Generexes
     /// </summary>
     public sealed class Stringerex : GenerexNoResultBase<char, Stringerex, StringerexMatch>
     {
-        internal sealed override StringerexMatch createNoResultMatch(char[] input, int index, int matchLength)
+        protected sealed override StringerexMatch createNoResultMatch(char[] input, int index, int matchLength)
         {
             return new StringerexMatch(input, index, matchLength);
         }
@@ -35,12 +35,12 @@ namespace RT.Generexes
         public Stringerex(IEqualityComparer<char> comparer, string elements) : base(comparer, elements.ToCharArray()) { }
 
         /// <summary>
-        /// Instantiates a regular expression that matches a sequence of consecutive elements.
+        /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified equality comparer.
         /// </summary>
         public Stringerex(IEqualityComparer<char> comparer, IEnumerable<char> elements) : base(comparer, elements.ToArray()) { }
 
         /// <summary>
-        /// Instantiates a regular expression that matches a single character that satisfies the given predicate (cf. "[...]" in traditional regular expression syntax).
+        /// Instantiates a regular expression that matches a single character that satisfies the given predicate (cf. <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
         public Stringerex(Predicate<char> predicate) : base(predicate) { }
 
@@ -145,13 +145,13 @@ namespace RT.Generexes
         public IEnumerable<StringerexMatch> Matches(string input, int startAt = 0) { return base.Matches(input.ToCharArray(), startAt); }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified string (cf. "|" or "[...]" in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or the specified string (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
         /// <seealso cref="Or(IEqualityComparer{char},string)"/>
         public Stringerex Or(string str) { return base.Or(EqualityComparer<char>.Default, str.ToCharArray()); }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified string using the specified equality comparer (cf. "|" or "[...]" in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or the specified string using the specified equality comparer (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
         /// <seealso cref="Or(string)"/>
         public Stringerex Or(IEqualityComparer<char> comparer, string str) { return base.Or(comparer, str.ToCharArray()); }
@@ -185,7 +185,7 @@ namespace RT.Generexes
         /// </summary>
         public static Stringerex New(IEqualityComparer<char> comparer, string str) { return new Stringerex(comparer, str); }
         /// <summary>
-        /// Instantiates a regular expression that matches a single character that satisfies the given predicate (cf. "[...]" in traditional regular expression syntax).
+        /// Instantiates a regular expression that matches a single character that satisfies the given predicate (cf. <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
         public static Stringerex New(Predicate<char> predicate) { return new Stringerex(predicate); }
         /// <summary>
@@ -194,11 +194,11 @@ namespace RT.Generexes
         public static Stringerex New(params Stringerex[] stringerexes) { return new Stringerex(stringerexes); }
 
         /// <summary>
-        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
         public static Stringerex<TResult> Ors<TResult>(IEnumerable<Stringerex<TResult>> stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
         /// <summary>
-        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
         public static Stringerex<TResult> Ors<TResult>(params Stringerex<TResult>[] stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
 

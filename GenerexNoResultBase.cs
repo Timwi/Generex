@@ -12,29 +12,24 @@ namespace RT.Generexes
         where TGenerex : GenerexNoResultBase<T, TGenerex, TGenerexMatch>
         where TGenerexMatch : GenerexMatch<T>
     {
-        internal sealed override int getLength(int match) { return match; }
-        internal sealed override int add(int match, int extra) { return match + extra; }
-        internal sealed override int setZero(int match) { return 0; }
+        protected sealed override int getLength(int match) { return match; }
+        protected sealed override int add(int match, int extra) { return match + extra; }
+        protected sealed override int setZero(int match) { return 0; }
         internal sealed override TGenerexMatch createMatch(T[] input, int index, int match) { return createNoResultMatch(input, index, match); }
         internal sealed override TGenerexMatch createBackwardsMatch(T[] input, int index, int match) { return createNoResultMatch(input, index + match, -match); }
-        internal abstract TGenerexMatch createNoResultMatch(T[] input, int index, int matchLength);
+        protected abstract TGenerexMatch createNoResultMatch(T[] input, int index, int matchLength);
 
-        /// <summary>
-        /// Instantiates an empty regular expression (always matches).
-        /// </summary>
-        internal GenerexNoResultBase() : base(emptyMatch, emptyMatch) { }
-
-        internal GenerexNoResultBase(IEqualityComparer<T> comparer, T[] elements)
+        protected GenerexNoResultBase(IEqualityComparer<T> comparer, T[] elements)
             : base(
                 elementsMatcher(elements, comparer, backward: false),
                 elementsMatcher(elements, comparer, backward: true)) { }
 
-        internal GenerexNoResultBase(Predicate<T> predicate)
+        protected GenerexNoResultBase(Predicate<T> predicate)
             : base(
                 forwardPredicateMatcher(predicate),
                 backwardPredicateMatcher(predicate)) { }
 
-        internal GenerexNoResultBase(GenerexNoResultBase<T, TGenerex, TGenerexMatch>[] generexSequence)
+        protected GenerexNoResultBase(GenerexNoResultBase<T, TGenerex, TGenerexMatch>[] generexSequence)
             : base(
                 sequenceMatcher(generexSequence, backward: false),
                 sequenceMatcher(generexSequence, backward: true)) { }
@@ -93,7 +88,7 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches a single element, no matter what it is (cf. "." in traditional regular expression syntax).
+        /// Returns a regular expression that matches a single element, no matter what it is (cf. <c>.</c> in traditional regular expression syntax).
         /// </summary>
         /// <seealso cref="Generex.CreateAnyGenerex"/>
         public static TGenerex Any
@@ -129,7 +124,7 @@ namespace RT.Generexes
         private static TGenerex _emptyCache;
 
         /// <summary>
-        /// Returns a regular expression that matches the beginning of the input collection (cf. "^" in traditional regular expression syntax). Successful matches are always zero length.
+        /// Returns a regular expression that matches the beginning of the input collection (cf. <c>^</c> in traditional regular expression syntax). Successful matches are always zero length.
         /// </summary>
         /// <seealso cref="Generex.CreateStartGenerex"/>
         public static TGenerex Start
@@ -147,7 +142,7 @@ namespace RT.Generexes
         private static TGenerex _startCache;
 
         /// <summary>
-        /// Returns a regular expression that matches the end of the input collection (cf. "$" in traditional regular expression syntax). Successful matches are always zero length.
+        /// Returns a regular expression that matches the end of the input collection (cf. <c>$</c> in traditional regular expression syntax). Successful matches are always zero length.
         /// </summary>
         /// <seealso cref="Generex.CreateEndGenerex"/>
         public static TGenerex End
@@ -179,7 +174,7 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified sequence of elements (cf. "|" or "[...]" in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or the specified sequence of elements (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
         /// <example>
         /// <para>The following code:</para>
@@ -190,7 +185,7 @@ namespace RT.Generexes
         public TGenerex Or(params T[] elements) { return Or(EqualityComparer<T>.Default, elements); }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified sequence of elements using the specified equality comparer (cf. "|" or "[...]" in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or the specified sequence of elements using the specified equality comparer (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
         /// <seealso cref="Or(T[])"/>
         public TGenerex Or(IEqualityComparer<T> comparer, params T[] elements)
@@ -202,16 +197,16 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified sequence of elements (cf. "|" or "[...]" in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or the specified sequence of elements (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex Or(IEnumerable<T> elements) { return Or(EqualityComparer<T>.Default, elements.ToArray()); }
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified sequence of elements using the specified equality comparer (cf. "|" or "[...]" in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or the specified sequence of elements using the specified equality comparer (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex Or(IEqualityComparer<T> comparer, IEnumerable<T> elements) { return Or(comparer, elements.ToArray()); }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or a single element that satisfies the specified predicate (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or a single element that satisfies the specified predicate (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex Or(Predicate<T> predicate)
         {
@@ -219,7 +214,7 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified sequence of regular expressions (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or the specified sequence of regular expressions (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
         /// <example>
         /// <para>The following code:</para>
@@ -236,7 +231,7 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified other regular expression (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or the specified other regular expression (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
         /// <remarks>
         /// <para>This overload is here even though an equivalent method is inherited from <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}"/> because without it, the following code:</para>
@@ -246,43 +241,43 @@ namespace RT.Generexes
         public new TGenerex Or(TGenerex other) { return base.Or(other); }
 
         /// <summary>
-        /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. "?" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. <c>?</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex OptionalGreedy() { return repeatBetween(0, 1, true); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression zero times or once. Zero times is prioritised (cf. "??" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression zero times or once. Zero times is prioritised (cf. <c>??</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex Optional() { return repeatBetween(0, 1, false); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression zero or more times. More times are prioritised (cf. "*" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression zero or more times. More times are prioritised (cf. <c>*</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex RepeatGreedy() { return Constructor(repeatInfinite(_forwardMatcher, true), repeatInfinite(_backwardMatcher, true)); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression zero or more times. Fewer times are prioritised (cf. "*?" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression zero or more times. Fewer times are prioritised (cf. <c>*?</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex Repeat() { return Constructor(repeatInfinite(_forwardMatcher, false), repeatInfinite(_backwardMatcher, false)); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression the specified number of times or more. More times are prioritised (cf. "{min,}" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression the specified number of times or more. More times are prioritised (cf. <c>{min,}</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex RepeatGreedy(int min) { return repeatMin(min, true); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression the specified number of times or more. Fewer times are prioritised (cf. "{min,}?" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression the specified number of times or more. Fewer times are prioritised (cf. <c>{min,}?</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex Repeat(int min) { return repeatMin(min, false); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. More times are prioritised (cf. "{min,max}" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. More times are prioritised (cf. <c>{min,max}</c> in traditional regular expression syntax).
         /// </summary>
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="max">Maximum number of times to match.</param>
         public TGenerex RepeatGreedy(int min, int max) { return repeatBetween(min, max, true); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. Fewer times are prioritised (cf. "{min,max}?" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. Fewer times are prioritised (cf. <c>{min,max}?</c> in traditional regular expression syntax).
         /// </summary>
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="max">Maximum number of times to match.</param>
         public TGenerex Repeat(int min, int max) { return repeatBetween(min, max, false); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression the specified number of times (cf. "{times}" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression the specified number of times (cf. <c>{times}</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex Times(int times)
         {
@@ -383,13 +378,13 @@ namespace RT.Generexes
             }
         }
 
-        /// <summary>Turns the current regular expression into a zero-width negative look-ahead assertion.</summary>
+        /// <summary>Turns the current regular expression into a zero-width negative look-ahead assertion (cf. <c>(?!...)</c> in traditional regular expression syntax).</summary>
         public TGenerex LookAheadNegative() { return lookNegative(behind: false, defaultMatch: Generex.ZeroWidthMatch); }
-        /// <summary>Turns the current regular expression into a zero-width negative look-ahead assertion.</summary>
+        /// <summary>Turns the current regular expression into a zero-width negative look-behind assertion (cf. <c>(?&lt;!...)</c> in traditional regular expression syntax).</summary>
         public TGenerex LookBehindNegative() { return lookNegative(behind: true, defaultMatch: Generex.ZeroWidthMatch); }
 
         /// <summary>Returns a successful zero-width match.</summary>
-        internal static IEnumerable<int> emptyMatch(T[] input, int startIndex) { return Generex.ZeroWidthMatch; }
+        protected static IEnumerable<int> emptyMatch(T[] input, int startIndex) { return Generex.ZeroWidthMatch; }
 
         /// <summary>Processes each match of this regular expression by running it through a provided selector.</summary>
         /// <typeparam name="TGenerexWithResult">Generex type to return (for example, <see cref="Generex{T,TResult}"/>).</typeparam>

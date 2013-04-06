@@ -6,7 +6,7 @@ namespace RT.Generexes
 {
     /// <summary>Abstract base class for all Generex regular expressions.</summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
-    /// <typeparam name="TMatch">Either int or <see cref="LengthAndResult{TResult}"/>.</typeparam>
+    /// <typeparam name="TMatch">Either <c>int</c> or <see cref="LengthAndResult{TResult}"/>.</typeparam>
     /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursively.)</typeparam>
     /// <typeparam name="TGenerexMatch">Type describing a match of a regular expression.</typeparam>
     public abstract class GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
@@ -38,9 +38,9 @@ namespace RT.Generexes
             }
         }
 
-        internal abstract int getLength(TMatch match);
-        internal abstract TMatch add(TMatch match, int extra);
-        internal abstract TMatch setZero(TMatch match);
+        protected abstract int getLength(TMatch match);
+        protected abstract TMatch add(TMatch match, int extra);
+        protected abstract TMatch setZero(TMatch match);
         internal abstract TGenerexMatch createMatch(T[] input, int index, TMatch match);
         internal abstract TGenerexMatch createBackwardsMatch(T[] input, int index, TMatch match);
 
@@ -134,7 +134,7 @@ namespace RT.Generexes
             return Matches(input, startAt).FirstOrDefault();
         }
 
-        internal T[] replace(T[] input, int startAt, Func<int, TMatch, IEnumerable<T>> replaceWith, int? maxReplace, bool backward)
+        protected T[] replace(T[] input, int startAt, Func<int, TMatch, IEnumerable<T>> replaceWith, int? maxReplace, bool backward)
         {
             var result = new List<T>(backward ? input.Skip(startAt) : input.Take(startAt));
             var prevIndex = startAt;
@@ -300,7 +300,7 @@ namespace RT.Generexes
         public TGenerex Then(Predicate<T> predicate) { return Then(new Generex<T>(predicate)); }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified other regular expression (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or the specified other regular expression (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex Or(TGenerex other)
         {
@@ -308,16 +308,16 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
         public static TGenerex Ors(params TGenerex[] other) { return other.Aggregate((prev, next) => prev.Or(next)); }
 
         /// <summary>
-        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
         public static TGenerex Ors(IEnumerable<TGenerex> other) { return other.Aggregate((prev, next) => prev.Or(next)); }
 
-        /// <summary>Matches this regular expression atomically (without backtracking into it) (cf. "(?>...)" in traditional regular expression syntax).</summary>
+        /// <summary>Matches this regular expression atomically (without backtracking into it) (cf. <c>(?&gt;...)</c> in traditional regular expression syntax).</summary>
         public TGenerex Atomic()
         {
             return Constructor(
@@ -326,7 +326,7 @@ namespace RT.Generexes
             );
         }
 
-        internal IEnumerable<TResult> matches<TResult>(T[] input, int startAt, Func<int, TMatch, TResult> selector, bool backward)
+        protected IEnumerable<TResult> matches<TResult>(T[] input, int startAt, Func<int, TMatch, TResult> selector, bool backward)
         {
             int i = startAt;
             int step = backward ? -1 : 1;
@@ -348,7 +348,7 @@ namespace RT.Generexes
             }
         }
 
-        internal TResult matchExact<TResult>(T[] input, int mustStartAt, int mustEndAt, Func<TMatch, TResult> selector)
+        protected TResult matchExact<TResult>(T[] input, int mustStartAt, int mustEndAt, Func<TMatch, TResult> selector)
         {
             if (mustEndAt < input.Length)
             {
@@ -436,9 +436,9 @@ namespace RT.Generexes
             );
         }
 
-        /// <summary>Turns the current regular expression into a zero-width positive look-ahead assertion.</summary>
+        /// <summary>Turns the current regular expression into a zero-width positive look-ahead assertion (cf. <c>(?=...)</c> in traditional regular expression syntax).</summary>
         public TGenerex LookAhead() { return look(behind: false); }
-        /// <summary>Turns the current regular expression into a zero-width positive look-behind assertion.</summary>
+        /// <summary>Turns the current regular expression into a zero-width positive look-behind assertion (cf. <c>(?&lt;=...)</c> in traditional regular expression syntax).</summary>
         public TGenerex LookBehind() { return look(behind: true); }
 
         private TGenerex look(bool behind)
@@ -449,7 +449,7 @@ namespace RT.Generexes
             return Constructor(newMatcher, newMatcher);
         }
 
-        internal TGenerex lookNegative(bool behind, IEnumerable<TMatch> defaultMatch)
+        protected TGenerex lookNegative(bool behind, IEnumerable<TMatch> defaultMatch)
         {
             // In a look-*behind* assertion, both matchers use the _backwardMatcher. Similarly, look-*ahead* assertions always use _forwardMatcher.
             matcher innerMatcher = behind ? _backwardMatcher : _forwardMatcher;

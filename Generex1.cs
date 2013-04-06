@@ -10,7 +10,7 @@ namespace RT.Generexes
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
     public sealed class Generex<T> : GenerexNoResultBase<T, Generex<T>, GenerexMatch<T>>
     {
-        internal sealed override GenerexMatch<T> createNoResultMatch(T[] input, int index, int matchLength)
+        protected sealed override GenerexMatch<T> createNoResultMatch(T[] input, int index, int matchLength)
         {
             return new GenerexMatch<T>(input, index, matchLength);
         }
@@ -36,12 +36,12 @@ namespace RT.Generexes
         public Generex(IEqualityComparer<T> comparer, params T[] elements) : base(comparer, elements) { }
 
         /// <summary>
-        /// Instantiates a regular expression that matches a sequence of consecutive elements.
+        /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified equality comparer.
         /// </summary>
         public Generex(IEqualityComparer<T> comparer, IEnumerable<T> elements) : base(comparer, elements.ToArray()) { }
 
         /// <summary>
-        /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. "[...]" in traditional regular expression syntax).
+        /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
         /// <param name="predicate">The predicate that identifies matching elements.</param>
         public Generex(Predicate<T> predicate) : base(predicate) { }

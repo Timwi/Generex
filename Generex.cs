@@ -17,55 +17,80 @@ namespace RT.Generexes
         /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive elements.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <param name="elements">The sequence of elements to match.</param>
         public static Generex<T> New<T>(params T[] elements) { return new Generex<T>(elements); }
         /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified equality comparer.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <param name="comparer">Equality comparer to determine matching elements.</param>
+        /// <param name="elements">The sequence of elements to match.</param>
         public static Generex<T> New<T>(IEqualityComparer<T> comparer, params T[] elements) { return new Generex<T>(comparer, elements); }
         /// <summary>
-        /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. "[...]" in traditional regular expression syntax).
+        /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <param name="predicate">Predicate that determines whether an element matches.</param>
         public static Generex<T> New<T>(Predicate<T> predicate) { return new Generex<T>(predicate); }
         /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive regular expressions.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <param name="generexes">Sequence of regular expressions to match.</param>
         public static Generex<T> New<T>(params Generex<T>[] generexes) { return new Generex<T>(generexes); }
 
         /// <summary>
-        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <param name="generexes">Collection of regular expressions, one of which is matched at a time.</param>
         public static Generex<T> Ors<T>(IEnumerable<Generex<T>> generexes) { return Generex<T>.Ors(generexes); }
         /// <summary>
-        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <param name="generexes">Collection of regular expressions, one of which is matched at a time.</param>
         public static Generex<T> Ors<T>(params Generex<T>[] generexes) { return Generex<T>.Ors(generexes); }
         /// <summary>
-        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <typeparam name="TResult">Type of the result object associated with each match of the regular expression.</typeparam>
+        /// <param name="generexes">Collection of regular expressions, one of which is matched at a time.</param>
         public static Generex<T, TResult> Ors<T, TResult>(IEnumerable<Generex<T, TResult>> generexes) { return Generex<T, TResult>.Ors(generexes); }
         /// <summary>
-        /// Returns a regular expression that matches any of the specified regular expressions (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <typeparam name="TResult">Type of the result object associated with each match of the regular expression.</typeparam>
+        /// <param name="generexes">Collection of regular expressions, one of which is matched at a time.</param>
         public static Generex<T, TResult> Ors<T, TResult>(params Generex<T, TResult>[] generexes) { return Generex<T, TResult>.Ors(generexes); }
 
         /// <summary>Returns a regular expression that matches a single element which is none of the specified elements.</summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
         /// <param name="elements">List of elements excluded from matching.</param>
         public static Generex<T> Not<T>(params T[] elements) { return Generex<T>.Not(EqualityComparer<T>.Default, elements); }
         /// <summary>Returns a regular expression that matches a single element which is none of the specified elements.</summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
         /// <param name="elements">List of elements excluded from matching.</param>
         /// <param name="comparer">Equality comparer to use.</param>
         public static Generex<T> Not<T>(IEqualityComparer<T> comparer, params T[] elements) { return Generex<T>.Not(comparer, elements); }
 
         /// <summary>Generates a recursive regular expression, i.e. one that can contain itself, allowing the matching of arbitrarily nested expressions.</summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
         /// <param name="generator">A function that generates the regular expression from an object that recursively represents the result.</param>
         public static Generex<T> Recursive<T>(Func<Generex<T>, Generex<T>> generator) { return Generex<T>.Recursive(generator); }
         /// <summary>Generates a recursive regular expression, i.e. one that can contain itself, allowing the matching of arbitrarily nested expressions.</summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <typeparam name="TResult">Type of the result object associated with each match of the regular expression.</typeparam>
         /// <param name="generator">A function that generates the regular expression from an object that recursively represents the result.</param>
         public static Generex<T, TResult> Recursive<T, TResult>(Func<Generex<T, TResult>, Generex<T, TResult>> generator) { return Generex<T, TResult>.Recursive(generator); }
 
         /// <summary>
         /// Determines whether the given input sequence contains a match for this regular expression, optionally starting the search at a specified index.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
@@ -74,6 +99,7 @@ namespace RT.Generexes
         /// <summary>
         /// Determines whether the given input sequence contains a match for this regular expression, optionally starting the search at a specified index.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
@@ -82,6 +108,7 @@ namespace RT.Generexes
         /// <summary>
         /// Determines whether the given input sequence matches this regular expression at a specific index.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
@@ -91,6 +118,7 @@ namespace RT.Generexes
         /// <summary>
         /// Determines whether the given input sequence matches this regular expression up to a specific index.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="mustEndAt">Index at which the match must end (default is the end of the input sequence).</param>
@@ -100,6 +128,7 @@ namespace RT.Generexes
         /// <summary>
         /// Determines whether the given input sequence matches this regular expression exactly.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
@@ -110,6 +139,7 @@ namespace RT.Generexes
         /// <summary>
         /// Determines whether the given input sequence contains a match for this regular expression that ends before the specified maximum index.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="endAt">Optional index before which a match must end. The search begins by matching from this index backwards, and then proceeds towards the start of the input sequence.</param>
@@ -118,6 +148,7 @@ namespace RT.Generexes
         /// <summary>
         /// Determines whether the given input sequence matches this regular expression, and if so, returns information about the first match.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
@@ -127,6 +158,7 @@ namespace RT.Generexes
         /// <summary>
         /// Determines whether the given input sequence matches this regular expression exactly, and if so, returns information about the match.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
@@ -138,6 +170,7 @@ namespace RT.Generexes
         /// Determines whether the given input sequence matches this regular expression, and if so, returns information about the first match
         /// found by matching the regular expression backwards (starting from the end of the input sequence).
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included.</param>
@@ -148,6 +181,7 @@ namespace RT.Generexes
         /// Returns a sequence of non-overlapping regular expression matches going backwards (starting at the end of the specified
         /// input sequence), optionally starting the search at the specified index.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="endAt">Optional index at which to begin the reverse search. Matches that end at or after this index are not included.</param>
@@ -156,6 +190,7 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a sequence of non-overlapping regular expression matches, optionally starting the search at the specified index.
         /// </summary>
+        /// <typeparam name="T">Type of the objects in the collection.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
@@ -166,35 +201,40 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that always matches and returns a zero-width match.
         /// </summary>
+        /// <typeparam name="T">Type of objects that the regular expression will later match against.</typeparam>
         /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
         /// <seealso cref="GenerexNoResultBase{T,TGenerex,TGenerexMatch}.Empty"/>
         public static Generex<T> CreateEmptyGenerex<T>(this T[] input) { return Generex<T>.Empty; }
 
         /// <summary>
-        /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. "[...]" in traditional regular expression syntax).
+        /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
+        /// <typeparam name="T">Type of objects that the regular expression will later match against.</typeparam>
         /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
         /// <param name="predicate">The predicate that identifies matching elements.</param>
         /// <seealso cref="Generex{T}(Predicate{T})"/>
         public static Generex<T> CreateGenerex<T>(this T[] input, Predicate<T> predicate) { return new Generex<T>(predicate); }
 
         /// <summary>
-        /// Returns a regular expression that matches a single element, no matter what it is (cf. "." in traditional regular expression syntax).
+        /// Returns a regular expression that matches a single element, no matter what it is (cf. <c>.</c> in traditional regular expression syntax).
         /// </summary>
+        /// <typeparam name="T">Type of objects that the regular expression will later match against.</typeparam>
         /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
         /// <seealso cref="GenerexNoResultBase{T,TGenerex,TGenerexMatch}.Any"/>
         public static Generex<T> CreateAnyGenerex<T>(this T[] input) { return Generex<T>.Any; }
 
         /// <summary>
-        /// Returns a regular expression that matches the beginning of the input collection (cf. "^" in traditional regular expression syntax). Successful matches are always zero length.
+        /// Returns a regular expression that matches the beginning of the input collection (cf. <c>^</c> in traditional regular expression syntax). Successful matches are always zero length.
         /// </summary>
+        /// <typeparam name="T">Type of objects that the regular expression will later match against.</typeparam>
         /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
         /// <seealso cref="GenerexNoResultBase{T,TGenerex,TGenerexMatch}.Start"/>
         public static Generex<T> CreateStartGenerex<T>(this T[] input) { return Generex<T>.Start; }
 
         /// <summary>
-        /// Returns a regular expression that matches the end of the input collection (cf. "$" in traditional regular expression syntax). Successful matches are always zero length.
+        /// Returns a regular expression that matches the end of the input collection (cf. <c>$</c> in traditional regular expression syntax). Successful matches are always zero length.
         /// </summary>
+        /// <typeparam name="T">Type of objects that the regular expression will later match against.</typeparam>
         /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
         /// <seealso cref="GenerexNoResultBase{T,TGenerex,TGenerexMatch}.End"/>
         public static Generex<T> CreateEndGenerex<T>(this T[] input) { return Generex<T>.End; }

@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace RT.Generexes
 {
-    /// <summary>Abstract base class for <see cref="Generex{T}"/> and siblings.</summary>
+    /// <summary>Abstract base class for <see cref="Generex{T,TResult}"/> and siblings.</summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
     /// <typeparam name="TResult">Type of objects generated from each match of the regular expression.</typeparam>
     /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursively.)</typeparam>
@@ -14,12 +14,12 @@ namespace RT.Generexes
         where TGenerex : GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch>
         where TGenerexMatch : GenerexMatch<T, TResult>
     {
-        internal sealed override int getLength(LengthAndResult<TResult> match) { return match.Length; }
-        internal sealed override LengthAndResult<TResult> add(LengthAndResult<TResult> match, int extra) { return match.Add(extra); }
-        internal sealed override LengthAndResult<TResult> setZero(LengthAndResult<TResult> match) { return new LengthAndResult<TResult>(match.Result, 0); }
+        protected sealed override int getLength(LengthAndResult<TResult> match) { return match.Length; }
+        protected sealed override LengthAndResult<TResult> add(LengthAndResult<TResult> match, int extra) { return match.Add(extra); }
+        protected sealed override LengthAndResult<TResult> setZero(LengthAndResult<TResult> match) { return new LengthAndResult<TResult>(match.Result, 0); }
         internal sealed override TGenerexMatch createMatch(T[] input, int index, LengthAndResult<TResult> match) { return createMatchWithResult(match.Result, input, index, match.Length); }
         internal sealed override TGenerexMatch createBackwardsMatch(T[] input, int index, LengthAndResult<TResult> match) { return createMatchWithResult(match.Result, input, index + match.Length, -match.Length); }
-        internal abstract TGenerexMatch createMatchWithResult(TResult result, T[] input, int index, int length);
+        protected abstract TGenerexMatch createMatchWithResult(TResult result, T[] input, int index, int length);
 
         /// <summary>
         /// Instantiates an empty regular expression which always matches and returns the specified result object.
@@ -117,7 +117,7 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches this regular expression, followed by the specified ones,
+        /// Returns a regular expression that matches this regular expression, followed by the specified one,
         /// and generates a match object that combines the result of this regular expression with the match of the other.
         /// </summary>
         public TCombinedGenerex Then<TGenerexNoResult, TGenerexNoResultMatch, TCombinedGenerex, TCombinedGenerexMatch, TCombinedResult>(TGenerexNoResult other, Func<TResult, TGenerexNoResultMatch, TCombinedResult> selector)
@@ -153,7 +153,7 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches this regular expression, followed by the specified ones,
+        /// Returns a regular expression that matches this regular expression, followed by the specified one,
         /// and generates a match object that combines the original two matches.
         /// </summary>
         public TCombinedGenerex ThenRaw<TOtherGenerex, TOtherGenerexMatch, TOtherResult, TCombinedGenerex, TCombinedGenerexMatch, TCombinedResult>(TOtherGenerex other, Func<TResult, TOtherResult, TCombinedResult> selector)
@@ -171,7 +171,7 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or a single element that satisfies the specified predicate (cf. "|" in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or a single element that satisfies the specified predicate (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex Or(Predicate<T> predicate, Func<GenerexMatch<T>, TResult> selector)
         {
@@ -179,7 +179,7 @@ namespace RT.Generexes
             return Or(Constructor(new matcher(orred._forwardMatcher), new matcher(orred._backwardMatcher)));
         }
 
-        internal TManyGenerex repeatInfinite<TManyGenerex, TManyGenerexMatch>(bool greedy)
+        protected TManyGenerex repeatInfinite<TManyGenerex, TManyGenerexMatch>(bool greedy)
             where TManyGenerex : GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>
             where TManyGenerexMatch : GenerexMatch<T, IEnumerable<TResult>>
         {
@@ -201,7 +201,7 @@ namespace RT.Generexes
                 createRepeatInfiniteMatcher(_backwardMatcher));
         }
 
-        internal TManyGenerex repeatMin<TManyGenerex, TManyGenerexMatch>(int min, bool greedy)
+        protected TManyGenerex repeatMin<TManyGenerex, TManyGenerexMatch>(int min, bool greedy)
             where TManyGenerex : GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>
             where TManyGenerexMatch : GenerexMatch<T, IEnumerable<TResult>>
         {
@@ -210,7 +210,7 @@ namespace RT.Generexes
                 .ThenRaw<TManyGenerex, TManyGenerexMatch, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch, IEnumerable<TResult>>(repeatInfinite<TManyGenerex, TManyGenerexMatch>(greedy), Enumerable.Concat);
         }
 
-        internal TManyGenerex repeatBetween<TManyGenerex, TManyGenerexMatch>(int min, int max, bool greedy)
+        protected TManyGenerex repeatBetween<TManyGenerex, TManyGenerexMatch>(int min, int max, bool greedy)
             where TManyGenerex : GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>
             where TManyGenerexMatch : GenerexMatch<T, IEnumerable<TResult>>
         {
@@ -287,9 +287,9 @@ namespace RT.Generexes
             );
         }
 
-        /// <summary>Turns the current regular expression into a zero-width negative look-ahead assertion, which returns the specified default result in case of a match.</summary>
+        /// <summary>Turns the current regular expression into a zero-width negative look-ahead assertion (cf. <c>(?!...)</c> in traditional regular expression syntax), which returns the specified default result in case of a match.</summary>
         public TGenerex LookAheadNegative(TResult defaultMatch) { return lookNegative(behind: false, defaultMatch: new[] { new LengthAndResult<TResult>(defaultMatch, 0) }); }
-        /// <summary>Turns the current regular expression into a zero-width negative look-behind assertion, which returns the specified default result in case of a match.</summary>
+        /// <summary>Turns the current regular expression into a zero-width negative look-behind assertion (cf. <c>(?&lt;!...)</c> in traditional regular expression syntax), which returns the specified default result in case of a match.</summary>
         public TGenerex LookBehindNegative(TResult defaultMatch) { return lookNegative(behind: true, defaultMatch: new[] { new LengthAndResult<TResult>(defaultMatch, 0) }); }
 
         /// <summary>Processes each match of this regular expression by running it through a provided selector.</summary>

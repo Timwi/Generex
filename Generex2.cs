@@ -11,7 +11,7 @@ namespace RT.Generexes
     /// <remarks>This type is not directly instantiated; use <see cref="Generex{T}.Process"/>.</remarks>
     public sealed class Generex<T, TResult> : GenerexWithResultBase<T, TResult, Generex<T, TResult>, GenerexMatch<T, TResult>>
     {
-        internal sealed override GenerexMatch<T, TResult> createMatchWithResult(TResult result, T[] input, int index, int length)
+        protected sealed override GenerexMatch<T, TResult> createMatchWithResult(TResult result, T[] input, int index, int length)
         {
             return new GenerexMatch<T, TResult>(result, input, index, length);
         }
@@ -41,7 +41,7 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches this regular expression, followed by the specified ones,
+        /// Returns a regular expression that matches this regular expression, followed by the specified one,
         /// and generates a match object that combines the result of this regular expression with the match of the other.
         /// </summary>
         public Generex<T, TCombined> Then<TCombined>(Generex<T> other, Func<TResult, GenerexMatch<T>, TCombined> selector)
@@ -59,7 +59,7 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches this regular expression, followed by the specified ones,
+        /// Returns a regular expression that matches this regular expression, followed by the specified one,
         /// and generates a match object that combines the original two matches.
         /// </summary>
         public Generex<T, TCombined> ThenRaw<TOther, TCombined>(Generex<T, TOther> other, Func<TResult, TOther, TCombined> selector)
@@ -68,43 +68,43 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. "?" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. <c>?</c> in traditional regular expression syntax).
         /// </summary>
         public Generex<T, IEnumerable<TResult>> OptionalGreedy() { return repeatBetween<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(0, 1, greedy: true); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression zero times or once. Zero times is prioritised (cf. "??" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression zero times or once. Zero times is prioritised (cf. <c>??</c> in traditional regular expression syntax).
         /// </summary>
         public Generex<T, IEnumerable<TResult>> Optional() { return repeatBetween<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(0, 1, greedy: false); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression zero or more times. More times are prioritised (cf. "*" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression zero or more times. More times are prioritised (cf. <c>*</c> in traditional regular expression syntax).
         /// </summary>
         public Generex<T, IEnumerable<TResult>> RepeatGreedy() { return repeatInfinite<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(greedy: true); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression zero or more times. Fewer times are prioritised (cf. "*?" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression zero or more times. Fewer times are prioritised (cf. <c>*?</c> in traditional regular expression syntax).
         /// </summary>
         public Generex<T, IEnumerable<TResult>> Repeat() { return repeatInfinite<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(greedy: false); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression the specified number of times or more. More times are prioritised (cf. "{min,}" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression the specified number of times or more. More times are prioritised (cf. <c>{min,}</c> in traditional regular expression syntax).
         /// </summary>
         public Generex<T, IEnumerable<TResult>> RepeatGreedy(int min) { return repeatMin<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(min, greedy: true); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression the specified number of times or more. Fewer times are prioritised (cf. "{min,}?" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression the specified number of times or more. Fewer times are prioritised (cf. <c>{min,}?</c> in traditional regular expression syntax).
         /// </summary>
         public Generex<T, IEnumerable<TResult>> Repeat(int min) { return repeatMin<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(min, greedy: false); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. More times are prioritised (cf. "{min,max}" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. More times are prioritised (cf. <c>{min,max}</c> in traditional regular expression syntax).
         /// </summary>
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="max">Maximum number of times to match.</param>
         public Generex<T, IEnumerable<TResult>> RepeatGreedy(int min, int max) { return repeatBetween<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(min, max, greedy: true); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. Fewer times are prioritised (cf. "{min,max}?" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. Fewer times are prioritised (cf. <c>{min,max}?</c> in traditional regular expression syntax).
         /// </summary>
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="max">Maximum number of times to match.</param>
         public Generex<T, IEnumerable<TResult>> Repeat(int min, int max) { return repeatBetween<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(min, max, greedy: false); }
         /// <summary>
-        /// Returns a regular expression that matches this regular expression the specified number of times (cf. "{times}" in traditional regular expression syntax).
+        /// Returns a regular expression that matches this regular expression the specified number of times (cf. <c>{times}</c> in traditional regular expression syntax).
         /// </summary>
         public Generex<T, IEnumerable<TResult>> Times(int times)
         {
