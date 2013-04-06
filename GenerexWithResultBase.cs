@@ -120,7 +120,7 @@ namespace RT.Generexes
         /// Returns a regular expression that matches this regular expression, followed by the specified one,
         /// and generates a match object that combines the result of this regular expression with the match of the other.
         /// </summary>
-        public TCombinedGenerex Then<TGenerexNoResult, TGenerexNoResultMatch, TCombinedGenerex, TCombinedGenerexMatch, TCombinedResult>(TGenerexNoResult other, Func<TResult, TGenerexNoResultMatch, TCombinedResult> selector)
+        protected TCombinedGenerex then<TGenerexNoResult, TGenerexNoResultMatch, TCombinedGenerex, TCombinedGenerexMatch, TCombinedResult>(TGenerexNoResult other, Func<TResult, TGenerexNoResultMatch, TCombinedResult> selector)
             where TGenerexNoResult : GenerexNoResultBase<T, TGenerexNoResult, TGenerexNoResultMatch>
             where TGenerexNoResultMatch : GenerexMatch<T>
             where TCombinedGenerex : GenerexWithResultBase<T, TCombinedResult, TCombinedGenerex, TCombinedGenerexMatch>
@@ -138,7 +138,7 @@ namespace RT.Generexes
         /// Returns a regular expression that matches this regular expression, followed by the specified one,
         /// and generates a match object that combines the result of this regular expression with the match of the other.
         /// </summary>
-        public TCombinedGenerex Then<TOtherGenerex, TOtherGenerexMatch, TOtherResult, TCombinedGenerex, TCombinedGenerexMatch, TCombinedResult>(TOtherGenerex other, Func<TResult, TOtherGenerexMatch, TCombinedResult> selector)
+        protected TCombinedGenerex then<TOtherGenerex, TOtherGenerexMatch, TOtherResult, TCombinedGenerex, TCombinedGenerexMatch, TCombinedResult>(TOtherGenerex other, Func<TResult, TOtherGenerexMatch, TCombinedResult> selector)
             where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T, TOtherResult>
             where TCombinedGenerex : GenerexWithResultBase<T, TCombinedResult, TCombinedGenerex, TCombinedGenerexMatch>
@@ -156,7 +156,7 @@ namespace RT.Generexes
         /// Returns a regular expression that matches this regular expression, followed by the specified one,
         /// and generates a match object that combines the original two matches.
         /// </summary>
-        public TCombinedGenerex ThenRaw<TOtherGenerex, TOtherGenerexMatch, TOtherResult, TCombinedGenerex, TCombinedGenerexMatch, TCombinedResult>(TOtherGenerex other, Func<TResult, TOtherResult, TCombinedResult> selector)
+        protected TCombinedGenerex thenRaw<TOtherGenerex, TOtherGenerexMatch, TOtherResult, TCombinedGenerex, TCombinedGenerexMatch, TCombinedResult>(TOtherGenerex other, Func<TResult, TOtherResult, TCombinedResult> selector)
             where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T, TOtherResult>
             where TCombinedGenerex : GenerexWithResultBase<T, TCombinedResult, TCombinedGenerex, TCombinedGenerexMatch>
@@ -207,7 +207,7 @@ namespace RT.Generexes
         {
             if (min < 0) throw new ArgumentException("'min' cannot be negative.", "min");
             return repeatBetween<TManyGenerex, TManyGenerexMatch>(min, min, true)
-                .ThenRaw<TManyGenerex, TManyGenerexMatch, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch, IEnumerable<TResult>>(repeatInfinite<TManyGenerex, TManyGenerexMatch>(greedy), Enumerable.Concat);
+                .thenRaw<TManyGenerex, TManyGenerexMatch, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch, IEnumerable<TResult>>(repeatInfinite<TManyGenerex, TManyGenerexMatch>(greedy), Enumerable.Concat);
         }
 
         protected TManyGenerex repeatBetween<TManyGenerex, TManyGenerexMatch>(int min, int max, bool greedy)

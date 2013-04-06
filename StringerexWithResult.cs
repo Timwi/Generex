@@ -128,7 +128,7 @@ namespace RT.Generexes
         /// </summary>
         public Stringerex<TCombined> Then<TCombined>(Stringerex other, Func<TResult, StringerexMatch, TCombined> selector)
         {
-            return base.Then<Stringerex, StringerexMatch, Stringerex<TCombined>, StringerexMatch<TCombined>, TCombined>(other, selector);
+            return then<Stringerex, StringerexMatch, Stringerex<TCombined>, StringerexMatch<TCombined>, TCombined>(other, selector);
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace RT.Generexes
         /// </summary>
         public Stringerex<TCombined> Then<TOther, TCombined>(Stringerex<TOther> other, Func<TResult, StringerexMatch<TOther>, TCombined> selector)
         {
-            return base.Then<Stringerex<TOther>, StringerexMatch<TOther>, TOther, Stringerex<TCombined>, StringerexMatch<TCombined>, TCombined>(other, selector);
+            return then<Stringerex<TOther>, StringerexMatch<TOther>, TOther, Stringerex<TCombined>, StringerexMatch<TCombined>, TCombined>(other, selector);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace RT.Generexes
         /// </summary>
         public Stringerex<TCombined> ThenRaw<TOther, TCombined>(Stringerex<TOther> other, Func<TResult, TOther, TCombined> selector)
         {
-            return base.ThenRaw<Stringerex<TOther>, StringerexMatch<TOther>, TOther, Stringerex<TCombined>, StringerexMatch<TCombined>, TCombined>(other, selector);
+            return thenRaw<Stringerex<TOther>, StringerexMatch<TOther>, TOther, Stringerex<TCombined>, StringerexMatch<TCombined>, TCombined>(other, selector);
         }
 
         /// <summary>
