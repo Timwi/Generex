@@ -21,7 +21,7 @@ namespace RT.Generexes
         /// </summary>
         public Stringerex(TResult result) : base(result) { }
 
-        internal Stringerex(matcher forward, matcher backward) : base(forward, backward) { }
+        private Stringerex(matcher forward, matcher backward) : base(forward, backward) { }
         static Stringerex() { Constructor = (forward, backward) => new Stringerex<TResult>(forward, backward); }
 
         /// <summary>
