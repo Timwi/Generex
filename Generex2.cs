@@ -11,6 +11,11 @@ namespace RT.Generexes
     /// <remarks>This type is not directly instantiated; use <see cref="Generex{T}.Process"/>.</remarks>
     public sealed class Generex<T, TResult> : GenerexWithResultBase<T, TResult, Generex<T, TResult>, GenerexMatch<T, TResult>>
     {
+        /// <summary>Instantiates a <see cref="GenerexMatch{T}"/> object from an index, length and result object.</summary>
+        /// <param name="result">The result object associated with this match.</param>
+        /// <param name="input">Original input array that was matched against.</param>
+        /// <param name="index">Start index of the match.</param>
+        /// <param name="length">Length of the match.</param>
         protected sealed override GenerexMatch<T, TResult> createMatchWithResult(TResult result, T[] input, int index, int length)
         {
             return new GenerexMatch<T, TResult>(result, input, index, length);

@@ -11,6 +11,11 @@ namespace RT.Generexes
     /// <remarks>This type is not directly instantiated; use <see cref="Stringerex.Process"/>.</remarks>
     public sealed class Stringerex<TResult> : GenerexWithResultBase<char, TResult, Stringerex<TResult>, StringerexMatch<TResult>>
     {
+        /// <summary>Instantiates a <see cref="GenerexMatch{T}"/> object from an index, length and result object.</summary>
+        /// <param name="result">The result object associated with this match.</param>
+        /// <param name="input">Original input array that was matched against.</param>
+        /// <param name="index">Start index of the match.</param>
+        /// <param name="length">Length of the match.</param>
         protected sealed override StringerexMatch<TResult> createMatchWithResult(TResult result, char[] input, int index, int length)
         {
             return new StringerexMatch<TResult>(result, input, index, length);
@@ -138,7 +143,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">Input string to match the regular expression against.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
-        /// <remarks>The behaviour is analogous to <see cref="Regex.Matches(string,string)"/>.
+        /// <remarks>The behaviour is analogous to <see cref="System.Text.RegularExpressions.Regex.Matches(string,string)"/>.
         /// The documentation for that method claims that it returns “all occurrences of the regular expression”, but this is false.</remarks>
         public IEnumerable<TResult> RawMatches(string input, int startAt = 0) { return RawMatches(input.ToCharArray(), startAt); }
 

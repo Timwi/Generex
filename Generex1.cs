@@ -10,6 +10,10 @@ namespace RT.Generexes
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
     public sealed class Generex<T> : GenerexNoResultBase<T, Generex<T>, GenerexMatch<T>>
     {
+        /// <summary>Instantiates a <see cref="GenerexMatch{T}"/> object from an index and length.</summary>
+        /// <param name="input">Original input array that was matched against.</param>
+        /// <param name="index">Start index of the match.</param>
+        /// <param name="matchLength">Length of the match.</param>
         protected sealed override GenerexMatch<T> createNoResultMatch(T[] input, int index, int matchLength)
         {
             return new GenerexMatch<T>(input, index, matchLength);

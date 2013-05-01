@@ -9,6 +9,10 @@ namespace RT.Generexes
     /// </summary>
     public sealed class Stringerex : GenerexNoResultBase<char, Stringerex, StringerexMatch>
     {
+        /// <summary>Instantiates a <see cref="GenerexMatch{T}"/> object from an index and length.</summary>
+        /// <param name="input">Original input array that was matched against.</param>
+        /// <param name="index">Start index of the match.</param>
+        /// <param name="matchLength">Length of the match.</param>
         protected sealed override StringerexMatch createNoResultMatch(char[] input, int index, int matchLength)
         {
             return new StringerexMatch(input, index, matchLength);

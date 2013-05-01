@@ -14,11 +14,20 @@ namespace RT.Generexes
         where TGenerex : GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch>
         where TGenerexMatch : GenerexMatch<T, TResult>
     {
+        /// <summary>Retrieves the length of the specified <paramref name="match"/>.</summary>
         protected sealed override int getLength(LengthAndResult<TResult> match) { return match.Length; }
+        /// <summary>Returns a new match that is longer than the specified <paramref name="match"/> by the specified <paramref name="extra"/> amount.</summary>
         protected sealed override LengthAndResult<TResult> add(LengthAndResult<TResult> match, int extra) { return match.Add(extra); }
+        /// <summary>Returns the specified <paramref name="match"/>, but with its length set to zero.</summary>
         protected sealed override LengthAndResult<TResult> setZero(LengthAndResult<TResult> match) { return new LengthAndResult<TResult>(match.Result, 0); }
         internal sealed override TGenerexMatch createMatch(T[] input, int index, LengthAndResult<TResult> match) { return createMatchWithResult(match.Result, input, index, match.Length); }
         internal sealed override TGenerexMatch createBackwardsMatch(T[] input, int index, LengthAndResult<TResult> match) { return createMatchWithResult(match.Result, input, index + match.Length, -match.Length); }
+
+        /// <summary>Instantiates a <see cref="GenerexMatch{T}"/> object from an index, length and result object.</summary>
+        /// <param name="result">The result object associated with this match.</param>
+        /// <param name="input">Original input array that was matched against.</param>
+        /// <param name="index">Start index of the match.</param>
+        /// <param name="length">Length of the match.</param>
         protected abstract TGenerexMatch createMatchWithResult(TResult result, T[] input, int index, int length);
 
         /// <summary>
@@ -180,6 +189,11 @@ namespace RT.Generexes
             return Or(Constructor(new matcher(orred._forwardMatcher), new matcher(orred._backwardMatcher)));
         }
 
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression zero or more times.
+        /// </summary>
+        /// <param name="greedy"><c>true</c> to prioritise longer matches (“greedy” matching);
+        /// <c>false</c> to prioritise shorter matches (“non-greedy” matching).</param>
         protected TManyGenerex repeatInfinite<TManyGenerex, TManyGenerexMatch>(bool greedy)
             where TManyGenerex : GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>
             where TManyGenerexMatch : GenerexMatch<T, IEnumerable<TResult>>
@@ -202,6 +216,12 @@ namespace RT.Generexes
                 createRepeatInfiniteMatcher(_backwardMatcher));
         }
 
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression the specified number of times or more.
+        /// </summary>
+        /// <param name="min">Minimum number of times the regular expression must match.</param>
+        /// <param name="greedy"><c>true</c> to prioritise longer matches (“greedy” matching);
+        /// <c>false</c> to prioritise shorter matches (“non-greedy” matching).</param>
         protected TManyGenerex repeatMin<TManyGenerex, TManyGenerexMatch>(int min, bool greedy)
             where TManyGenerex : GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>
             where TManyGenerexMatch : GenerexMatch<T, IEnumerable<TResult>>
@@ -211,6 +231,13 @@ namespace RT.Generexes
                 .thenRaw<TManyGenerex, TManyGenerexMatch, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch, IEnumerable<TResult>>(repeatInfinite<TManyGenerex, TManyGenerexMatch>(greedy), Enumerable.Concat);
         }
 
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression any number of times within specified boundaries.
+        /// </summary>
+        /// <param name="min">Minimum number of times to match.</param>
+        /// <param name="max">Maximum number of times to match.</param>
+        /// <param name="greedy"><c>true</c> to prioritise longer matches (“greedy” matching);
+        /// <c>false</c> to prioritise shorter matches (“non-greedy” matching).</param>
         protected TManyGenerex repeatBetween<TManyGenerex, TManyGenerexMatch>(int min, int max, bool greedy)
             where TManyGenerex : GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>
             where TManyGenerexMatch : GenerexMatch<T, IEnumerable<TResult>>

@@ -12,23 +12,41 @@ namespace RT.Generexes
         where TGenerex : GenerexNoResultBase<T, TGenerex, TGenerexMatch>
         where TGenerexMatch : GenerexMatch<T>
     {
+        /// <summary>Returns <paramref name="match"/>.</summary>
         protected sealed override int getLength(int match) { return match; }
+        /// <summary>Returns the sum of <paramref name="match"/> and <paramref name="extra"/>.</summary>
         protected sealed override int add(int match, int extra) { return match + extra; }
+        /// <summary>Returns zero.</summary>
         protected sealed override int setZero(int match) { return 0; }
         internal sealed override TGenerexMatch createMatch(T[] input, int index, int match) { return createNoResultMatch(input, index, match); }
         internal sealed override TGenerexMatch createBackwardsMatch(T[] input, int index, int match) { return createNoResultMatch(input, index + match, -match); }
+
+        /// <summary>Instantiates a <see cref="GenerexMatch{T}"/> object from an index and length.</summary>
+        /// <param name="input">Original input array that was matched against.</param>
+        /// <param name="index">Start index of the match.</param>
+        /// <param name="matchLength">Length of the match.</param>
         protected abstract TGenerexMatch createNoResultMatch(T[] input, int index, int matchLength);
 
+        /// <summary>
+        /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified equality comparer.
+        /// </summary>
         protected GenerexNoResultBase(IEqualityComparer<T> comparer, T[] elements)
             : base(
                 elementsMatcher(elements, comparer, backward: false),
                 elementsMatcher(elements, comparer, backward: true)) { }
 
+        /// <summary>
+        /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. <c>[...]</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <param name="predicate">The predicate that identifies matching elements.</param>
         protected GenerexNoResultBase(Predicate<T> predicate)
             : base(
                 forwardPredicateMatcher(predicate),
                 backwardPredicateMatcher(predicate)) { }
 
+        /// <summary>
+        /// Instantiates a regular expression that matches a sequence of consecutive regular expressions.
+        /// </summary>
         protected GenerexNoResultBase(GenerexNoResultBase<T, TGenerex, TGenerexMatch>[] generexSequence)
             : base(
                 sequenceMatcher(generexSequence, backward: false),
