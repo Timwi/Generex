@@ -128,7 +128,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
-        /// <returns>An object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing a regular expression match in case of success; <c>null</c> if no match.</returns>
         public TGenerexMatch Match(T[] input, int startAt = 0)
         {
             return Matches(input, startAt).FirstOrDefault();
@@ -223,7 +223,7 @@ namespace RT.Generexes
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
         /// <param name="mustEndAt">Index at which the match must end (default is the end of the input sequence).</param>
-        /// <returns>An object describing the regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing the regular expression match in case of success; <c>null</c> if no match.</returns>
         public TGenerexMatch MatchExact(T[] input, int mustStartAt = 0, int? mustEndAt = null)
         {
             return matchExact(input, mustStartAt, mustEndAt ?? input.Length, match => createMatch(input, mustStartAt, match));
@@ -235,7 +235,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included.</param>
-        /// <returns>An object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing a regular expression match in case of success; <c>null</c> if no match.</returns>
         public TGenerexMatch MatchReverse(T[] input, int? endAt = null)
         {
             return MatchesReverse(input, endAt).FirstOrDefault();

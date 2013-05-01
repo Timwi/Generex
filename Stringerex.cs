@@ -106,7 +106,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">String to match the regular expression against.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
-        /// <returns>An object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing a regular expression match in case of success; <c>null</c> if no match.</returns>
         public StringerexMatch Match(string input, int startAt = 0) { return base.Match(input.ToCharArray(), startAt); }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace RT.Generexes
         /// <param name="input">String to match the regular expression against.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
         /// <param name="mustEndAt">Index at which the match must end (default is the end of the string).</param>
-        /// <returns>An object describing the regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing the regular expression match in case of success; <c>null</c> if no match.</returns>
         public StringerexMatch MatchExact(string input, int mustStartAt = 0, int? mustEndAt = null) { return base.MatchExact(input.ToCharArray(), mustStartAt, mustEndAt); }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">String to match the regular expression against.</param>
         /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included.</param>
-        /// <returns>An object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing a regular expression match in case of success; <c>null</c> if no match.</returns>
         public StringerexMatch MatchReverse(string input, int? endAt = null) { return base.MatchReverse(input.ToCharArray(), endAt); }
 
         /// <summary>

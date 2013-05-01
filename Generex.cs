@@ -152,7 +152,7 @@ namespace RT.Generexes
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
-        /// <returns>An object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing a regular expression match in case of success; <c>null</c> if no match.</returns>
         public static GenerexMatch<T> Match<T>(this T[] input, Generex<T> generex, int startAt = 0) { return generex.Match(input, startAt); }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace RT.Generexes
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
         /// <param name="mustEndAt">Index at which the match must end (default is the end of the input sequence).</param>
-        /// <returns>An object describing the regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing the regular expression match in case of success; <c>null</c> if no match.</returns>
         public static GenerexMatch<T> MatchExact<T>(this T[] input, Generex<T> generex, int mustStartAt = 0, int? mustEndAt = null) { return generex.MatchExact(input, mustStartAt, mustEndAt); }
 
         /// <summary>
@@ -174,7 +174,7 @@ namespace RT.Generexes
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included.</param>
-        /// <returns>An object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing a regular expression match in case of success; <c>null</c> if no match.</returns>
         public static GenerexMatch<T> MatchReverse<T>(this T[] input, Generex<T> generex, int? endAt = null) { return generex.MatchReverse(input, endAt); }
 
         /// <summary>

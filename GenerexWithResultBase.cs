@@ -36,7 +36,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
-        /// <returns>The result of the first match in case of success; default(TResult) if no match.</returns>
+        /// <returns>The result of the first match in case of success; <c>default(TResult)</c> if no match.</returns>
         public TResult RawMatch(T[] input, int startAt = 0)
         {
             return RawMatches(input, startAt).FirstOrDefault();
@@ -44,11 +44,11 @@ namespace RT.Generexes
 
         /// <summary>
         /// Determines whether the given input sequence matches this regular expression, and if so, returns the result of the first match
-        /// found by matching the regular expression backwards (starting from the end of the input sequence).
+        /// found by matching the regular expression backwards.
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
-        /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included.</param>
-        /// <returns>The result of the match in case of success; default(TResult) if no match.</returns>
+        /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included. (Default is the end of the input sequence.)</param>
+        /// <returns>The result of the match in case of success; <c>default(TResult)</c> if no match.</returns>
         public TResult RawMatchReverse(T[] input, int? endAt = null)
         {
             return RawMatchesReverse(input, endAt).FirstOrDefault();
@@ -60,7 +60,7 @@ namespace RT.Generexes
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
         /// <param name="mustEndAt">Index at which the match must end (default is the end of the input sequence).</param>
-        /// <returns>The result of the match in case of success; default(TResult) if no match.</returns>
+        /// <returns>The result of the match in case of success; <c>default(TResult)</c> if no match.</returns>
         public TResult RawMatchExact(T[] input, int mustStartAt = 0, int? mustEndAt = null)
         {
             return matchExact(input, mustStartAt, mustEndAt ?? input.Length, m => m.Result);
@@ -79,11 +79,12 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a sequence of non-overlapping regular expression matches going backwards (starting at the end of the specified
-        /// input sequence), optionally starting the search at the specified index.
+        /// Returns a sequence of non-overlapping regular expression matches going backwards,
+        /// optionally starting the search at the specified index.
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
-        /// <param name="endAt">Optional index at which to begin the reverse search. Matches that end at or after this index are not included.</param>
+        /// <param name="endAt">Optional index at which to begin the reverse search. Matches that end at or after this index are not included.
+        /// (Default is the end of the input sequence.)</param>
         public IEnumerable<TResult> RawMatchesReverse(T[] input, int? endAt = null)
         {
             return matches(input, endAt ?? input.Length, (index, resultInfo) => resultInfo.Result, backward: true);
@@ -297,7 +298,7 @@ namespace RT.Generexes
         /// <typeparam name="TOtherGenerexMatch">Generex match type that corresponds to <typeparamref name="TOtherGenerex"/></typeparam>
         /// <typeparam name="TOtherResult">Type of the object returned by <paramref name="selector"/>.</typeparam>
         /// <param name="selector">Function to process a regular expression match.</param>
-        public TOtherGenerex Process<TOtherGenerex, TOtherGenerexMatch, TOtherResult>(Func<TGenerexMatch, TOtherResult> selector)
+        protected TOtherGenerex process<TOtherGenerex, TOtherGenerexMatch, TOtherResult>(Func<TGenerexMatch, TOtherResult> selector)
             where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T, TOtherResult>
         {
@@ -312,7 +313,7 @@ namespace RT.Generexes
         /// <typeparam name="TOtherGenerexMatch">Generex match type that corresponds to <typeparamref name="TOtherGenerex"/></typeparam>
         /// <typeparam name="TOtherResult">Type of the object returned by <paramref name="selector"/>.</typeparam>
         /// <param name="selector">Function to process a regular expression match.</param>
-        public TOtherGenerex ProcessRaw<TOtherGenerex, TOtherGenerexMatch, TOtherResult>(Func<TResult, TOtherResult> selector)
+        protected TOtherGenerex processRaw<TOtherGenerex, TOtherGenerexMatch, TOtherResult>(Func<TResult, TOtherResult> selector)
             where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T, TOtherResult>
         {

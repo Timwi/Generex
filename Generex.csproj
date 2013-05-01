@@ -49,6 +49,7 @@
     <Compile Include="GenerexWithResultBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stringerex.cs" />
+    <Compile Include="Stringerexes.cs" />
     <Compile Include="StringerexWithResult.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

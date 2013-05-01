@@ -29,7 +29,7 @@ namespace RT.Generexes
         /// <param name="selector">Function to process a regular expression match.</param>
         public Generex<T, TOtherResult> Process<TOtherResult>(Func<GenerexMatch<T, TResult>, TOtherResult> selector)
         {
-            return base.Process<Generex<T, TOtherResult>, GenerexMatch<T, TOtherResult>, TOtherResult>(selector);
+            return process<Generex<T, TOtherResult>, GenerexMatch<T, TOtherResult>, TOtherResult>(selector);
         }
 
         /// <summary>Processes each match of this regular expression by running each result through a provided selector.</summary>
@@ -37,7 +37,7 @@ namespace RT.Generexes
         /// <param name="selector">Function to process the result of a regular expression match.</param>
         public Generex<T, TOtherResult> ProcessRaw<TOtherResult>(Func<TResult, TOtherResult> selector)
         {
-            return base.ProcessRaw<Generex<T, TOtherResult>, GenerexMatch<T, TOtherResult>, TOtherResult>(selector);
+            return processRaw<Generex<T, TOtherResult>, GenerexMatch<T, TOtherResult>, TOtherResult>(selector);
         }
 
         /// <summary>

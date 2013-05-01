@@ -68,7 +68,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">String to match the regular expression against.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
-        /// <returns>An object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing a regular expression match in case of success; <c>null</c> if no match.</returns>
         public StringerexMatch<TResult> Match(string input, int startAt = 0) { return base.Match(input.ToCharArray(), startAt); }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace RT.Generexes
         /// <param name="input">String to match the regular expression against.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
         /// <param name="mustEndAt">Index at which the match must end (default is the end of the string).</param>
-        /// <returns>An object describing the regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing the regular expression match in case of success; <c>null</c> if no match.</returns>
         public StringerexMatch<TResult> MatchExact(string input, int mustStartAt = 0, int? mustEndAt = null) { return base.MatchExact(input.ToCharArray(), mustStartAt, mustEndAt); }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">String to match the regular expression against.</param>
         /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included.</param>
-        /// <returns>An object describing a regular expression match in case of success; null if no match.</returns>
+        /// <returns>An object describing a regular expression match in case of success; <c>null</c> if no match.</returns>
         public StringerexMatch<TResult> MatchReverse(string input, int? endAt = null) { return base.MatchReverse(input.ToCharArray(), endAt); }
 
         /// <summary>
@@ -106,12 +106,56 @@ namespace RT.Generexes
         /// The documentation for that method claims that it returns “all occurrences of the regular expression”, but this is false.</remarks>
         public IEnumerable<StringerexMatch<TResult>> Matches(string input, int startAt = 0) { return base.Matches(input.ToCharArray(), startAt); }
 
+        /// <summary>
+        /// Determines whether the given input string matches this regular expression, and if so, returns the result of the first match.
+        /// </summary>
+        /// <param name="input">Input string to match the regular expression against.</param>
+        /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
+        /// <returns>The result of the first match in case of success; <c>default(TResult)</c> if no match.</returns>
+        public TResult RawMatch(string input, int startAt = 0) { return RawMatch(input.ToCharArray(), startAt); }
+
+        /// <summary>
+        /// Determines whether the given input string matches this regular expression, and if so, returns the result of the first match
+        /// found by matching the regular expression backwards.
+        /// </summary>
+        /// <param name="input">Input string to match the regular expression against.</param>
+        /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included.
+        /// (Default is the end of the input string.)</param>
+        /// <returns>The result of the match in case of success; <c>default(TResult)</c> if no match.</returns>
+        public TResult RawMatchReverse(string input, int? endAt = null) { return RawMatchReverse(input.ToCharArray(), endAt); }
+
+        /// <summary>
+        /// Determines whether the given input string matches this regular expression exactly, and if so, returns the match.
+        /// </summary>
+        /// <param name="input">Input string to match the regular expression against.</param>
+        /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
+        /// <param name="mustEndAt">Index at which the match must end (default is the end of the input string).</param>
+        /// <returns>The result of the match in case of success; <c>default(TResult)</c> if no match.</returns>
+        public TResult RawMatchExact(string input, int mustStartAt = 0, int? mustEndAt = null) { return RawMatchExact(input.ToCharArray(), mustStartAt, mustEndAt); }
+
+        /// <summary>
+        /// Returns a sequence of non-overlapping regular expression matches, optionally starting the search at the specified index.
+        /// </summary>
+        /// <param name="input">Input string to match the regular expression against.</param>
+        /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
+        /// <remarks>The behaviour is analogous to <see cref="Regex.Matches(string,string)"/>.
+        /// The documentation for that method claims that it returns “all occurrences of the regular expression”, but this is false.</remarks>
+        public IEnumerable<TResult> RawMatches(string input, int startAt = 0) { return RawMatches(input.ToCharArray(), startAt); }
+
+        /// <summary>
+        /// Returns a sequence of non-overlapping regular expression matches going backwards, optionally starting the search at the specified index.
+        /// </summary>
+        /// <param name="input">Input sequence to match the regular expression against.</param>
+        /// <param name="endAt">Optional index at which to begin the reverse search. Matches that end at or after this index are not included.
+        /// (Default is the end of the input string.)</param>
+        public IEnumerable<TResult> RawMatchesReverse(string input, int? endAt = null) { return RawMatchesReverse(input.ToCharArray(), endAt); }
+
         /// <summary>Processes each match of this regular expression by running it through a provided selector.</summary>
         /// <typeparam name="TOtherResult">Type of the object returned by <paramref name="selector"/>.</typeparam>
         /// <param name="selector">Function to process a regular expression match.</param>
         public Stringerex<TOtherResult> Process<TOtherResult>(Func<StringerexMatch<TResult>, TOtherResult> selector)
         {
-            return base.Process<Stringerex<TOtherResult>, StringerexMatch<TOtherResult>, TOtherResult>(selector);
+            return process<Stringerex<TOtherResult>, StringerexMatch<TOtherResult>, TOtherResult>(selector);
         }
 
         /// <summary>Processes each match of this regular expression by running each result through a provided selector.</summary>
@@ -119,7 +163,7 @@ namespace RT.Generexes
         /// <param name="selector">Function to process the result of a regular expression match.</param>
         public Stringerex<TOtherResult> ProcessRaw<TOtherResult>(Func<TResult, TOtherResult> selector)
         {
-            return base.ProcessRaw<Stringerex<TOtherResult>, StringerexMatch<TOtherResult>, TOtherResult>(selector);
+            return processRaw<Stringerex<TOtherResult>, StringerexMatch<TOtherResult>, TOtherResult>(selector);
         }
 
         /// <summary>
