@@ -238,5 +238,21 @@ namespace RT.Generexes
         /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
         /// <seealso cref="GenerexNoResultBase{T,TGenerex,TGenerexMatch}.End"/>
         public static Generex<T> CreateEndGenerex<T>(this T[] input) { return Generex<T>.End; }
+
+        /// <summary>Generates a recursive regular expression, i.e. one that can contain itself, allowing the matching of arbitrarily nested expressions.</summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
+        /// <param name="generator">A function that generates the regular expression from an object that recursively represents the result.</param>
+        /// <seealso cref="Generex.Recursive{T}"/>
+        public static Generex<T> CreateRecursiveGenerex<T>(this T[] input, Func<Generex<T>, Generex<T>> generator) { return Generex.Recursive<T>(generator); }
+
+        /// <summary>Generates a recursive regular expression, i.e. one that can contain itself, allowing the matching of arbitrarily nested expressions.</summary>
+        /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <typeparam name="TResult">Type of the result object associated with each match of the regular expression.</typeparam>
+        /// <param name="input">The value of this parameter is ignored, but its static type is used for type inference to enable matching of collections of anonymous types.</param>
+        /// <param name="example">The value of this parameter is ignored, but its static type is used for type inference to enable regular expressions that return result objects of anonymous types.</param>
+        /// <param name="generator">A function that generates the regular expression from an object that recursively represents the result.</param>
+        /// <seealso cref="Generex.Recursive{T}"/>
+        public static Generex<T, TResult> CreateRecursiveGenerex<T, TResult>(this T[] input, TResult example, Func<Generex<T, TResult>, Generex<T, TResult>> generator) { return Generex.Recursive<T, TResult>(generator); }
     }
 }
