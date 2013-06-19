@@ -197,7 +197,7 @@ namespace RT.Generexes
         /// <example>
         /// <para>The following code:</para>
         /// <code>var regex = new Generex&lt;char&gt;('a', 'b').Or('c', 'd');</code>
-        /// <para>is equivalent to the regular expression <c>ab|cd</c>, NOT <c>ab|c|d</c>.</para>
+        /// <para>is equivalent to the regular expression <c>ab|cd</c>, NOT <c>ab|c|d</c>. For the latter, use <see cref="Generex.Ors(Generex{T}[])"/>.</para>
         /// </example>
         /// <seealso cref="Or(IEqualityComparer{T},T[])"/>
         public TGenerex Or(params T[] elements) { return Or(EqualityComparer<T>.Default, elements); }
@@ -237,7 +237,7 @@ namespace RT.Generexes
         /// <example>
         /// <para>The following code:</para>
         /// <code>var regex = regex1.Or(regex2, regex3);</code>
-        /// <para>generates a regular expression equivalent to <c>1|23</c>, NOT <c>1|2|3</c>.</para>
+        /// <para>generates a regular expression equivalent to <c>1|23</c>, NOT <c>1|2|3</c>. For the latter, use <see cref="Generex.Ors(Generex{T}[])"/>.</para>
         /// </example>
         public TGenerex Or(params TGenerex[] other)
         {
