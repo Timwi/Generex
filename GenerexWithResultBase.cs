@@ -198,7 +198,7 @@ namespace RT.Generexes
             where TManyGenerex : GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>
             where TManyGenerexMatch : GenerexMatch<T, IEnumerable<TResult>>
         {
-            var createRepeatInfiniteMatcher = Extensions.Lambda((matcher inner) =>
+            var createRepeatInfiniteMatcher = InternalExtensions.Lambda((matcher inner) =>
             {
                 GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>.matcher newMatcher = null;
                 if (greedy)
@@ -348,6 +348,55 @@ namespace RT.Generexes
                 (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => new LengthAndResult<TOtherResult>(selector(m.Result), m.Length)),
                 (input, startIndex) => _backwardMatcher(input, startIndex).Select(m => new LengthAndResult<TOtherResult>(selector(m.Result), m.Length))
             );
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression, then uses a specified <paramref name="selector"/> to
+        /// create a new regular expression from the result of the match, and then matches the new regular expression.
+        /// </summary>
+        /// <param name="selector">A delegate that creates a new regular expression from the result of a match of the current regular expression.</param>
+        /// <returns>The combined regular expression.</returns>
+        /// <remarks>
+        /// Regular expressions created by this method cannot match backwards. Thus, they cannot be used in calls to any of the following methods:
+        /// <see cref="Stringerex.MatchReverse(string, int?)"/>, <see cref="Stringerex{TResult}.MatchReverse(string, int?)"/>,
+        /// <see cref="Stringerex.IsMatchReverse(string, int?)"/>, <see cref="Stringerex{TResult}.IsMatchReverse(string, int?)"/>,
+        /// <see cref="Stringerex.MatchesReverse(string, int?)"/>, <see cref="Stringerex{TResult}.MatchesReverse(string, int?)"/>,
+        /// <see cref="Stringerex{TResult}.RawMatchReverse(string, int?)"/>
+        /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.ReplaceReverse(T[], Func{TGenerexMatch,T[]}, int?, int?)"/>,
+        /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.ReplaceReverse(T[], IEnumerable{T}, int?, int?)"/>,
+        /// <see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.ReplaceReverse(T[], Func{TResult, IEnumerable{T}}, int?, int?)"/>,
+        /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.LookBehind"/>,
+        /// <see cref="GenerexNoResultBase{T, TGenerex, TGenerexMatch}.LookBehindNegative()"/>,
+        /// <see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.LookBehindNegative(TResult)"/>.
+        /// </remarks>
+        public Generex<T> ThenRaw(Func<TResult, Generex<T>> selector)
+        {
+            return then<Generex<T>, int, GenerexMatch<T>, TResult>(selector, (input, startIndex, matchObj) => matchObj.Result);
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression, then uses a specified <paramref name="selector"/> to
+        /// create a new regular expression from the result of the match, and then matches the new regular expression.
+        /// </summary>
+        /// <typeparam name="TOtherResult">The type of the result returned by matches of the new regular expression.</typeparam>
+        /// <param name="selector">A delegate that creates a new regular expression from the result of a match of the current regular expression.</param>
+        /// <returns>The combined regular expression.</returns>
+        /// <remarks>
+        /// Regular expressions created by this method cannot match backwards. Thus, they cannot be used in calls to any of the following methods:
+        /// <see cref="Stringerex.MatchReverse(string, int?)"/>, <see cref="Stringerex{TResult}.MatchReverse(string, int?)"/>,
+        /// <see cref="Stringerex.IsMatchReverse(string, int?)"/>, <see cref="Stringerex{TResult}.IsMatchReverse(string, int?)"/>,
+        /// <see cref="Stringerex.MatchesReverse(string, int?)"/>, <see cref="Stringerex{TResult}.MatchesReverse(string, int?)"/>,
+        /// <see cref="Stringerex{TResult}.RawMatchReverse(string, int?)"/>
+        /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.ReplaceReverse(T[], Func{TGenerexMatch,T[]}, int?, int?)"/>,
+        /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.ReplaceReverse(T[], IEnumerable{T}, int?, int?)"/>,
+        /// <see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.ReplaceReverse(T[], Func{TResult, IEnumerable{T}}, int?, int?)"/>,
+        /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.LookBehind"/>,
+        /// <see cref="GenerexNoResultBase{T, TGenerex, TGenerexMatch}.LookBehindNegative()"/>,
+        /// <see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.LookBehindNegative(TResult)"/>.
+        /// </remarks>
+        public Generex<T, TOtherResult> ThenRaw<TOtherResult>(Func<TResult, Generex<T, TOtherResult>> selector)
+        {
+            return then<Generex<T, TOtherResult>, LengthAndResult<TOtherResult>, GenerexMatch<T, TOtherResult>, TResult>(selector, (input, startIndex, matchObj) => matchObj.Result);
         }
     }
 }

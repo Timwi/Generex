@@ -248,14 +248,14 @@ namespace RT.Generexes
         /// </summary>
         public Stringerex<IEnumerable<TResult>> RepeatWithSeparator(Stringerex separator)
         {
-            return ThenRaw(separator.Then(this).Repeat(), Extensions.Concat);
+            return ThenRaw(separator.Then(this).Repeat(), InternalExtensions.Concat);
         }
         /// <summary>
         /// Returns a regular expression that matches this regular expression one or more times, interspersed with a separator. More times are prioritised.
         /// </summary>
         public Stringerex<IEnumerable<TResult>> RepeatWithSeparatorGreedy(Stringerex separator)
         {
-            return ThenRaw(separator.Then(this).RepeatGreedy(), Extensions.Concat);
+            return ThenRaw(separator.Then(this).RepeatGreedy(), InternalExtensions.Concat);
         }
     }
 }
