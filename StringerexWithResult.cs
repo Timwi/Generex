@@ -190,6 +190,15 @@ namespace RT.Generexes
         }
 
         /// <summary>
+        /// Returns a regular expression that matches this regular expression followed by the specified string.
+        /// </summary>
+        public Stringerex<TResult> Then(string str) { return base.Then(EqualityComparer<char>.Default, str.ToCharArray()); }
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression followed by the specified string, using the specified equality comparer.
+        /// </summary>
+        public Stringerex<TResult> Then(IEqualityComparer<char> comparer, string str) { return base.Then(comparer, str.ToCharArray()); }
+
+        /// <summary>
         /// Returns a regular expression that matches this regular expression, followed by the specified one,
         /// and generates a match object that combines the original two matches.
         /// </summary>
