@@ -340,7 +340,7 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a sequence of non-overlapping regular expression matches, optionally starting the search at the specified index.
         /// </summary>
-        /// <typeparam name="TResult">Type of the result object to return for each match.</typeparam>
+        /// <typeparam name="TResult">Type of the result object associated with each match of the regular expression.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="startAt">Index at which to start the search. Depending on <paramref name="backward"/>, the
         /// matching behaviour is like that of <see cref="Matches"/> or <see cref="MatchesReverse"/>.</param>
@@ -370,7 +370,7 @@ namespace RT.Generexes
         }
 
         /// <summary>Returns a single match that starts and ends at the specified indexes within the <paramref name="input"/> array.</summary>
-        /// <typeparam name="TResult">Type of the result object to return.</typeparam>
+        /// <typeparam name="TResult">Type of the result object associated with each match of the regular expression.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="mustStartAt">Index within <paramref name="input"/> at which the match must start.</param>
         /// <param name="mustEndAt">Index within <paramref name="input"/> at which the match must end.</param>
@@ -623,6 +623,38 @@ namespace RT.Generexes
         public Generex<T, TResult> Then<TResult>(Func<TGenerexMatch, Generex<T, TResult>> selector)
         {
             return Then<Generex<T, TResult>, LengthAndResult<TResult>, GenerexMatch<T, TResult>>(selector);
+        }
+
+        /// <summary>
+        /// Returns a regular expression that only matches if the subarray matched by this regular expression also contains a match for the specified other regular expression.
+        /// </summary>
+        /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
+        /// <param name="other">A regular expression which must match the subarray matched by this regular expression.</param>
+        public TGenerex And<TOtherGenerex, TOtherGenerexMatch>(GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch> other)
+            where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T>
+        {
+            return Constructor(
+                (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => other.IsMatch(input.Subarray(startIndex, getLength(m)))),
+                (input, startIndex) => _backwardMatcher(input, startIndex).Where(m => other.IsMatch(input.Subarray(startIndex + getLength(m), -getLength(m))))
+            );
+        }
+
+        /// <summary>
+        /// Returns a regular expression that only matches if the subarray matched by this regular expression also fully matches the specified other regular expression.
+        /// </summary>
+        /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
+        /// <param name="other">A regular expression which must match the subarray matched by this regular expression.</param>
+        public TGenerex AndExact<TOtherGenerex, TOtherGenerexMatch>(GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch> other)
+            where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T>
+        {
+            return Constructor(
+                (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => other.IsMatchExact(input.Subarray(startIndex, getLength(m)))),
+                (input, startIndex) => _backwardMatcher(input, startIndex).Where(m => other.IsMatchExact(input.Subarray(startIndex + getLength(m), -getLength(m))))
+            );
         }
     }
 }

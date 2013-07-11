@@ -24,14 +24,24 @@ namespace RT.Generexes
         public Stringerex() : base(emptyMatch, emptyMatch) { }
 
         /// <summary>
-        /// Instantiates a regular expression that matches a specified string.
-        /// </summary>
-        public Stringerex(string elements) : base(EqualityComparer<char>.Default, elements.ToCharArray()) { }
-
-        /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive elements.
         /// </summary>
         public Stringerex(IEnumerable<char> elements) : base(EqualityComparer<char>.Default, elements.ToArray()) { }
+
+        /// <summary>
+        /// Instantiates a regular expression that matches a specified character.
+        /// </summary>
+        public Stringerex(char ch) : base(EqualityComparer<char>.Default, new[] { ch }) { }
+
+        /// <summary>
+        /// Instantiates a regular expression that matches a specified character using the specified equality comparer.
+        /// </summary>
+        public Stringerex(IEqualityComparer<char> comparer, char ch) : base(comparer, new[] { ch }) { }
+
+        /// <summary>
+        /// Instantiates a regular expression that matches a specified string.
+        /// </summary>
+        public Stringerex(string elements) : base(EqualityComparer<char>.Default, elements.ToCharArray()) { }
 
         /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified equality comparer.
@@ -176,10 +186,18 @@ namespace RT.Generexes
         public Stringerex<TResult> Then<TResult>(Stringerex<TResult> other) { return then<Stringerex<TResult>, StringerexMatch<TResult>, TResult>(other); }
 
         /// <summary>Processes each match of this regular expression by running it through a provided selector.</summary>
-        /// <typeparam name="TResult">Type of the object returned by <paramref name="selector"/>.</typeparam>
+        /// <typeparam name="TResult">Type of the result object associated with each match of the regular expression.</typeparam>
         /// <param name="selector">Function to process a regular expression match.</param>
         public Stringerex<TResult> Process<TResult>(Func<StringerexMatch, TResult> selector) { return process<Stringerex<TResult>, StringerexMatch<TResult>, TResult>(selector); }
 
+        /// <summary>
+        /// Instantiates a regular expression that matches the specified character.
+        /// </summary>
+        public static Stringerex New(char ch) { return new Stringerex(ch); }
+        /// <summary>
+        /// Instantiates a regular expression that matches the specified character using the specified equality comparer.
+        /// </summary>
+        public static Stringerex New(IEqualityComparer<char> comparer, char ch) { return new Stringerex(comparer, ch); }
         /// <summary>
         /// Instantiates a regular expression that matches the specified string.
         /// </summary>
@@ -210,8 +228,36 @@ namespace RT.Generexes
         /// <param name="generator">A function that generates the regular expression from an object that recursively represents the result.</param>
         public static Stringerex<TResult> Recursive<TResult>(Func<Stringerex<TResult>, Stringerex<TResult>> generator) { return Stringerex<TResult>.Recursive(generator); }
 
+        /// <summary>Generates a regular expression that matches the characters of the specified string in any order.</summary>
+        /// <param name="characters">A string containing the characters to match.</param>
+        public static Stringerex InAnyOrder(string characters)
+        {
+            if (characters == null)
+                throw new ArgumentNullException("characters");
+
+            return Generex.InAnyOrder<Stringerex, Stringerex>(
+                thenner: (prev, next) => prev.Then(next),
+                orer: (one, two) => one.Or(two),
+                constructor: () => new Stringerex(),
+                generexes: characters.Select(ch => new Stringerex(ch)).ToArray());
+        }
+
+        /// <summary>Generates a regular expression that matches the characters of the specified string in any order.</summary>
+        /// <param name="comparer">The equality comparer to use to determine matching characters.</param>
+        /// <param name="characters">A string containing the characters to match.</param>
+        public static Stringerex InAnyOrder(IEqualityComparer<char> comparer, string characters)
+        {
+            if (characters == null)
+                throw new ArgumentNullException("characters");
+
+            return Generex.InAnyOrder<Stringerex, Stringerex>(
+                thenner: (prev, next) => prev.Then(next),
+                orer: (one, two) => one.Or(two),
+                constructor: () => new Stringerex(),
+                generexes: characters.Select(ch => Stringerex.New(comparer, ch)).ToArray());
+        }
+
         /// <summary>Generates a regular expression that matches the specified regular expressions in any order.</summary>
-        /// <typeparam name="T">Type of the elements to match.</typeparam>
         /// <param name="stringerexes">The regular expressions to match.</param>
         public static Stringerex InAnyOrder(params Stringerex[] stringerexes)
         {
@@ -226,7 +272,7 @@ namespace RT.Generexes
         }
 
         /// <summary>Generates a regular expression that matches the specified regular expressions in any order.</summary>
-        /// <typeparam name="T">Type of the elements to match.</typeparam>
+        /// <typeparam name="TResult">Type of the result object associated with each match of the regular expression.</typeparam>
         /// <param name="stringerexes">The regular expressions to match.</param>
         public static Stringerex<IEnumerable<TResult>> InAnyOrder<TResult>(params Stringerex<TResult>[] stringerexes)
         {

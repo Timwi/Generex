@@ -68,7 +68,7 @@ namespace RT.Generexes
     /// Represents the result of a regular expression match using <see cref="Generex{T,TResult}"/>.
     /// </summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
-    /// <typeparam name="TResult">Type of objects generated from each match of the regular expression.</typeparam>
+    /// <typeparam name="TResult">Type of the result object associated with this regular expression match.</typeparam>
     public class GenerexMatch<T, TResult> : GenerexMatch<T>
     {
         /// <summary>Contains the object generated from this match of the regular expression.</summary>
@@ -84,7 +84,7 @@ namespace RT.Generexes
     /// <summary>
     /// Represents the result of a regular expression match using <see cref="Stringerex{TResult}"/>.
     /// </summary>
-    /// <typeparam name="TResult">Type of objects generated from each match of the regular expression.</typeparam>
+    /// <typeparam name="TResult">Type of the result object associated with this regular expression match.</typeparam>
     public class StringerexMatch<TResult> : GenerexMatch<char, TResult>
     {
         /// <summary>

@@ -7,7 +7,7 @@ namespace RT.Generexes
     /// <summary>
     /// Provides regular-expression functionality for strings.
     /// </summary>
-    /// <typeparam name="TResult">Type of objects generated from each match of the regular expression.</typeparam>
+    /// <typeparam name="TResult">Type of the result object associated with each match of the regular expression.</typeparam>
     /// <remarks>This type is not directly instantiated; use <see cref="Stringerex.Process"/>.</remarks>
     public sealed class Stringerex<TResult> : GenerexWithResultBase<char, TResult, Stringerex<TResult>, StringerexMatch<TResult>>
     {
@@ -265,6 +265,123 @@ namespace RT.Generexes
         public Stringerex<IEnumerable<TResult>> RepeatWithSeparatorGreedy(Stringerex separator)
         {
             return ThenRaw(separator.Then(this).RepeatGreedy(), InternalExtensions.Concat);
+        }
+
+        /// <summary>
+        /// Returns a regular expression that only matches if the substring matched by this regular expression also contains a match for the specified other regular expression,
+        /// and if so, combines the first match’s result object with the second match using a specified selector.
+        /// </summary>
+        /// <typeparam name="TOtherResult">The type of the result object associated with each match of <paramref name="other"/>.</typeparam>
+        /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
+        /// <typeparam name="TCombinedResult">The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
+        /// <param name="other">A regular expression which must match the substring matched by this regular expression.</param>
+        /// <param name="selector">A selector function that combines the result object associated with the match of this regular expression, and the match of <paramref name="other"/>, into a new result object.</param>
+        /// <remarks>
+        /// <para>It is important to note that <c>a.And(b)</c> is not the same as <c>b.And(a)</c>. See <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.And"/> for an example.</para>
+        /// <para>The value of the <see cref="GenerexMatch{T}.Index"/> property of the match object passed into <paramref name="selector"/> refers to the index within the substring, not the index within the original input sequence.</para>
+        /// </remarks>
+        public Stringerex<TCombinedResult> And<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult>(GenerexWithResultBase<char, TOtherResult, TOtherGenerex, TOtherGenerexMatch> other, Func<TResult, TOtherGenerexMatch, TCombinedResult> selector)
+            where TOtherGenerex : GenerexWithResultBase<char, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : StringerexMatch<TOtherResult>
+        {
+            return and<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult, Stringerex<TCombinedResult>, StringerexMatch<TCombinedResult>>(substring => other.Match(substring), selector);
+        }
+
+        /// <summary>
+        /// Returns a regular expression that only matches if the substring matched by this regular expression also fully matches the specified other regular expression, and if so,
+        /// combines the first match’s result object with the second match using a specified selector.
+        /// </summary>
+        /// <typeparam name="TOtherResult">The type of the result object associated with each match of <paramref name="other"/>.</typeparam>
+        /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
+        /// <typeparam name="TCombinedResult">The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
+        /// <param name="other">A regular expression which must match the substring matched by this regular expression.</param>
+        /// <param name="selector">A selector function that combines the result object associated with the match of this regular expression, and the match of <paramref name="other"/>, into a new result object.</param>
+        /// <remarks>
+        /// <para>It is important to note that <c>a.And(b)</c> is not the same as <c>b.And(a)</c>. See <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.And"/> for an example.</para>
+        /// <para>The value of the <see cref="GenerexMatch{T}.Index"/> property of the match object passed into <paramref name="selector"/> refers to the index within the substring, not the index within the original input sequence.</para>
+        /// </remarks>
+        public Stringerex<TCombinedResult> AndExact<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult>(GenerexWithResultBase<char, TOtherResult, TOtherGenerex, TOtherGenerexMatch> other, Func<TResult, TOtherGenerexMatch, TCombinedResult> selector)
+            where TOtherGenerex : GenerexWithResultBase<char, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : StringerexMatch<TOtherResult>
+        {
+            return and<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult, Stringerex<TCombinedResult>, StringerexMatch<TCombinedResult>>(substring => other.MatchExact(substring), selector);
+        }
+
+        /// <summary>
+        /// Returns a regular expression that only matches if the substring matched by this regular expression also contains a match for the specified other regular expression
+        /// when matching backwards, and if so, combines the first match’s result object with the second match using a specified selector.
+        /// </summary>
+        /// <typeparam name="TOtherResult">The type of the result object associated with each match of <paramref name="other"/>.</typeparam>
+        /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
+        /// <typeparam name="TCombinedResult">The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
+        /// <param name="other">A regular expression which must match the substring matched by this regular expression.</param>
+        /// <param name="selector">A selector function that combines the result object associated with the match of this regular expression, and the match of <paramref name="other"/>, into a new result object.</param>
+        /// <remarks>
+        /// <para>It is important to note that <c>a.And(b)</c> is not the same as <c>b.And(a)</c>. See <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.And"/> for an example.</para>
+        /// <para>The value of the <see cref="GenerexMatch{T}.Index"/> property of the match object passed into <paramref name="selector"/> refers to the index within the substring, not the index within the original input sequence.</para>
+        /// </remarks>
+        public Stringerex<TCombinedResult> AndReverse<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult>(GenerexWithResultBase<char, TOtherResult, TOtherGenerex, TOtherGenerexMatch> other, Func<TResult, TOtherGenerexMatch, TCombinedResult> selector)
+            where TOtherGenerex : GenerexWithResultBase<char, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : StringerexMatch<TOtherResult>
+        {
+            return and<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult, Stringerex<TCombinedResult>, StringerexMatch<TCombinedResult>>(substring => other.MatchReverse(substring), selector);
+        }
+
+        /// <summary>
+        /// Returns a regular expression that only matches if the substring matched by this regular expression also contains a match for the specified other regular expression,
+        /// and if so, combines the result objects associated with both matches using a specified selector.
+        /// </summary>
+        /// <typeparam name="TOtherResult">The type of the result object associated with each match of <paramref name="other"/>.</typeparam>
+        /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
+        /// <typeparam name="TCombinedResult">The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
+        /// <param name="other">A regular expression which must match the substring matched by this regular expression.</param>
+        /// <param name="selector">A selector function that combines the result objects associated with the matches of this regular expression and <paramref name="other"/> into a new result object.</param>
+        /// <remarks>It is important to note that <c>a.And(b)</c> is not the same as <c>b.And(a)</c>. See <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.And"/> for an example.</remarks>
+        public Stringerex<TCombinedResult> AndRaw<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult>(GenerexWithResultBase<char, TOtherResult, TOtherGenerex, TOtherGenerexMatch> other, Func<TResult, TOtherResult, TCombinedResult> selector)
+            where TOtherGenerex : GenerexWithResultBase<char, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : StringerexMatch<TOtherResult>
+        {
+            return and<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult, Stringerex<TCombinedResult>, StringerexMatch<TCombinedResult>>(substring => other.Match(substring), (result, otherMatch) => selector(result, otherMatch.Result));
+        }
+
+        /// <summary>
+        /// Returns a regular expression that only matches if the substring matched by this regular expression also fully matches the specified other regular expression, and if so,
+        /// combines the result objects associated with both matches using a specified selector.
+        /// </summary>
+        /// <typeparam name="TOtherResult">The type of the result object associated with each match of <paramref name="other"/>.</typeparam>
+        /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
+        /// <typeparam name="TCombinedResult">The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
+        /// <param name="other">A regular expression which must match the substring matched by this regular expression.</param>
+        /// <param name="selector">A selector function that combines the result objects associated with the matches of this regular expression and <paramref name="other"/> into a new result object.</param>
+        /// <remarks>It is important to note that <c>a.And(b)</c> is not the same as <c>b.And(a)</c>. See <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.And"/> for an example.</remarks>
+        public Stringerex<TCombinedResult> AndExactRaw<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult>(GenerexWithResultBase<char, TOtherResult, TOtherGenerex, TOtherGenerexMatch> other, Func<TResult, TOtherResult, TCombinedResult> selector)
+            where TOtherGenerex : GenerexWithResultBase<char, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : StringerexMatch<TOtherResult>
+        {
+            return and<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult, Stringerex<TCombinedResult>, StringerexMatch<TCombinedResult>>(substring => other.MatchExact(substring), (result, otherMatch) => selector(result, otherMatch.Result));
+        }
+
+        /// <summary>
+        /// Returns a regular expression that only matches if the substring matched by this regular expression also contains a match for the specified other regular expression
+        /// when matching backwards, and if so, combines the result objects associated with both matches using a specified selector.
+        /// </summary>
+        /// <typeparam name="TOtherResult">The type of the result object associated with each match of <paramref name="other"/>.</typeparam>
+        /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
+        /// <typeparam name="TCombinedResult">The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
+        /// <param name="other">A regular expression which must match the substring matched by this regular expression.</param>
+        /// <param name="selector">A selector function that combines the result objects associated with the matches of this regular expression and <paramref name="other"/> into a new result object.</param>
+        /// <remarks>It is important to note that <c>a.And(b)</c> is not the same as <c>b.And(a)</c>. See <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.And"/> for an example.</remarks>
+        public Stringerex<TCombinedResult> AndReverseRaw<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult>(GenerexWithResultBase<char, TOtherResult, TOtherGenerex, TOtherGenerexMatch> other, Func<TResult, TOtherResult, TCombinedResult> selector)
+            where TOtherGenerex : GenerexWithResultBase<char, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : StringerexMatch<TOtherResult>
+        {
+            return and<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult, Stringerex<TCombinedResult>, StringerexMatch<TCombinedResult>>(substring => other.MatchReverse(substring), (result, otherMatch) => selector(result, otherMatch.Result));
         }
     }
 }

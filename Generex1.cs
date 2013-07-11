@@ -73,7 +73,7 @@ namespace RT.Generexes
         public Generex<T, TResult> Then<TResult>(Generex<T, TResult> other) { return then<Generex<T, TResult>, GenerexMatch<T, TResult>, TResult>(other); }
 
         /// <summary>Processes each match of this regular expression by running it through a provided selector.</summary>
-        /// <typeparam name="TResult">Type of the object returned by <paramref name="selector"/>.</typeparam>
+        /// <typeparam name="TResult">Type of the object returned by <paramref name="selector"/>, which is a result object associated with each match of the regular expression.</typeparam>
         /// <param name="selector">Function to process a regular expression match.</param>
         public Generex<T, TResult> Process<TResult>(Func<GenerexMatch<T>, TResult> selector)
         {

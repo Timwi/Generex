@@ -7,7 +7,7 @@ namespace RT.Generexes
 {
     /// <summary>Abstract base class for <see cref="Generex{T,TResult}"/> and siblings.</summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
-    /// <typeparam name="TResult">Type of objects generated from each match of the regular expression.</typeparam>
+    /// <typeparam name="TResult">Type of the result object associated with each match of the regular expression.</typeparam>
     /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursively.)</typeparam>
     /// <typeparam name="TGenerexMatch">Type describing a match of a regular expression.</typeparam>
     public abstract class GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch> : GenerexBase<T, LengthAndResult<TResult>, TGenerex, TGenerexMatch>
@@ -397,6 +397,42 @@ namespace RT.Generexes
         public Generex<T, TOtherResult> ThenRaw<TOtherResult>(Func<TResult, Generex<T, TOtherResult>> selector)
         {
             return then<Generex<T, TOtherResult>, LengthAndResult<TOtherResult>, GenerexMatch<T, TOtherResult>, TResult>(selector, (input, startIndex, matchObj) => matchObj.Result);
+        }
+
+        /// <summary>
+        /// Returns a regular expression that only matches if the subarray matched by this regular expression also matches the specified matching function,
+        /// and if so, combines the first match’s result object with the second match using a specified selector.
+        /// </summary>
+        /// <typeparam name="TOtherResult">The type of the result object associated with each match returned by <paramref name="innerMatch"/>.</typeparam>
+        /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>, but with <typeparamref name="TOtherResult"/> in place of <c>TResult</c>.)</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>, but with <typeparamref name="TOtherResult"/> in place of <c>TResult</c>.)</typeparam>
+        /// <typeparam name="TCombinedResult">The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
+        /// <typeparam name="TCombinedGenerex">The type of the new regular expression to be returned. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>, but with <typeparamref name="TCombinedResult"/> in place of <c>TResult</c>.)</typeparam>
+        /// <typeparam name="TCombinedGenerexMatch">The type of the match object for the regular expression to be returned. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>, but with <typeparamref name="TCombinedResult"/> in place of <c>TResult</c>.)</typeparam>
+        /// <param name="innerMatch">A function that runs on the subarray matched by this regular expression and returns either a match or <c>null</c>.</param>
+        /// <param name="selector">A selector function that combines the result object associated with the match of this regular expression, and the match returned by <paramref name="innerMatch"/>, into a new result object.</param>
+        /// <remarks>The match object passed into <paramref name="selector"/> is the same that <paramref name="innerMatch"/> returned. Therefore, its <see cref="GenerexMatch{T}.Index"/> property refers to the index within the subarray, not the original input sequence.</remarks>
+        protected TCombinedGenerex and<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult, TCombinedGenerex, TCombinedGenerexMatch>(Func<T[], TOtherGenerexMatch> innerMatch, Func<TResult, TOtherGenerexMatch, TCombinedResult> selector)
+            where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T, TOtherResult>
+            where TCombinedGenerex : GenerexWithResultBase<T, TCombinedResult, TCombinedGenerex, TCombinedGenerexMatch>
+            where TCombinedGenerexMatch : GenerexMatch<T, TCombinedResult>
+        {
+            return GenerexWithResultBase<T, TCombinedResult, TCombinedGenerex, TCombinedGenerexMatch>.Constructor(
+                (input, startIndex) => _forwardMatcher(input, startIndex).SelectMany(m =>
+                {
+                    var subarray = input.Subarray(startIndex, getLength(m));
+                    var submatch = innerMatch(subarray);
+                    return submatch == null ? Enumerable.Empty<LengthAndResult<TCombinedResult>>() : new[] { new LengthAndResult<TCombinedResult>(selector(m.Result, submatch), m.Length) };
+                }),
+                (input, startIndex) => _backwardMatcher(input, startIndex).SelectMany(m =>
+                {
+                    var length = getLength(m);
+                    var subarray = input.Subarray(startIndex + length, -length);
+                    var submatch = innerMatch(subarray);
+                    return submatch == null ? Enumerable.Empty<LengthAndResult<TCombinedResult>>() : new[] { new LengthAndResult<TCombinedResult>(selector(m.Result, submatch), m.Length) };
+                })
+            );
         }
     }
 }

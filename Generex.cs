@@ -289,6 +289,7 @@ namespace RT.Generexes
 
         /// <summary>Generates a regular expression that matches the specified regular expressions in any order.</summary>
         /// <typeparam name="T">Type of the elements to match.</typeparam>
+        /// <typeparam name="TResult">Type of the result object associated with each match of the regular expression.</typeparam>
         /// <param name="generexes">The regular expressions to match.</param>
         public static Generex<T, IEnumerable<TResult>> InAnyOrder<T, TResult>(params Generex<T, TResult>[] generexes)
         {
