@@ -143,12 +143,10 @@ namespace RT.Generexes
         {
             get
             {
-                if (_emptyCache == null)
-                {
-                    matcher zeroWidthMatch = (input, startIndex) => Generex.ZeroWidthMatch;
-                    return (_emptyCache = Constructor(zeroWidthMatch, zeroWidthMatch));
-                }
-                return _emptyCache;
+                if (_emptyCache != null)
+                    return _emptyCache;
+                matcher zeroWidthMatch = (input, startIndex) => Generex.ZeroWidthMatch;
+                return (_emptyCache = Constructor(zeroWidthMatch, zeroWidthMatch));
             }
         }
         private static TGenerex _emptyCache;
@@ -161,12 +159,10 @@ namespace RT.Generexes
         {
             get
             {
-                if (_startCache == null)
-                {
-                    matcher matcher = (input, startIndex) => startIndex != 0 ? Generex.NoMatch : Generex.ZeroWidthMatch;
-                    return (_startCache = Constructor(matcher, matcher));
-                }
-                return _startCache;
+                if (_startCache != null)
+                    return _startCache;
+                matcher matcher = (input, startIndex) => startIndex != 0 ? Generex.NoMatch : Generex.ZeroWidthMatch;
+                return (_startCache = Constructor(matcher, matcher));
             }
         }
         private static TGenerex _startCache;
@@ -179,12 +175,10 @@ namespace RT.Generexes
         {
             get
             {
-                if (_endCache == null)
-                {
-                    matcher matcher = (input, startIndex) => startIndex != input.Length ? Generex.NoMatch : Generex.ZeroWidthMatch;
-                    return (_endCache = Constructor(matcher, matcher));
-                }
-                return _endCache;
+                if (_endCache != null)
+                    return _endCache;
+                matcher matcher = (input, startIndex) => startIndex != input.Length ? Generex.NoMatch : Generex.ZeroWidthMatch;
+                return (_endCache = Constructor(matcher, matcher));
             }
         }
         private static TGenerex _endCache;
