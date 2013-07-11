@@ -124,6 +124,36 @@ namespace RT.Generexes
         private static TGenerex _anyCache;
 
         /// <summary>
+        /// Returns a regular expression that matches any number of elements, no matter what they are; fewer are prioritized (cf. <c>.*?</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <seealso cref="Generex.CreateAnythingGenerex"/>
+        public static TGenerex Anything
+        {
+            get
+            {
+                if (_anythingCache == null)
+                    _anythingCache = Any.Repeat();
+                return _anythingCache;
+            }
+        }
+        private static TGenerex _anythingCache;
+
+        /// <summary>
+        /// Returns a regular expression that matches any number of elements, no matter what they are; more are prioritized (cf. <c>.*</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <seealso cref="Generex.CreateAnythingGreedyGenerex"/>
+        public static TGenerex AnythingGreedy
+        {
+            get
+            {
+                if (_anythingGreedyCache == null)
+                    _anythingGreedyCache = Any.RepeatGreedy();
+                return _anythingGreedyCache;
+            }
+        }
+        private static TGenerex _anythingGreedyCache;
+
+        /// <summary>
         /// Returns a regular expression that always matches and returns a zero-width match.
         /// </summary>
         /// <seealso cref="Generex.CreateEmptyGenerex"/>
