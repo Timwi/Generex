@@ -113,12 +113,10 @@ namespace RT.Generexes
         {
             get
             {
-                if (_anyCache == null)
-                    _anyCache = Constructor(
-                        (input, startIndex) => startIndex >= input.Length ? Generex.NoMatch : Generex.OneElementMatch,
-                        (input, startIndex) => startIndex <= 0 ? Generex.NoMatch : Generex.NegativeOneElementMatch
-                    );
-                return _anyCache;
+                return _anyCache ?? (_anyCache = Constructor(
+                    (input, startIndex) => startIndex >= input.Length ? Generex.NoMatch : Generex.OneElementMatch,
+                    (input, startIndex) => startIndex <= 0 ? Generex.NoMatch : Generex.NegativeOneElementMatch
+                ));
             }
         }
         private static TGenerex _anyCache;
@@ -127,30 +125,14 @@ namespace RT.Generexes
         /// Returns a regular expression that matches any number of elements, no matter what they are; fewer are prioritized (cf. <c>.*?</c> in traditional regular expression syntax).
         /// </summary>
         /// <seealso cref="Generex.CreateAnythingGenerex"/>
-        public static TGenerex Anything
-        {
-            get
-            {
-                if (_anythingCache == null)
-                    _anythingCache = Any.Repeat();
-                return _anythingCache;
-            }
-        }
+        public static TGenerex Anything { get { return _anythingCache ?? (_anythingCache = Any.Repeat()); } }
         private static TGenerex _anythingCache;
 
         /// <summary>
         /// Returns a regular expression that matches any number of elements, no matter what they are; more are prioritized (cf. <c>.*</c> in traditional regular expression syntax).
         /// </summary>
         /// <seealso cref="Generex.CreateAnythingGreedyGenerex"/>
-        public static TGenerex AnythingGreedy
-        {
-            get
-            {
-                if (_anythingGreedyCache == null)
-                    _anythingGreedyCache = Any.RepeatGreedy();
-                return _anythingGreedyCache;
-            }
-        }
+        public static TGenerex AnythingGreedy { get { return _anythingGreedyCache ?? (_anythingGreedyCache = Any.RepeatGreedy()); } }
         private static TGenerex _anythingGreedyCache;
 
         /// <summary>
@@ -164,7 +146,7 @@ namespace RT.Generexes
                 if (_emptyCache == null)
                 {
                     matcher zeroWidthMatch = (input, startIndex) => Generex.ZeroWidthMatch;
-                    _emptyCache = Constructor(zeroWidthMatch, zeroWidthMatch);
+                    return (_emptyCache = Constructor(zeroWidthMatch, zeroWidthMatch));
                 }
                 return _emptyCache;
             }
@@ -182,7 +164,7 @@ namespace RT.Generexes
                 if (_startCache == null)
                 {
                     matcher matcher = (input, startIndex) => startIndex != 0 ? Generex.NoMatch : Generex.ZeroWidthMatch;
-                    _startCache = Constructor(matcher, matcher);
+                    return (_startCache = Constructor(matcher, matcher));
                 }
                 return _startCache;
             }
@@ -200,7 +182,7 @@ namespace RT.Generexes
                 if (_endCache == null)
                 {
                     matcher matcher = (input, startIndex) => startIndex != input.Length ? Generex.NoMatch : Generex.ZeroWidthMatch;
-                    _endCache = Constructor(matcher, matcher);
+                    return (_endCache = Constructor(matcher, matcher));
                 }
                 return _endCache;
             }
