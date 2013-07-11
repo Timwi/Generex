@@ -631,6 +631,22 @@ namespace RT.Generexes
         /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
         /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
         /// <param name="other">A regular expression which must match the subarray matched by this regular expression.</param>
+        /// <remarks>
+        /// <para>It is important to note that <c>a.And(b)</c> is not the same as <c>b.And(a)</c>. Consider the following input string:</para>
+        /// <code>foo {bar [baz]} quux</code>
+        /// <para>and the following regular expressions:</para>
+        /// <code>
+        ///     var curly = Stringerex.New('{').Then(Stringerex.Any.Repeat()).Then('}');
+        ///     var square = Stringerex.New('[').Then(Stringerex.Any.Repeat()).Then(']');
+        /// </code>
+        /// <para>Now consider:</para>
+        /// <list type="bullet">
+        ///     <item><description><c>curly.And(square)</c> means: match the curly brackets first (yielding the substring <c>{bar [baz]}</c>) and then match the square brackets inside of that.
+        ///     The result is a successful match, because the substring <c>{bar [baz]}</c> does contain <c>[baz]</c>.</description></item>
+        ///     <item><description><c>square.And(curly)</c> means: match the square brackets first (yielding the substring <c>[baz]</c>) and then match the square brackets inside of that.
+        ///     The result is no match, because there are no curly brackets in <c>[baz]</c>.</description></item>
+        /// </list>
+        /// </remarks>
         public TGenerex And<TOtherGenerex, TOtherGenerexMatch>(GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch> other)
             where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T>
@@ -647,6 +663,7 @@ namespace RT.Generexes
         /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
         /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
         /// <param name="other">A regular expression which must match the subarray matched by this regular expression.</param>
+        /// <remarks>It is important to note that <c>a.And(b)</c> is not the same as <c>b.And(a)</c>. See <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.And"/> for an example.</remarks>
         public TGenerex AndExact<TOtherGenerex, TOtherGenerexMatch>(GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch> other)
             where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T>

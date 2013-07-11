@@ -471,6 +471,7 @@ namespace RT.Generexes
         /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
         /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
         /// <param name="other">A regular expression which must match the subarray matched by this regular expression.</param>
+        /// <remarks>It is important to note that <c>a.And(b)</c> is not the same as <c>b.And(a)</c>. See <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.And"/> for an example.</remarks>
         public TOtherGenerex And<TOtherResult, TOtherGenerex, TOtherGenerexMatch>(GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch> other)
             where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T, TOtherResult>
@@ -486,6 +487,7 @@ namespace RT.Generexes
         /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
         /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
         /// <param name="other">A regular expression which must match the subarray matched by this regular expression.</param>
+        /// <remarks>It is important to note that <c>a.And(b)</c> is not the same as <c>b.And(a)</c>. See <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.And"/> for an example.</remarks>
         public TOtherGenerex AndExact<TOtherResult, TOtherGenerex, TOtherGenerexMatch>(GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch> other)
             where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T, TOtherResult>
@@ -502,6 +504,7 @@ namespace RT.Generexes
         /// <typeparam name="TOtherGenerex">The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
         /// <typeparam name="TOtherGenerexMatch">The type of the match object for the other regular expression. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
         /// <param name="other">A regular expression which must match the subarray matched by this regular expression.</param>
+        /// <remarks>It is important to note that <c>a.And(b)</c> is not the same as <c>b.And(a)</c>. See <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.And"/> for an example.</remarks>
         public TOtherGenerex AndReverse<TOtherResult, TOtherGenerex, TOtherGenerexMatch>(GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch> other)
             where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T, TOtherResult>
