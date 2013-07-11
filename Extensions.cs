@@ -117,6 +117,98 @@ namespace RT.Generexes
         {
             return generex.Then<Stringerex<TOtherResult>, LengthAndResult<TOtherResult>, StringerexMatch<TOtherResult>>(selector);
         }
+
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. <c>?</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <typeparam name="T">The type of objects being matched.</typeparam>
+        /// <typeparam name="TResult">The type of the result of each match.</typeparam>
+        /// <param name="inner">The regular expression to be modified.</param>
+        /// <returns>A regular expression whose result object is a nullable version of the original result object.</returns>
+        public static Generex<T, TResult?> OrNullGreedy<T, TResult>(this Generex<T, TResult> inner) where TResult : struct
+        {
+            return inner.ProcessRaw(result => (TResult?) result).Or(new Generex<T, TResult?>(null));
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. <c>?</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <typeparam name="T">The type of objects being matched.</typeparam>
+        /// <typeparam name="TResult">The type of the result of each match.</typeparam>
+        /// <param name="inner">The regular expression to be modified.</param>
+        /// <returns>A regular expression whose result object is the original result object or <c>default(TResult)</c>.</returns>
+        public static Generex<T, TResult> OrDefaultGreedy<T, TResult>(this Generex<T, TResult> inner)
+        {
+            return inner.Or(new Generex<T, TResult>(default(TResult)));
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. <c>?</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result of each match.</typeparam>
+        /// <param name="inner">The regular expression to be modified.</param>
+        /// <returns>A regular expression whose result object is a nullable version of the original result object.</returns>
+        public static Stringerex<TResult?> OrNullGreedy<TResult>(this Stringerex<TResult> inner) where TResult : struct
+        {
+            return inner.ProcessRaw(result => (TResult?) result).Or(new Stringerex<TResult?>(null));
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. <c>?</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result of each match.</typeparam>
+        /// <param name="inner">The regular expression to be modified.</param>
+        /// <returns>A regular expression whose result object is the original result object or <c>default(TResult)</c>.</returns>
+        public static Stringerex<TResult> OrDefaultGreedy<TResult>(this Stringerex<TResult> inner)
+        {
+            return inner.Or(new Stringerex<TResult>(default(TResult)));
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression zero times or once. Zero times is prioritised (cf. <c>??</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <typeparam name="T">The type of objects being matched.</typeparam>
+        /// <typeparam name="TResult">The type of the result of each match.</typeparam>
+        /// <param name="inner">The regular expression to be modified.</param>
+        /// <returns>A regular expression whose result object is a nullable version of the original result object.</returns>
+        public static Generex<T, TResult?> OrNull<T, TResult>(this Generex<T, TResult> inner) where TResult : struct
+        {
+            return new Generex<T, TResult?>(null).Or(inner.ProcessRaw(result => (TResult?) result));
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression zero times or once. Zero times is prioritised (cf. <c>??</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <typeparam name="T">The type of objects being matched.</typeparam>
+        /// <typeparam name="TResult">The type of the result of each match.</typeparam>
+        /// <param name="inner">The regular expression to be modified.</param>
+        /// <returns>A regular expression whose result object is the original result object or <c>default(TResult)</c>.</returns>
+        public static Generex<T, TResult> OrDefault<T, TResult>(this Generex<T, TResult> inner)
+        {
+            return new Generex<T, TResult>(default(TResult)).Or(inner);
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression zero times or once. Zero times is prioritised (cf. <c>??</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result of each match.</typeparam>
+        /// <param name="inner">The regular expression to be modified.</param>
+        /// <returns>A regular expression whose result object is a nullable version of the original result object.</returns>
+        public static Stringerex<TResult?> OrNull<TResult>(this Stringerex<TResult> inner) where TResult : struct
+        {
+            return new Stringerex<TResult?>(null).Or(inner.ProcessRaw(result => (TResult?) result));
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression zero times or once. Zero times is prioritised (cf. <c>??</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result of each match.</typeparam>
+        /// <param name="inner">The regular expression to be modified.</param>
+        /// <returns>A regular expression whose result object is the original result object or <c>default(TResult)</c>.</returns>
+        public static Stringerex<TResult> OrDefault<TResult>(this Stringerex<TResult> inner)
+        {
+            return new Stringerex<TResult>(default(TResult)).Or(inner);
+        }
     }
 
     static class InternalExtensions

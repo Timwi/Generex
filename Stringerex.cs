@@ -209,5 +209,35 @@ namespace RT.Generexes
         /// <summary>Generates a recursive regular expression, i.e. one that can contain itself, allowing the matching of arbitrarily nested expressions.</summary>
         /// <param name="generator">A function that generates the regular expression from an object that recursively represents the result.</param>
         public static Stringerex<TResult> Recursive<TResult>(Func<Stringerex<TResult>, Stringerex<TResult>> generator) { return Stringerex<TResult>.Recursive(generator); }
+
+        /// <summary>Generates a regular expression that matches the specified regular expressions in any order.</summary>
+        /// <typeparam name="T">Type of the elements to match.</typeparam>
+        /// <param name="stringerexes">The regular expressions to match.</param>
+        public static Stringerex InAnyOrder(params Stringerex[] stringerexes)
+        {
+            if (stringerexes == null)
+                throw new ArgumentNullException("stringerexes");
+
+            return Generex.InAnyOrder<Stringerex, Stringerex>(
+                thenner: (prev, next) => prev.Then(next),
+                orer: (one, two) => one.Or(two),
+                constructor: () => new Stringerex(),
+                generexes: stringerexes);
+        }
+
+        /// <summary>Generates a regular expression that matches the specified regular expressions in any order.</summary>
+        /// <typeparam name="T">Type of the elements to match.</typeparam>
+        /// <param name="stringerexes">The regular expressions to match.</param>
+        public static Stringerex<IEnumerable<TResult>> InAnyOrder<TResult>(params Stringerex<TResult>[] stringerexes)
+        {
+            if (stringerexes == null)
+                throw new ArgumentNullException("stringerexes");
+
+            return Generex.InAnyOrder<Stringerex<TResult>, Stringerex<IEnumerable<TResult>>>(
+                thenner: (prev, next) => prev.ThenRaw(next, InternalExtensions.Concat),
+                orer: (one, two) => one.Or(two),
+                constructor: () => new Stringerex<IEnumerable<TResult>>(Enumerable.Empty<TResult>()),
+                generexes: stringerexes);
+        }
     }
 }

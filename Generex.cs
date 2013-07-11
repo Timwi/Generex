@@ -254,5 +254,73 @@ namespace RT.Generexes
         /// <param name="generator">A function that generates the regular expression from an object that recursively represents the result.</param>
         /// <seealso cref="Generex.Recursive{T}"/>
         public static Generex<T, TResult> CreateRecursiveGenerex<T, TResult>(this T[] input, TResult example, Func<Generex<T, TResult>, Generex<T, TResult>> generator) { return Generex.Recursive<T, TResult>(generator); }
+
+        /// <summary>Generates a regular expression that matches the specified elements in any order.</summary>
+        /// <typeparam name="T">Type of the elements to match.</typeparam>
+        /// <param name="elements">The elements to match.</param>
+        public static Generex<T> InAnyOrder<T>(params T[] elements)
+        {
+            return InAnyOrder<T>(EqualityComparer<T>.Default, elements);
+        }
+
+        /// <summary>Generates a regular expression that matches the specified elements in any order.</summary>
+        /// <typeparam name="T">Type of the elements to match.</typeparam>
+        /// <param name="comparer">Equality comparer to determine matching elements.</param>
+        /// <param name="elements">The elements to match.</param>
+        public static Generex<T> InAnyOrder<T>(IEqualityComparer<T> comparer, params T[] elements)
+        {
+            return InAnyOrder<T>(elements.Select(elem => new Generex<T>(comparer, elem)).ToArray());
+        }
+
+        /// <summary>Generates a regular expression that matches the specified regular expressions in any order.</summary>
+        /// <typeparam name="T">Type of the elements to match.</typeparam>
+        /// <param name="generexes">The regular expressions to match.</param>
+        public static Generex<T> InAnyOrder<T>(params Generex<T>[] generexes)
+        {
+            if (generexes == null)
+                throw new ArgumentNullException("generexes");
+
+            return InAnyOrder<Generex<T>, Generex<T>>(
+                thenner: (prev, next) => prev.Then(next),
+                orer: (one, two) => one.Or(two),
+                constructor: () => new Generex<T>(),
+                generexes: generexes);
+        }
+
+        /// <summary>Generates a regular expression that matches the specified regular expressions in any order.</summary>
+        /// <typeparam name="T">Type of the elements to match.</typeparam>
+        /// <param name="generexes">The regular expressions to match.</param>
+        public static Generex<T, IEnumerable<TResult>> InAnyOrder<T, TResult>(params Generex<T, TResult>[] generexes)
+        {
+            if (generexes == null)
+                throw new ArgumentNullException("generexes");
+
+            return InAnyOrder<Generex<T, TResult>, Generex<T, IEnumerable<TResult>>>(
+                thenner: (prev, next) => prev.ThenRaw(next, InternalExtensions.Concat),
+                orer: (one, two) => one.Or(two),
+                constructor: () => new Generex<T, IEnumerable<TResult>>(Enumerable.Empty<TResult>()),
+                generexes: generexes);
+        }
+
+        internal static TResultGenerex InAnyOrder<TInputGenerex, TResultGenerex>(
+            Func<TInputGenerex, TResultGenerex, TResultGenerex> thenner,
+            Func<TResultGenerex, TResultGenerex, TResultGenerex> orer,
+            Func<TResultGenerex> constructor,
+            params TInputGenerex[] generexes)
+            where TResultGenerex : class
+        {
+            TResultGenerex generex = null;
+            for (int i = 0; i < generexes.Length; i++)
+            {
+                var subarray = new TInputGenerex[generexes.Length - 1];
+                if (i > 0)
+                    Array.Copy(generexes, 0, subarray, 0, i);
+                if (i < generexes.Length - 1)
+                    Array.Copy(generexes, i + 1, subarray, i, generexes.Length - 1 - i);
+                var thisGenerex = thenner(generexes[i], InAnyOrder<TInputGenerex, TResultGenerex>(thenner, orer, constructor, subarray));
+                generex = generex == null ? thisGenerex : orer(generex, thisGenerex);
+            }
+            return generex ?? constructor();
+        }
     }
 }
