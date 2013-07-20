@@ -569,8 +569,8 @@ namespace RT.Generexes
         /// <list type="bullet">
         ///     <item><description><see cref="Then(Func{TGenerexMatch, Generex{T}})"/></description></item>
         ///     <item><description><see cref="Then{TResult}(Func{TGenerexMatch, Generex{T, TResult}})"/></description></item>
-        ///     <item><description><see cref="PublicExtensions.Then{TMatch, TGenerex, TGenerexMatch}(GenerexBase{char, TMatch, TGenerex, TGenerexMatch}, Func{TGenerexMatch, Stringerex})"/></description></item>
-        ///     <item><description><see cref="PublicExtensions.Then{TMatch, TGenerex, TGenerexMatch, TResult}(GenerexBase{char, TMatch, TGenerex, TGenerexMatch}, Func{TGenerexMatch, Stringerex{TResult}})"/></description></item>
+        ///     <item><description><see cref="Generex.Then{TMatch, TGenerex, TGenerexMatch}(GenerexBase{char, TMatch, TGenerex, TGenerexMatch}, Func{TGenerexMatch, Stringerex})"/></description></item>
+        ///     <item><description><see cref="Generex.Then{TMatch, TGenerex, TGenerexMatch, TResult}(GenerexBase{char, TMatch, TGenerex, TGenerexMatch}, Func{TGenerexMatch, Stringerex{TResult}})"/></description></item>
         /// </list>
         /// <para>Regular expressions created by this method cannot match backwards. Thus, they cannot be used in calls to any of the following methods:
         /// <see cref="MatchReverse"/>, <see cref="IsMatchReverse"/>, <see cref="MatchesReverse"/>, <see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.RawMatchReverse"/>
