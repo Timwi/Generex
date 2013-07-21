@@ -605,11 +605,11 @@ namespace RT.Generexes
         ///         <para><c>IsMatch</c>:</para>
         ///         <list type="bullet">
         ///             <item><description><see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.IsMatchReverse(T[], int?)"/></description></item>
-        ///             <item><description><see cref="Generex.IsMatchReverse{T}(T[], Generex{T}, int?)"/></description></item>
+        ///             <item><description><see cref="Generex.IsMatchReverse{T,TMatch,TGenerex,TGenerexMatch}(T[], GenerexBase{T,TMatch,TGenerex,TGenerexMatch}, int?)"/></description></item>
         ///             <item><description><see cref="Stringerex.IsMatchReverse(string, int?)"/></description></item>
         ///             <item><description><see cref="Stringerex{TResult}.IsMatchReverse(string, int?)"/></description></item>
         ///             <item><description><see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.IsMatchUpTo(T[], int?)"/></description></item>
-        ///             <item><description><see cref="Generex.IsMatchUpTo{T}(T[], Generex{T}, int?)"/></description></item>
+        ///             <item><description><see cref="Generex.IsMatchUpTo{T,TMatch,TGenerex,TGenerexMatch}(T[], GenerexBase{T,TMatch,TGenerex,TGenerexMatch}, int?)"/></description></item>
         ///             <item><description><see cref="Stringerex.IsMatchUpTo(string, int?)"/></description></item>
         ///             <item><description><see cref="Stringerex{TResult}.IsMatchUpTo(string, int?)"/></description></item>
         ///         </list>
@@ -618,7 +618,7 @@ namespace RT.Generexes
         ///         <para><c>Match</c>:</para>
         ///         <list type="bullet">
         ///             <item><description><see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.MatchReverse(T[], int?)"/></description></item>
-        ///             <item><description><see cref="Generex.MatchReverse{T}(T[], Generex{T}, int?)"/></description></item>
+        ///             <item><description><see cref="Generex.MatchReverse{T,TMatch,TGenerex,TGenerexMatch}(T[], GenerexBase{T,TMatch,TGenerex,TGenerexMatch}, int?)"/></description></item>
         ///             <item><description><see cref="Stringerex.MatchReverse(string, int?)"/></description></item>
         ///             <item><description><see cref="Stringerex{TResult}.MatchReverse(string, int?)"/></description></item>
         ///             <item><description><see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.RawMatchReverse(T[], int?)"/></description></item>
@@ -629,7 +629,7 @@ namespace RT.Generexes
         ///         <para><c>Matches</c>:</para>
         ///         <list type="bullet">
         ///             <item><description><see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.MatchesReverse(T[], int?)"/></description></item>
-        ///             <item><description><see cref="Generex.MatchesReverse{T}(T[], Generex{T}, int?)"/></description></item>
+        ///             <item><description><see cref="Generex.MatchesReverse{T,TMatch,TGenerex,TGenerexMatch}(T[], GenerexBase{T,TMatch,TGenerex,TGenerexMatch}, int?)"/></description></item>
         ///             <item><description><see cref="Stringerex.MatchesReverse(string, int?)"/></description></item>
         ///             <item><description><see cref="Stringerex{TResult}.MatchesReverse(string, int?)"/></description></item>
         ///             <item><description><see cref="GenerexWithResultBase{T,TResult,TGenerex,TGenerexMatch}.RawMatchesReverse(T[], int?)"/></description></item>

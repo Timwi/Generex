@@ -160,6 +160,9 @@ namespace RT.Generexes
         /// Determines whether the given input sequence contains a match for this regular expression, optionally starting the search at a specified index.
         /// </summary>
         /// <typeparam name="T">Type of the objects in the collection.</typeparam>
+        /// <typeparam name="TMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerex">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerexMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
@@ -171,6 +174,9 @@ namespace RT.Generexes
         /// Determines whether the given input sequence matches this regular expression at a specific index.
         /// </summary>
         /// <typeparam name="T">Type of the objects in the collection.</typeparam>
+        /// <typeparam name="TMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerex">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerexMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
@@ -183,6 +189,9 @@ namespace RT.Generexes
         /// Determines whether the given input sequence matches this regular expression up to a specific index.
         /// </summary>
         /// <typeparam name="T">Type of the objects in the collection.</typeparam>
+        /// <typeparam name="TMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerex">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerexMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="mustEndAt">Index at which the match must end (default is the end of the input sequence).</param>
@@ -195,6 +204,9 @@ namespace RT.Generexes
         /// Determines whether the given input sequence matches this regular expression exactly.
         /// </summary>
         /// <typeparam name="T">Type of the objects in the collection.</typeparam>
+        /// <typeparam name="TMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerex">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerexMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
@@ -208,6 +220,9 @@ namespace RT.Generexes
         /// Determines whether the given input sequence contains a match for this regular expression that ends before the specified maximum index.
         /// </summary>
         /// <typeparam name="T">Type of the objects in the collection.</typeparam>
+        /// <typeparam name="TMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerex">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerexMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="endAt">Optional index before which a match must end. The search begins by matching from this index backwards, and then proceeds towards the start of the input sequence.</param>
@@ -219,6 +234,9 @@ namespace RT.Generexes
         /// Determines whether the given input sequence matches this regular expression, and if so, returns information about the first match.
         /// </summary>
         /// <typeparam name="T">Type of the objects in the collection.</typeparam>
+        /// <typeparam name="TMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerex">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerexMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
@@ -231,6 +249,9 @@ namespace RT.Generexes
         /// Determines whether the given input sequence matches this regular expression exactly, and if so, returns information about the match.
         /// </summary>
         /// <typeparam name="T">Type of the objects in the collection.</typeparam>
+        /// <typeparam name="TMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerex">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerexMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
@@ -245,6 +266,9 @@ namespace RT.Generexes
         /// found by matching the regular expression backwards (starting from the end of the input sequence).
         /// </summary>
         /// <typeparam name="T">Type of the objects in the collection.</typeparam>
+        /// <typeparam name="TMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerex">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerexMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included.</param>
@@ -258,6 +282,9 @@ namespace RT.Generexes
         /// input sequence), optionally starting the search at the specified index.
         /// </summary>
         /// <typeparam name="T">Type of the objects in the collection.</typeparam>
+        /// <typeparam name="TMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerex">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerexMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="endAt">Optional index at which to begin the reverse search. Matches that end at or after this index are not included.</param>
@@ -269,6 +296,9 @@ namespace RT.Generexes
         /// Returns a sequence of non-overlapping regular expression matches, optionally starting the search at the specified index.
         /// </summary>
         /// <typeparam name="T">Type of the objects in the collection.</typeparam>
+        /// <typeparam name="TMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerex">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerexMatch">See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="generex">The regular expression to match.</param>
         /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
