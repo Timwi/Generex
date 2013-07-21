@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace RT.Generexes
 {
-    /// <summary>Abstract base class for <see cref="Generex{T,TResult}"/> and siblings.</summary>
+    /// <summary>Abstract base class for <see cref="Generex{T,TResult}"/> and <see cref="Stringerex{TResult}"/>.</summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
     /// <typeparam name="TResult">Type of the result object associated with each match of the regular expression.</typeparam>
     /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursively.)</typeparam>
@@ -183,10 +183,36 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or a single element that satisfies the specified predicate (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
+        /// <param name="predicate">The predicate to match a single element against.</param>
+        /// <param name="selector">A selector that returns the result object for the new regular expression based on the element matched by the <paramref name="predicate"/>.</param>
         public TGenerex Or(Predicate<T> predicate, Func<GenerexMatch<T>, TResult> selector)
         {
-            var orred = new Generex<T>(predicate).Process(selector);
-            return Or(Constructor(new matcher(orred._forwardMatcher), new matcher(orred._backwardMatcher)));
+            var other = new Generex<T>(predicate).Process(selector);
+            return Or(Constructor(new matcher(other._forwardMatcher), new matcher(other._backwardMatcher)));
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches either this regular expression or a single element using the specified equality comparer (cf. <c>|</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <param name="element">The element to match.</param>
+        /// <param name="selector">A selector that returns the result object for the new regular expression based on the <paramref name="element"/> matched.</param>
+        /// <param name="comparer">An optional equality comparer to use against the <paramref name="element"/>.</param>
+        public TGenerex Or(T element, Func<GenerexMatch<T>, TResult> selector, IEqualityComparer<T> comparer = null)
+        {
+            var other = new Generex<T>(comparer ?? EqualityComparer<T>.Default, element).Process(selector);
+            return Or(Constructor(new matcher(other._forwardMatcher), new matcher(other._backwardMatcher)));
+        }
+
+        /// <summary>
+        /// Returns a regular expression that matches either this regular expression or the specified sequence of elements (cf. <c>|</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <param name="elements">The sequence of elements to match.</param>
+        /// <param name="selector">A selector that returns the result object for the new regular expression based on the sequence matched by the <paramref name="elements"/>.</param>
+        /// <param name="comparer">An optional equality comparer to use against the elements in <paramref name="elements"/>.</param>
+        public TGenerex Or(IEnumerable<T> elements, Func<GenerexMatch<T>, TResult> selector, IEqualityComparer<T> comparer = null)
+        {
+            var other = new Generex<T>(comparer ?? EqualityComparer<T>.Default, elements).Process(selector);
+            return Or(Constructor(new matcher(other._forwardMatcher), new matcher(other._backwardMatcher)));
         }
 
         /// <summary>
@@ -422,5 +448,14 @@ namespace RT.Generexes
 
         /// <summary>Returns a regular expression that matches the specified element (first operand) followed by the specified regular expression (second operand).</summary>
         public static TGenerex operator +(T one, GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch> two) { return new Generex<T>(one).then<TGenerex, TGenerexMatch, TResult>((TGenerex) two); }
+
+        /// <summary>Returns a regular expression that matches the specified regular expression (first operand) followed by a single element that satisfies the specified predicate (second operand).</summary>
+        public static TGenerex operator +(GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch> one, Predicate<T> two) { return one.Then(two); }
+
+        /// <summary>Returns a regular expression that matches a single element that satisfies the specified predicate (first operand) followed by the specified regular expression (second operand).</summary>
+        public static TGenerex operator +(Predicate<T> one, GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch> two) { return new Generex<T>(one).then<TGenerex, TGenerexMatch, TResult>((TGenerex) two); }
+
+        /// <summary>Returns a regular expression that matches either one of the specified regular expressions (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        public static TGenerex operator |(GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch> one, TGenerex two) { return one.Or(two); }
     }
 }

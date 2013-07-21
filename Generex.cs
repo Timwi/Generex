@@ -544,5 +544,25 @@ namespace RT.Generexes
         {
             return new Stringerex<TResult>(default(TResult)).Or(inner);
         }
+
+        /// <summary>
+        /// Converts the specified <see cref="Generex{T}"/> to an equivalent regular expression of type <see cref="Stringerex"/>.
+        /// </summary>
+        public static Stringerex ToStringerex(this Generex<char> generex)
+        {
+            return Stringerex.Constructor(
+                (input, startIndex) => generex._forwardMatcher(input, startIndex),
+                (input, startIndex) => generex._backwardMatcher(input, startIndex));
+        }
+
+        /// <summary>
+        /// Converts the specified <see cref="Generex{T,TResult}"/> to an equivalent regular expression of type <see cref="Stringerex{TResult}"/>.
+        /// </summary>
+        public static Stringerex<TResult> ToStringerex<TResult>(this Generex<char, TResult> generex)
+        {
+            return Stringerex<TResult>.Constructor(
+                (input, startIndex) => generex._forwardMatcher(input, startIndex),
+                (input, startIndex) => generex._backwardMatcher(input, startIndex));
+        }
     }
 }

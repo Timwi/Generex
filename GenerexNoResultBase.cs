@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace RT.Generexes
 {
-    /// <summary>Abstract base class for <see cref="Generex{T}"/> and siblings.</summary>
+    /// <summary>Abstract base class for <see cref="Generex{T}"/> and <see cref="Stringerex"/>.</summary>
     /// <typeparam name="T">Type of the objects in the collection.</typeparam>
     /// <typeparam name="TGenerex">The derived type. (Pass the type itself recursively.)</typeparam>
     /// <typeparam name="TGenerexMatch">Type describing a match of a regular expression.</typeparam>
@@ -200,73 +200,45 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified sequence of elements (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).
+        /// Returns a regular expression that matches either this regular expression or the specified single element using the specified equality comparer (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
-        /// <example>
-        /// <para>The following code:</para>
-        /// <code>var regex = new Generex&lt;char&gt;('a', 'b').Or('c', 'd');</code>
-        /// <para>is equivalent to the regular expression <c>ab|cd</c>, NOT <c>ab|c|d</c>. For the latter, use <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.Ors(TGenerex[])"/>.</para>
-        /// </example>
-        /// <seealso cref="Or(IEqualityComparer{T},T[])"/>
-        public TGenerex Or(params T[] elements) { return Or(EqualityComparer<T>.Default, elements); }
-
-        /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified sequence of elements using the specified equality comparer (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).
-        /// </summary>
-        /// <seealso cref="Or(T[])"/>
-        public TGenerex Or(IEqualityComparer<T> comparer, params T[] elements)
+        /// <seealso cref="Or(IEnumerable{T},IEqualityComparer{T})"/>
+        /// <seealso cref="Or(Predicate{T})"/>
+        public TGenerex Or(T element, IEqualityComparer<T> comparer = null)
         {
+            comparer = comparer ?? EqualityComparer<T>.Default;
             return Or(Constructor(
-                elementsMatcher(elements, comparer, backward: false),
-                elementsMatcher(elements, comparer, backward: true)
+                elementMatcher(element, comparer, backward: false),
+                elementMatcher(element, comparer, backward: true)
             ));
         }
 
         /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified sequence of elements (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).
-        /// </summary>
-        public TGenerex Or(IEnumerable<T> elements) { return Or(EqualityComparer<T>.Default, elements.ToArray()); }
-        /// <summary>
         /// Returns a regular expression that matches either this regular expression or the specified sequence of elements using the specified equality comparer (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
-        public TGenerex Or(IEqualityComparer<T> comparer, IEnumerable<T> elements) { return Or(comparer, elements.ToArray()); }
+        /// <seealso cref="Or(T,IEqualityComparer{T})"/>
+        /// <seealso cref="Or(Predicate{T})"/>
+        public TGenerex Or(IEnumerable<T> elements, IEqualityComparer<T> comparer = null)
+        {
+            var array = (elements as T[]) ?? elements.ToArray();
+            comparer = comparer ?? EqualityComparer<T>.Default;
+            return Or(Constructor(
+                elementsMatcher(array, comparer, false),
+                elementsMatcher(array, comparer, true)
+            ));
+        }
 
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or a single element that satisfies the specified predicate (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
+        /// <seealso cref="Or(T,IEqualityComparer{T})"/>
+        /// <seealso cref="Or(IEnumerable{T},IEqualityComparer{T})"/>
         public TGenerex Or(Predicate<T> predicate)
         {
             return Or(Constructor(forwardPredicateMatcher(predicate), backwardPredicateMatcher(predicate)));
         }
 
-        /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified sequence of regular expressions (cf. <c>|</c> in traditional regular expression syntax).
-        /// </summary>
-        /// <example>
-        /// <para>The following code:</para>
-        /// <code>var regex = regex1.Or(regex2, regex3);</code>
-        /// <para>generates a regular expression equivalent to <c>1|23</c>, NOT <c>1|2|3</c>. For the latter, use <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.Ors(TGenerex[])"/>.</para>
-        /// </example>
-        public TGenerex Or(params TGenerex[] other)
-        {
-            if (other.Length == 0)
-                return (TGenerex) this;
-            if (other.Length == 1)
-                return Or(other[0]);
-            return Or(Constructor(sequenceMatcher(other, backward: false), sequenceMatcher(other, backward: true)));
-        }
-
-        /// <summary>
-        /// Returns a regular expression that matches either this regular expression or the specified other regular expression (cf. <c>|</c> in traditional regular expression syntax).
-        /// </summary>
-        /// <remarks>
-        /// <para>This overload is here even though an equivalent method is inherited from <see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}"/> because without it, the following code:</para>
-        /// <code>myGenerex.Or(myOtherGenerex);</code>
-        /// <para>would call the <see cref="Or(TGenerex[])"/> overload instead because method overload resolution prefers direct members over inherited ones.</para>
-        /// </remarks>
-        public new TGenerex Or(TGenerex other) { return base.Or(other); }
-
-        /// <summary>
+        /// <summary>       
         /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. <c>?</c> in traditional regular expression syntax).
         /// </summary>
         public TGenerex OptionalGreedy() { return repeatBetween(0, 1, true); }
@@ -550,12 +522,45 @@ namespace RT.Generexes
         /// <summary>Returns a regular expression that matches the specified element (first operand) followed by the specified regular expression (second operand).</summary>
         public static TGenerex operator +(T one, GenerexNoResultBase<T, TGenerex, TGenerexMatch> two)
         {
-            var forward = elementMatcher(one, EqualityComparer<T>.Default, false);
-            var backward = elementMatcher(one, EqualityComparer<T>.Default, true);
             return Constructor(
-                (input, startIndex) => forward(input, startIndex).SelectMany(m => two._forwardMatcher(input, startIndex + m).Select(m2 => m + m2)),
-                (input, startIndex) => backward(input, startIndex).SelectMany(m => two._backwardMatcher(input, startIndex + m).Select(m2 => m2 + m))
-            );
+                then(elementMatcher(one, EqualityComparer<T>.Default, false), two._forwardMatcher),
+                then(elementMatcher(one, EqualityComparer<T>.Default, true), two._backwardMatcher));
+        }
+
+        /// <summary>Returns a regular expression that matches the specified regular expression (first operand) followed by the specified element (second operand).</summary>
+        public static TGenerex operator +(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, Predicate<T> two) { return one.Then(two); }
+
+        /// <summary>Returns a regular expression that matches the specified element (first operand) followed by the specified regular expression (second operand).</summary>
+        public static TGenerex operator +(Predicate<T> one, GenerexNoResultBase<T, TGenerex, TGenerexMatch> two)
+        {
+            return Constructor(
+                then(forwardPredicateMatcher(one), two._forwardMatcher),
+                then(backwardPredicateMatcher(one), two._backwardMatcher));
+        }
+
+        /// <summary>Returns a regular expression that matches either one of the specified regular expressions (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        public static TGenerex operator |(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, TGenerex two) { return one.Or(two); }
+
+        /// <summary>Returns a regular expression that matches either the specified regular expression (first operand) or the specified element (second operand) (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        public static TGenerex operator |(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, T two) { return one.Or(two); }
+
+        /// <summary>Returns a regular expression that matches either the specified element (first operand) or the specified regular expression (second operand) (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        public static TGenerex operator |(T one, GenerexNoResultBase<T, TGenerex, TGenerexMatch> two)
+        {
+            return Constructor(
+                or(elementMatcher(one, EqualityComparer<T>.Default, false), two._forwardMatcher),
+                or(elementMatcher(one, EqualityComparer<T>.Default, true), two._backwardMatcher));
+        }
+
+        /// <summary>Returns a regular expression that matches either the specified regular expression (first operand) or a single element that satisfies the specified predicate (second operand) (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        public static TGenerex operator |(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, Predicate<T> two) { return one.Or(two); }
+
+        /// <summary>Returns a regular expression that matches either a single element that satisfies the specified predicate (first operand) or the specified regular expression (second operand) (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        public static TGenerex operator |(Predicate<T> one, GenerexNoResultBase<T, TGenerex, TGenerexMatch> two)
+        {
+            return Constructor(
+                or(forwardPredicateMatcher(one), two._forwardMatcher),
+                or(backwardPredicateMatcher(one), two._backwardMatcher));
         }
     }
 }

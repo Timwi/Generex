@@ -208,6 +208,18 @@ namespace RT.Generexes
         }
 
         /// <summary>
+        /// Returns a regular expression that matches either this regular expression or the specified string (cf. <c>|</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <param name="str">The string to match.</param>
+        /// <param name="selector">A selector that returns the result object for the new regular expression based on the string matched by <paramref name="str"/>.</param>
+        /// <param name="comparer">An optional equality comparer to use against <paramref name="str"/>.</param>
+        public Stringerex<TResult> Or(string str, Func<StringerexMatch, TResult> selector, IEqualityComparer<char> comparer = null)
+        {
+            var other = new Stringerex(comparer ?? EqualityComparer<char>.Default, str).Process(selector);
+            return Or(Constructor(new matcher(other._forwardMatcher), new matcher(other._backwardMatcher)));
+        }
+
+        /// <summary>
         /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. <c>?</c> in traditional regular expression syntax).
         /// </summary>
         public Stringerex<IEnumerable<TResult>> OptionalGreedy() { return repeatBetween<Stringerex<IEnumerable<TResult>>, StringerexMatch<IEnumerable<TResult>>>(0, 1, greedy: true); }

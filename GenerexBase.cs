@@ -309,7 +309,9 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or the specified other regular expression (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
-        public TGenerex Or(TGenerex other)
+        public TGenerex Or<TOtherGenerex, TOtherGenerexMatch>(GenerexBase<T, TMatch, TOtherGenerex, TOtherGenerexMatch> other)
+            where TOtherGenerex : GenerexBase<T, TMatch, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T>
         {
             return Constructor(or(_forwardMatcher, other._forwardMatcher), or(_backwardMatcher, other._backwardMatcher));
         }
@@ -384,20 +386,28 @@ namespace RT.Generexes
             return _forwardMatcher(input, mustStartAt).Where(m => getLength(m) == mustHaveLength).Select(selector).FirstOrDefault();
         }
 
-        private static matcher or(matcher one, matcher two)
+        internal static matcher or<TOtherGenerex, TOtherGenerexMatch>(matcher one, GenerexBase<T, TMatch, TOtherGenerex, TOtherGenerexMatch>.matcher two)
+            where TOtherGenerex : GenerexBase<T, TMatch, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T>
         {
-            return new safeOrMatcher(one, two).Matcher;
+            return new safeOrMatcher<TOtherGenerex, TOtherGenerexMatch>(one, two).Matcher;
         }
 
         /// <summary>
         /// This class implements the “or” (or alternation) operation without invoking both matchers at the start.
         /// (This is important in cases involving recursive regular expressions, see e.g. <see cref="Generex.Recursive{T}"/>.)
         /// </summary>
-        private class safeOrMatcher
+        private class safeOrMatcher<TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerex : GenerexBase<T, TMatch, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T>
         {
             public matcher One { get; private set; }
-            public matcher Two { get; private set; }
-            public safeOrMatcher(matcher one, matcher two) { One = one; Two = two; }
+            public GenerexBase<T, TMatch, TOtherGenerex, TOtherGenerexMatch>.matcher Two { get; private set; }
+            public safeOrMatcher(matcher one, GenerexBase<T, TMatch, TOtherGenerex, TOtherGenerexMatch>.matcher two)
+            {
+                One = one;
+                Two = two;
+            }
             public IEnumerable<TMatch> Matcher(T[] input, int startIndex)
             {
                 foreach (var match in One(input, startIndex))
