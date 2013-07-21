@@ -581,7 +581,7 @@ namespace RT.Generexes
         /// <param name="selector">A delegate that creates a new regular expression from a match of the current regular expression.</param>
         /// <returns>The combined regular expression.</returns>
         /// <remarks>
-        /// <para>Regular expressions created by this method cannot match backwards. Thus, they cannot be used in calls to any of the following methods:</para>
+        /// <para>Regular expressions created by this method (and several other overloads listed below) cannot match backwards. Thus, they cannot be used in calls to any of the following methods:</para>
         /// <list type="bullet">
         ///     <item><description>
         ///         <para><c>And</c>:</para>
@@ -644,6 +644,18 @@ namespace RT.Generexes
         ///             <item><description><see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.ReplaceReverse(T[], Func{TResult, IEnumerable{T}}, int?, int?)"/></description></item>
         ///         </list>
         ///     </description></item>
+        /// </list>
+        /// <para>The overloads affected by this restriction are:</para>
+        /// <list type="bullet">
+        ///     <item><description><see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then(Func{TGenerexMatch, Generex{T}})"/> (this method)</description></item>
+        ///     <item><description><see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TResult}(Func{TGenerexMatch, Generex{T, TResult}})"/></description></item>
+        ///     <item><description><see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch, TOtherGenerexMatch}(Func{TGenerexMatch, TOtherGenerex})"/></description></item>
+        ///     <item><description><see cref="Generex.Then{TMatch, TGenerex, TGenerexMatch}(GenerexBase{char, TMatch, TGenerex, TGenerexMatch}, Func{TGenerexMatch, Stringerex})"/></description></item>
+        ///     <item><description><see cref="Generex.Then{TMatch, TGenerex, TGenerexMatch, TResult}(GenerexBase{char, TMatch, TGenerex, TGenerexMatch}, Func{TGenerexMatch, Stringerex{TResult}})"/></description></item>
+        ///     <item><description><see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.ThenRaw(Func{TResult, Generex{T}})"/></description></item>
+        ///     <item><description><see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.ThenRaw{TOtherResult}(Func{TResult, Generex{T, TOtherResult}})"/></description></item>
+        ///     <item><description><see cref="Generex.ThenRaw{TResult, TGenerex, TGenerexMatch}(GenerexWithResultBase{char, TResult, TGenerex, TGenerexMatch}, Func{TGenerexMatch, Stringerex})"/></description></item>
+        ///     <item><description><see cref="Generex.ThenRaw{TResult, TGenerex, TGenerexMatch, TOtherResult}(GenerexWithResultBase{char, TResult, TGenerex, TGenerexMatch}, Func{TGenerexMatch, Stringerex{TOtherResult}})"/></description></item>
         /// </list>
         /// </remarks>
         public Generex<T> Then(Func<TGenerexMatch, Generex<T>> selector)
