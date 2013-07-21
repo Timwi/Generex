@@ -30,7 +30,7 @@ namespace RT.Generexes
         /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified equality comparer.
         /// </summary>
-        protected GenerexNoResultBase(IEqualityComparer<T> comparer, T[] elements)
+        protected GenerexNoResultBase(T[] elements, IEqualityComparer<T> comparer)
             : base(
                 elementsMatcher(elements, comparer, backward: false),
                 elementsMatcher(elements, comparer, backward: true)) { }

@@ -215,7 +215,7 @@ namespace RT.Generexes
         /// <param name="comparer">An optional equality comparer to use against <paramref name="str"/>.</param>
         public Stringerex<TResult> Or(string str, Func<StringerexMatch, TResult> selector, IEqualityComparer<char> comparer = null)
         {
-            var other = new Stringerex(comparer ?? EqualityComparer<char>.Default, str).Process(selector);
+            var other = new Stringerex(str, comparer ?? EqualityComparer<char>.Default).Process(selector);
             return Or(Constructor(new matcher(other._forwardMatcher), new matcher(other._backwardMatcher)));
         }
 

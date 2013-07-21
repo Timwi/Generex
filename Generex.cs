@@ -139,7 +139,7 @@ namespace RT.Generexes
             Func<TInputGenerex, TResultGenerex, TResultGenerex> thenner,
             Func<TResultGenerex, TResultGenerex, TResultGenerex> orer,
             Func<TResultGenerex> constructor,
-            params TInputGenerex[] generexes)
+            TInputGenerex[] generexes)
             where TResultGenerex : class
         {
             TResultGenerex generex = null;

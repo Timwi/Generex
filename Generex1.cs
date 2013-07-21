@@ -27,22 +27,22 @@ namespace RT.Generexes
         /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive elements.
         /// </summary>
-        public Generex(params T[] elements) : base(EqualityComparer<T>.Default, elements) { }
+        public Generex(params T[] elements) : base(elements, EqualityComparer<T>.Default) { }
 
         /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive elements.
         /// </summary>
-        public Generex(IEnumerable<T> elements) : base(EqualityComparer<T>.Default, elements.ToArray()) { }
+        public Generex(IEnumerable<T> elements) : base(elements.ToArray(), EqualityComparer<T>.Default) { }
 
         /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified equality comparer.
         /// </summary>
-        public Generex(IEqualityComparer<T> comparer, params T[] elements) : base(comparer, elements) { }
+        public Generex(IEqualityComparer<T> comparer, params T[] elements) : base(elements, comparer) { }
 
         /// <summary>
         /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified equality comparer.
         /// </summary>
-        public Generex(IEqualityComparer<T> comparer, IEnumerable<T> elements) : base(comparer, elements.ToArray()) { }
+        public Generex(IEqualityComparer<T> comparer, IEnumerable<T> elements) : base(elements.ToArray(), comparer) { }
 
         /// <summary>
         /// Instantiates a regular expression that matches a single element that satisfies the given predicate (cf. <c>[...]</c> in traditional regular expression syntax).

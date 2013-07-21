@@ -24,34 +24,19 @@ namespace RT.Generexes
         public Stringerex() : base(emptyMatch, emptyMatch) { }
 
         /// <summary>
-        /// Instantiates a regular expression that matches a sequence of consecutive elements.
+        /// Instantiates a regular expression that matches a specified character using the specified optional equality comparer.
         /// </summary>
-        public Stringerex(IEnumerable<char> elements) : base(EqualityComparer<char>.Default, elements.ToArray()) { }
+        public Stringerex(char ch, IEqualityComparer<char> comparer = null) : base(new[] { ch }, comparer ?? EqualityComparer<char>.Default) { }
 
         /// <summary>
-        /// Instantiates a regular expression that matches a specified character.
+        /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified optional equality comparer.
         /// </summary>
-        public Stringerex(char ch) : base(EqualityComparer<char>.Default, new[] { ch }) { }
+        public Stringerex(string elements, IEqualityComparer<char> comparer = null) : base(elements.ToCharArray(), comparer ?? EqualityComparer<char>.Default) { }
 
         /// <summary>
-        /// Instantiates a regular expression that matches a specified character using the specified equality comparer.
+        /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified optional equality comparer.
         /// </summary>
-        public Stringerex(IEqualityComparer<char> comparer, char ch) : base(comparer, new[] { ch }) { }
-
-        /// <summary>
-        /// Instantiates a regular expression that matches a specified string.
-        /// </summary>
-        public Stringerex(string elements) : base(EqualityComparer<char>.Default, elements.ToCharArray()) { }
-
-        /// <summary>
-        /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified equality comparer.
-        /// </summary>
-        public Stringerex(IEqualityComparer<char> comparer, string elements) : base(comparer, elements.ToCharArray()) { }
-
-        /// <summary>
-        /// Instantiates a regular expression that matches a sequence of consecutive elements using the specified equality comparer.
-        /// </summary>
-        public Stringerex(IEqualityComparer<char> comparer, IEnumerable<char> elements) : base(comparer, elements.ToArray()) { }
+        public Stringerex(IEnumerable<char> elements, IEqualityComparer<char> comparer = null) : base(elements.ToArray(), comparer ?? EqualityComparer<char>.Default) { }
 
         /// <summary>
         /// Instantiates a regular expression that matches a single character that satisfies the given predicate (cf. <c>[...]</c> in traditional regular expression syntax).
@@ -181,21 +166,17 @@ namespace RT.Generexes
         public Stringerex<TResult> Process<TResult>(Func<StringerexMatch, TResult> selector) { return process<Stringerex<TResult>, StringerexMatch<TResult>, TResult>(selector); }
 
         /// <summary>
-        /// Instantiates a regular expression that matches the specified character.
+        /// Instantiates a regular expression that matches the specified character using the specified optional equality comparer.
         /// </summary>
-        public static Stringerex New(char ch) { return new Stringerex(ch); }
+        public static Stringerex New(char ch, IEqualityComparer<char> comparer = null) { return new Stringerex(ch, comparer); }
         /// <summary>
-        /// Instantiates a regular expression that matches the specified character using the specified equality comparer.
+        /// Instantiates a regular expression that matches the specified string using the specified optional equality comparer.
         /// </summary>
-        public static Stringerex New(IEqualityComparer<char> comparer, char ch) { return new Stringerex(comparer, ch); }
+        public static Stringerex New(string str, IEqualityComparer<char> comparer = null) { return new Stringerex(str, comparer); }
         /// <summary>
-        /// Instantiates a regular expression that matches the specified string.
+        /// Instantiates a regular expression that matches the specified sequence of characters using the specified optional equality comparer.
         /// </summary>
-        public static Stringerex New(string str) { return new Stringerex(str); }
-        /// <summary>
-        /// Instantiates a regular expression that matches the specified string using the specified equality comparer.
-        /// </summary>
-        public static Stringerex New(IEqualityComparer<char> comparer, string str) { return new Stringerex(comparer, str); }
+        public static Stringerex New(IEnumerable<char> elements, IEqualityComparer<char> comparer = null) { return new Stringerex(elements, comparer); }
         /// <summary>
         /// Instantiates a regular expression that matches a single character that satisfies the given predicate (cf. <c>[...]</c> in traditional regular expression syntax).
         /// </summary>
@@ -220,31 +201,19 @@ namespace RT.Generexes
 
         /// <summary>Generates a regular expression that matches the characters of the specified string in any order.</summary>
         /// <param name="characters">A string containing the characters to match.</param>
-        public static Stringerex InAnyOrder(string characters)
+        /// <param name="comparer">The optional equality comparer to use to determine matching characters.</param>
+        public static Stringerex InAnyOrder(string characters, IEqualityComparer<char> comparer = null)
         {
             if (characters == null)
                 throw new ArgumentNullException("characters");
+
+            comparer = comparer ?? EqualityComparer<char>.Default;
 
             return Generex.InAnyOrder<Stringerex, Stringerex>(
                 thenner: (prev, next) => prev.Then(next),
                 orer: (one, two) => one.Or(two),
                 constructor: () => new Stringerex(),
-                generexes: characters.Select(ch => new Stringerex(ch)).ToArray());
-        }
-
-        /// <summary>Generates a regular expression that matches the characters of the specified string in any order.</summary>
-        /// <param name="comparer">The equality comparer to use to determine matching characters.</param>
-        /// <param name="characters">A string containing the characters to match.</param>
-        public static Stringerex InAnyOrder(IEqualityComparer<char> comparer, string characters)
-        {
-            if (characters == null)
-                throw new ArgumentNullException("characters");
-
-            return Generex.InAnyOrder<Stringerex, Stringerex>(
-                thenner: (prev, next) => prev.Then(next),
-                orer: (one, two) => one.Or(two),
-                constructor: () => new Stringerex(),
-                generexes: characters.Select(ch => Stringerex.New(comparer, ch)).ToArray());
+                generexes: characters.Select(ch => Stringerex.New(ch, comparer)).ToArray());
         }
 
         /// <summary>Generates a regular expression that matches the specified regular expressions in any order.</summary>
