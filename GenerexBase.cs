@@ -64,16 +64,6 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        /// Determines whether the given input sequence contains a match for this regular expression, optionally starting the search at a specified index.
-        /// </summary>
-        /// <param name="input">Input sequence to match the regular expression against.</param>
-        /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
-        public bool IsMatch(IEnumerable<T> input, int startAt = 0)
-        {
-            return IsMatch(input.ToArray(), startAt);
-        }
-
-        /// <summary>
         /// Determines whether the given input sequence matches this regular expression at a specific index.
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
@@ -191,6 +181,10 @@ namespace RT.Generexes
         /// <param name="startAt">Optional index within the input sequence at which to start matching.</param>
         /// <param name="maxReplace">Optional maximum number of replacements to make (null for infinite).</param>
         /// <returns>The resulting sequence containing the replacements.</returns>
+        /// <remarks>
+        /// The <paramref name="replaceWith"/> enumerable is only enumerated if a replacement is actually made.
+        /// If multiple replacements are made, it is enumerated only once.
+        /// </remarks>
         public T[] Replace(T[] input, IEnumerable<T> replaceWith, int startAt = 0, int? maxReplace = null)
         {
             // evaluate replaceWith only once, and only if necessary
@@ -221,6 +215,8 @@ namespace RT.Generexes
         /// <param name="endAt">Optional index at which to begin the reverse search. Matches that end at or after this index are not included.</param>
         /// <param name="maxReplace">Optional maximum number of replacements to make (null for infinite).</param>
         /// <returns>The resulting sequence containing the replacements.</returns>
+        /// The <paramref name="replaceWith"/> enumerable is only enumerated if a replacement is actually made.
+        /// If multiple replacements are made, it is enumerated only once.
         public T[] ReplaceReverse(T[] input, IEnumerable<T> replaceWith, int? endAt = null, int? maxReplace = null)
         {
             // evaluate replaceWith only once, and only if necessary
@@ -612,6 +608,10 @@ namespace RT.Generexes
         ///             <item><description><see cref="Generex.IsMatchReverse{T}(T[], Generex{T}, int?)"/></description></item>
         ///             <item><description><see cref="Stringerex.IsMatchReverse(string, int?)"/></description></item>
         ///             <item><description><see cref="Stringerex{TResult}.IsMatchReverse(string, int?)"/></description></item>
+        ///             <item><description><see cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.IsMatchUpTo(T[], int?)"/></description></item>
+        ///             <item><description><see cref="Generex.IsMatchUpTo{T}(T[], Generex{T}, int?)"/></description></item>
+        ///             <item><description><see cref="Stringerex.IsMatchUpTo(string, int?)"/></description></item>
+        ///             <item><description><see cref="Stringerex{TResult}.IsMatchUpTo(string, int?)"/></description></item>
         ///         </list>
         ///     </description></item>
         ///     <item><description>

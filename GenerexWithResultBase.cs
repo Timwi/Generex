@@ -416,5 +416,11 @@ namespace RT.Generexes
                 })
             );
         }
+
+        /// <summary>Returns a regular expression that matches the specified regular expression (first operand) followed by the specified element (second operand).</summary>
+        public static TGenerex operator +(GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch> one, T two) { return one.Then(two); }
+
+        /// <summary>Returns a regular expression that matches the specified element (first operand) followed by the specified regular expression (second operand).</summary>
+        public static TGenerex operator +(T one, GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch> two) { return new Generex<T>(one).then<TGenerex, TGenerexMatch, TResult>((TGenerex) two); }
     }
 }
