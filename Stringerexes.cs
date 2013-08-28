@@ -24,9 +24,9 @@ namespace RT.Generexes
 
         /// <summary>Parses a decimal number, allowing fractional parts and exponential notation.</summary>
         public static readonly Stringerex<double> Number = optionalMinus
-            .Then(Digit0to9.RepeatGreedy())
-            .Then(new Stringerex(".").Then(Digit0to9.RepeatGreedy()).OptionalGreedy())
-            .Do(m => m.Length > 0)
+            .Then(Digit0to9.RepeatGreedy()
+                .Then(new Stringerex(".").Then(Digit0to9.RepeatGreedy()).OptionalGreedy())
+                .Do(m => m.Length > 0))
             .Then(Stringerex.Ors("e", "E").Then(Stringerex.Ors("+", "-", "")).Then(Digit0to9.RepeatGreedy(1)).OptionalGreedy())
             .Process(m => Convert.ToDouble(m.Match));
     }
