@@ -68,7 +68,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
-        /// <returns>True if a match starting at the specified index exists (which need not run all the way to the end of the sequence); otherwise, false.</returns>
+        /// <returns><c>true</c> if a match starting at the specified index exists (which need not run all the way to the end of the sequence); otherwise, <c>false</c>.</returns>
         public bool IsMatchAt(T[] input, int mustStartAt = 0)
         {
             return _forwardMatcher(input, mustStartAt).Any();
@@ -79,7 +79,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="mustEndAt">Index at which the match must end (default is the end of the input sequence).</param>
-        /// <returns>True if a match ending at the specified index exists (which need not begin at the start of the sequence); otherwise, false.</returns>
+        /// <returns><c>true</c> if a match ending at the specified index exists (which need not begin at the start of the sequence); otherwise, <c>false</c>.</returns>
         public bool IsMatchUpTo(T[] input, int? mustEndAt = null)
         {
             return _backwardMatcher(input, mustEndAt ?? input.Length).Any();
@@ -91,7 +91,7 @@ namespace RT.Generexes
         /// <param name="input">Input sequence to match the regular expression against.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
         /// <param name="mustEndAt">Index at which the match must end (default is the end of the input sequence).</param>
-        /// <returns>True if a match starting and ending at the specified indexes exists; otherwise, false.</returns>
+        /// <returns><c>true</c> if a match starting and ending at the specified indexes exists; otherwise, <c>false</c>.</returns>
         public bool IsMatchExact(T[] input, int mustStartAt = 0, int? mustEndAt = null)
         {
             var mustEndAtReally = mustEndAt ?? input.Length;

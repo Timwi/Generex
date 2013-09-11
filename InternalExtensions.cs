@@ -63,7 +63,7 @@ namespace RT.Generexes
         /// <param name="sourceStartIndex">Start index of the subarray within the first array to compare.</param>
         /// <param name="otherArray">Array to compare the subarray against.</param>
         /// <param name="comparer">Optional equality comparer.</param>
-        /// <returns>True if the current array contains the specified subarray at the specified index; false otherwise.</returns>
+        /// <returns><c>true</c> if the current array contains the specified subarray at the specified index; false otherwise.</returns>
         public static bool SubarrayEquals<T>(this T[] sourceArray, int sourceStartIndex, T[] otherArray, IEqualityComparer<T> comparer = null)
         {
             if (otherArray == null)
@@ -80,7 +80,7 @@ namespace RT.Generexes
         /// <param name="otherStartIndex">Start index of the subarray within the second array to compare.</param>
         /// <param name="length">Length of the subarrays to compare.</param>
         /// <param name="comparer">Optional equality comparer.</param>
-        /// <returns>True if the two arrays contain the same subarrays at the specified indexes; false otherwise.</returns>
+        /// <returns><c>true</c> if the two arrays contain the same subarrays at the specified indexes; false otherwise.</returns>
         public static bool SubarrayEquals<T>(this T[] sourceArray, int sourceStartIndex, T[] otherArray, int otherStartIndex, int length, IEqualityComparer<T> comparer = null)
         {
             if (sourceArray == null)

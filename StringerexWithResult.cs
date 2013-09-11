@@ -41,7 +41,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">String to match the regular expression against.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
-        /// <returns>True if a match starting at the specified index exists (which need not run all the way to the end of the string); otherwise, false.</returns>
+        /// <returns><c>true</c> if a match starting at the specified index exists (which need not run all the way to the end of the string); otherwise, <c>false</c>.</returns>
         public bool IsMatchAt(string input, int mustStartAt = 0) { return base.IsMatchAt(input.ToCharArray(), mustStartAt); }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="input">String to match the regular expression against.</param>
         /// <param name="mustEndAt">Index at which the match must end (default is the end of the string).</param>
-        /// <returns>True if a match ending at the specified index exists (which need not begin at the start of the string); otherwise, false.</returns>
+        /// <returns><c>true</c> if a match ending at the specified index exists (which need not begin at the start of the string); otherwise, <c>false</c>.</returns>
         public bool IsMatchUpTo(string input, int? mustEndAt = null) { return base.IsMatchUpTo(input.ToCharArray(), mustEndAt); }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace RT.Generexes
         /// <param name="input">String to match the regular expression against.</param>
         /// <param name="mustStartAt">Index at which the match must start (default is 0).</param>
         /// <param name="mustEndAt">Index at which the match must end (default is the end of the string).</param>
-        /// <returns>True if a match starting and ending at the specified indexes exists; otherwise, false.</returns>
+        /// <returns><c>true</c> if a match starting and ending at the specified indexes exists; otherwise, <c>false</c>.</returns>
         public bool IsMatchExact(string input, int mustStartAt = 0, int? mustEndAt = null) { return base.IsMatchExact(input.ToCharArray(), mustStartAt, mustEndAt); }
 
         /// <summary>
