@@ -365,6 +365,14 @@ namespace RT.Generexes
         /// <seealso cref="GenerexNoResultBase{T,TGenerex,TGenerexMatch}.End"/>
         public static Generex<T> CreateEndGenerex<T>(this T[] input) { return Generex<T>.End; }
 
+        /// <summary>
+        /// Returns a regular expression that never matches (cf. <c>(?!)</c> in traditional regular expression syntax).
+        /// </summary>
+        /// <typeparam name="T">Type of objects that the regular expression will later match against.</typeparam>
+        /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
+        /// <seealso cref="GenerexNoResultBase{T,TGenerex,TGenerexMatch}.Fail"/>
+        public static Generex<T> CreateFailGenerex<T>(this T[] input) { return Generex<T>.Fail; }
+
         /// <summary>Generates a recursive regular expression, i.e. one that can contain itself, allowing the matching of arbitrarily nested expressions.</summary>
         /// <typeparam name="T">Type of the objects in the collection against which the regular expression will be matched.</typeparam>
         /// <param name="input">The value of this parameter is ignored, but can be used for type inference to enable matching of collections of anonymous types.</param>
