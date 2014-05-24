@@ -248,11 +248,12 @@ namespace RT.Generexes
         /// <param name="min">Minimum number of times the regular expression must match.</param>
         /// <param name="greedy"><c>true</c> to prioritise longer matches (“greedy” matching);
         /// <c>false</c> to prioritise shorter matches (“non-greedy” matching).</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="min"/> is negative.</exception>
         protected TManyGenerex repeatMin<TManyGenerex, TManyGenerexMatch>(int min, bool greedy)
             where TManyGenerex : GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>
             where TManyGenerexMatch : GenerexMatch<T, IEnumerable<TResult>>
         {
-            if (min < 0) throw new ArgumentException("'min' cannot be negative.", "min");
+            if (min < 0) throw new ArgumentOutOfRangeException("'min' cannot be negative.", "min");
             return repeatBetween<TManyGenerex, TManyGenerexMatch>(min, min, true)
                 .thenRaw<TManyGenerex, TManyGenerexMatch, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch, IEnumerable<TResult>>(repeatInfinite<TManyGenerex, TManyGenerexMatch>(greedy), Enumerable.Concat);
         }
@@ -264,11 +265,13 @@ namespace RT.Generexes
         /// <param name="max">Maximum number of times to match.</param>
         /// <param name="greedy"><c>true</c> to prioritise longer matches (“greedy” matching);
         /// <c>false</c> to prioritise shorter matches (“non-greedy” matching).</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="min"/> is negative.</exception>
+        /// <exception cref="ArgumentException"><paramref name="max"/> is smaller than <paramref name="min"/>.</exception>
         protected TManyGenerex repeatBetween<TManyGenerex, TManyGenerexMatch>(int min, int max, bool greedy)
             where TManyGenerex : GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>
             where TManyGenerexMatch : GenerexMatch<T, IEnumerable<TResult>>
         {
-            if (min < 0) throw new ArgumentException("'min' cannot be negative.", "min");
+            if (min < 0) throw new ArgumentOutOfRangeException("'min' cannot be negative.", "min");
             if (max < min) throw new ArgumentException("'max' cannot be smaller than 'min'.", "max");
             var rm = new repeatMatcher
             {

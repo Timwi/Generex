@@ -92,29 +92,37 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches this regular expression the specified number of times or more. More times are prioritised (cf. <c>{min,}</c> in traditional regular expression syntax).
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="min"/> is negative.</exception>
         public Generex<T, IEnumerable<TResult>> RepeatGreedy(int min) { return repeatMin<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(min, greedy: true); }
         /// <summary>
         /// Returns a regular expression that matches this regular expression the specified number of times or more. Fewer times are prioritised (cf. <c>{min,}?</c> in traditional regular expression syntax).
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="min"/> is negative.</exception>
         public Generex<T, IEnumerable<TResult>> Repeat(int min) { return repeatMin<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(min, greedy: false); }
         /// <summary>
         /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. More times are prioritised (cf. <c>{min,max}</c> in traditional regular expression syntax).
         /// </summary>
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="max">Maximum number of times to match.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="min"/> is negative.</exception>
+        /// <exception cref="ArgumentException"><paramref name="max"/> is smaller than <paramref name="min"/>.</exception>
         public Generex<T, IEnumerable<TResult>> RepeatGreedy(int min, int max) { return repeatBetween<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(min, max, greedy: true); }
         /// <summary>
         /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. Fewer times are prioritised (cf. <c>{min,max}?</c> in traditional regular expression syntax).
         /// </summary>
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="max">Maximum number of times to match.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="min"/> is negative.</exception>
+        /// <exception cref="ArgumentException"><paramref name="max"/> is smaller than <paramref name="min"/>.</exception>
         public Generex<T, IEnumerable<TResult>> Repeat(int min, int max) { return repeatBetween<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(min, max, greedy: false); }
         /// <summary>
         /// Returns a regular expression that matches this regular expression the specified number of times (cf. <c>{times}</c> in traditional regular expression syntax).
         /// </summary>
+        /// <param name="times">A non-negative number specifying the number of repetitions of the regular expression.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="times"/> is negative.</exception>
         public Generex<T, IEnumerable<TResult>> Times(int times)
         {
-            if (times < 0) throw new ArgumentException("'times' cannot be negative.", "times");
+            if (times < 0) throw new ArgumentOutOfRangeException("'times' cannot be negative.", "times");
             return repeatBetween<Generex<T, IEnumerable<TResult>>, GenerexMatch<T, IEnumerable<TResult>>>(times, times, true);
         }
 

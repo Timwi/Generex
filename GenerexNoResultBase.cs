@@ -273,29 +273,37 @@ namespace RT.Generexes
         /// <summary>
         /// Returns a regular expression that matches this regular expression the specified number of times or more. More times are prioritised (cf. <c>{min,}</c> in traditional regular expression syntax).
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="min"/> is negative.</exception>
         public TGenerex RepeatGreedy(int min) { return repeatMin(min, true); }
         /// <summary>
         /// Returns a regular expression that matches this regular expression the specified number of times or more. Fewer times are prioritised (cf. <c>{min,}?</c> in traditional regular expression syntax).
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="min"/> is negative.</exception>
         public TGenerex Repeat(int min) { return repeatMin(min, false); }
         /// <summary>
         /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. More times are prioritised (cf. <c>{min,max}</c> in traditional regular expression syntax).
         /// </summary>
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="max">Maximum number of times to match.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="min"/> is negative.</exception>
+        /// <exception cref="ArgumentException"><paramref name="max"/> is smaller than <paramref name="min"/>.</exception>
         public TGenerex RepeatGreedy(int min, int max) { return repeatBetween(min, max, true); }
         /// <summary>
         /// Returns a regular expression that matches this regular expression any number of times within specified boundaries. Fewer times are prioritised (cf. <c>{min,max}?</c> in traditional regular expression syntax).
         /// </summary>
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="max">Maximum number of times to match.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="min"/> is negative.</exception>
+        /// <exception cref="ArgumentException"><paramref name="max"/> is smaller than <paramref name="min"/>.</exception>
         public TGenerex Repeat(int min, int max) { return repeatBetween(min, max, false); }
         /// <summary>
         /// Returns a regular expression that matches this regular expression the specified number of times (cf. <c>{times}</c> in traditional regular expression syntax).
         /// </summary>
+        /// <param name="times">A non-negative number specifying the number of repetitions of the regular expression.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="times"/> is negative.</exception>
         public TGenerex Times(int times)
         {
-            if (times < 0) throw new ArgumentException("'times' cannot be negative.", "times");
+            if (times < 0) throw new ArgumentOutOfRangeException("'times' cannot be negative.", "times");
             return repeatBetween(times, times, true);
         }
         /// <summary>
@@ -341,9 +349,10 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="greedy">If true, more matches are prioritised; otherwise, fewer matches are prioritised.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="min"/> is negative.</exception>
         private TGenerex repeatMin(int min, bool greedy)
         {
-            if (min < 0) throw new ArgumentException("'min' cannot be negative.", "min");
+            if (min < 0) throw new ArgumentOutOfRangeException("'min' cannot be negative.", "min");
             return repeatBetween(min, min, true).Then(repeatInfinite(greedy));
         }
 
@@ -353,9 +362,11 @@ namespace RT.Generexes
         /// <param name="min">Minimum number of times to match.</param>
         /// <param name="max">Maximum number of times to match.</param>
         /// <param name="greedy">If true, more matches are prioritised; otherwise, fewer matches are prioritised.</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="min"/> is negative.</exception>
+        /// <exception cref="ArgumentException"><paramref name="max"/> is smaller than <paramref name="min"/>.</exception>
         private TGenerex repeatBetween(int min, int max, bool greedy)
         {
-            if (min < 0) throw new ArgumentException("'min' cannot be negative.", "min");
+            if (min < 0) throw new ArgumentOutOfRangeException("'min' cannot be negative.", "min");
             if (max < min) throw new ArgumentException("'max' cannot be smaller than 'min'.", "max");
             var rm = new repeatMatcher
             {

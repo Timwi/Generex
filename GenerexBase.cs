@@ -558,6 +558,63 @@ namespace RT.Generexes
         }
 
         /// <summary>
+        /// Returns a regular expression that matches this regular expression, then attempts to match the specified
+        /// other regular expression and throws an exception if the second regular expression failed to match.
+        /// </summary>
+        /// <typeparam name="TOtherGenerex">Type of the second regular expression (<paramref name="expectation"/>).</typeparam>
+        /// <typeparam name="TOtherMatch">Type of internal match information used by <typeparamref name="TOtherGenerex"/> (i.e. <c>int</c> or <c>LengthAndResult&lt;T&gt;</c>).</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">Type of match object returned by matches of <typeparamref name="TOtherGenerex"/>.</typeparam>
+        /// <typeparam name="TResultGenerex">Type of the resulting regular expression.</typeparam>
+        /// <typeparam name="TResultMatch">Type of internal match information used by <typeparamref name="TResultGenerex"/> (i.e. <c>int</c> or <c>LengthAndResult&lt;T&gt;</c>).</typeparam>
+        /// <typeparam name="TResultGenerexMatch">Type of match object returned by matches of <typeparamref name="TResultGenerex"/>.</typeparam>
+        /// <param name="expectation">The regular expression that is expected to match after the current one.</param>
+        /// <param name="exceptionGenerator">A selector that generates the exception object to be thrown.</param>
+        /// <param name="matchCombiner">A selector that generates the internal match information for the combined match given a match of the current regular expression and one of the <paramref name="expectation"/>.</param>
+        /// <returns>The combined regular expression.</returns>
+        /// <remarks>
+        /// Regular expressions created by this method cannot match backwards. The full set of affected methods is listed at
+        /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then(Func{TGenerexMatch, Generex{T}})"/>.
+        /// </remarks>
+        protected TResultGenerex thenExpect<TOtherGenerex, TOtherMatch, TOtherGenerexMatch, TResultGenerex, TResultMatch, TResultGenerexMatch>(
+            TOtherGenerex expectation,
+            Func<T[], int, TMatch, Exception> exceptionGenerator,
+            Func<TMatch, TOtherMatch, TResultMatch> matchCombiner)
+            where TOtherGenerex : GenerexBase<T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T>
+            where TResultGenerex : GenerexBase<T, TResultMatch, TResultGenerex, TResultGenerexMatch>
+            where TResultGenerexMatch : GenerexMatch<T>
+        {
+            return GenerexBase<T, TResultMatch, TResultGenerex, TResultGenerexMatch>.Constructor(
+
+                // forward matcher: very much like .then(), but with an extra helper to throw the exception if the expectation is not met
+                (input, startIndex) => _forwardMatcher(input, startIndex).SelectMany(m => thenExpectHelper(
+                        expectation._forwardMatcher(input, startIndex + getLength(m)),
+                        input, startIndex, m, exceptionGenerator, matchCombiner)),
+
+                // backward matcher: impossible
+                (input, startIndex) =>
+                {
+                    throw new InvalidOperationException("A Generex created by .ThenExpect() cannot match backwards (i.e., cannot be used in MatchReverse, IsMatchReverse, MatchesReverse, ReplaceReverse, AndReverse, or zero-width look-behind assertions).");
+                }
+            );
+        }
+
+        private IEnumerable<TResultMatch> thenExpectHelper<TOtherMatch, TResultMatch>(
+            IEnumerable<TOtherMatch> expectationMatches, T[] input, int startIndex, TMatch prevMatch,
+            Func<T[], int, TMatch, Exception> exceptionGenerator, Func<TMatch, TOtherMatch, TResultMatch> matchCombiner)
+        {
+            var prevLength = getLength(prevMatch);
+            using (var e = expectationMatches.GetEnumerator())
+            {
+                if (!e.MoveNext())
+                    throw exceptionGenerator(input, startIndex, prevMatch);
+                do
+                    yield return matchCombiner(prevMatch, e.Current);
+                while (e.MoveNext());
+            }
+        }
+
+        /// <summary>
         /// Returns a regular expression that matches this regular expression, then uses a specified <paramref name="selector"/> to
         /// create a new regular expression from the match, and then matches the new regular expression.
         /// </summary>
