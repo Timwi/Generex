@@ -73,6 +73,27 @@ namespace RT.Generexes
             return thenRaw<Generex<T, TOther>, GenerexMatch<T, TOther>, TOther, Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(other, selector);
         }
 
+        public Generex<T, TCombined> ThenExpect<TCombined>(Generex<T> other, Func<TResult, GenerexMatch<T>, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
+        {
+            return thenExpect<Generex<T>, int, GenerexMatch<T>, Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>>(other,
+                (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)),
+                (input, startIndex, m1, m2) => new LengthAndResult<TCombined>(selector(m1.Result, other.createMatch(input, startIndex, m2)), getLength(m1) + m2));
+        }
+
+        public Generex<T, TCombined> ThenExpect<TOther, TCombined>(Generex<T, TOther> other, Func<TResult, GenerexMatch<T, TOther>, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
+        {
+            return thenExpect<Generex<T, TOther>, LengthAndResult<TOther>, GenerexMatch<T, TOther>, Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>>(other,
+                (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)),
+                (input, startIndex, m1, m2) => new LengthAndResult<TCombined>(selector(m1.Result, other.createMatch(input, startIndex, m2)), getLength(m1) + other.getLength(m2)));
+        }
+
+        public Generex<T, TCombined> ThenExpectRaw<TOther, TCombined>(Generex<T, TOther> other, Func<TResult, TOther, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
+        {
+            return thenExpect<Generex<T, TOther>, LengthAndResult<TOther>, GenerexMatch<T, TOther>, Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>>(other,
+                (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)),
+                (input, startIndex, m1, m2) => new LengthAndResult<TCombined>(selector(m1.Result, m2.Result), getLength(m1) + other.getLength(m2)));
+        }
+
         /// <summary>
         /// Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf. <c>?</c> in traditional regular expression syntax).
         /// </summary>
