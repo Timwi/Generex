@@ -215,6 +215,14 @@ namespace RT.Generexes
             );
         }
 
+        public TOtherGenerex ThenExpect<TOtherGenerex, TOtherGenerexMatch, TResult>(GenerexWithResultBase<T, TResult, TOtherGenerex, TOtherGenerexMatch> other, Func<TGenerexMatch, Exception> exceptionGenerator)
+            where TOtherGenerex : GenerexWithResultBase<T, TResult, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T, TResult>
+        {
+            return thenExpect<TOtherGenerex, LengthAndResult<TResult>, TOtherGenerexMatch, TOtherGenerex, LengthAndResult<TResult>, TOtherGenerexMatch>(
+                other, (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)), (input, startIndex, m1, m2) => m2.Add(m1));
+        }
+
         /// <summary>
         /// Returns a regular expression that matches either this regular expression or the specified single element using the specified equality comparer (cf. <c>|</c> in traditional regular expression syntax).
         /// </summary>
