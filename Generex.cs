@@ -653,5 +653,21 @@ namespace RT.Generexes
                 return null;
             return match.Result;
         }
+
+        public static TResult? RawMatchNullable<TResult>(this Stringerex<TResult> stringerex, string input, int startAt = 0) where TResult : struct
+        {
+            var match = stringerex.Match(input, startAt);
+            if (match == null)
+                return null;
+            return match.Result;
+        }
+
+        public static TResult? RawMatchReverseNullable<TResult>(this Stringerex<TResult> stringerex, string input, int? endAt = null) where TResult : struct
+        {
+            var match = stringerex.MatchReverse(input, endAt);
+            if (match == null)
+                return null;
+            return match.Result;
+        }
     }
 }
