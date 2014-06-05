@@ -73,25 +73,69 @@ namespace RT.Generexes
             return thenRaw<Generex<T, TOther>, GenerexMatch<T, TOther>, TOther, Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(other, selector);
         }
 
-        public Generex<T, TCombined> ThenExpect<TCombined>(Generex<T> other, Func<TResult, GenerexMatch<T>, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression, then attempts to match the specified
+        /// other regular expression and throws an exception if the second regular expression fails to match;
+        /// otherwise, a match object is generated from the current match object and the second match.
+        /// </summary>
+        /// <typeparam name="TCombined">Type of the result object for the resulting regular expression.</typeparam>
+        /// <param name="expectation">The regular expression that is expected to match after the current one.</param>
+        /// <param name="selector">A selector which, in case of a match, generates the new result given the current result object and the match of the <paramref name="expectation"/>.</param>
+        /// <param name="exceptionGenerator">A selector which, in case of no match, generates the exception object to be thrown.</param>
+        /// <returns>The resulting regular expression.</returns>
+        /// <remarks>
+        /// Regular expressions created by this method cannot match backwards. The full set of affected methods is listed at
+        /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch, TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.
+        /// </remarks>
+        public Generex<T, TCombined> ThenExpect<TCombined>(Generex<T> expectation, Func<TResult, GenerexMatch<T>, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
         {
-            return thenExpect<Generex<T>, int, GenerexMatch<T>, Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>>(other,
+            return thenExpect<Generex<T>, int, GenerexMatch<T>, Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>>(expectation,
                 (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)),
-                (input, startIndex, m1, m2) => new LengthAndResult<TCombined>(selector(m1.Result, other.createMatch(input, startIndex, m2)), getLength(m1) + m2));
+                (input, startIndex, m1, m2) => new LengthAndResult<TCombined>(selector(m1.Result, expectation.createMatch(input, startIndex, m2)), getLength(m1) + m2));
         }
 
-        public Generex<T, TCombined> ThenExpect<TOther, TCombined>(Generex<T, TOther> other, Func<TResult, GenerexMatch<T, TOther>, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression, then attempts to match the specified
+        /// other regular expression and throws an exception if the second regular expression fails to match;
+        /// otherwise, a match object is generated from the current match object and the second match.
+        /// </summary>
+        /// <typeparam name="TOther">Type of the result object of the <paramref name="expectation"/>.</typeparam>
+        /// <typeparam name="TCombined">Type of the result object for the resulting regular expression.</typeparam>
+        /// <param name="expectation">The regular expression that is expected to match after the current one.</param>
+        /// <param name="selector">A selector which, in case of a match, generates the new result given the current result object and the match of the <paramref name="expectation"/>.</param>
+        /// <param name="exceptionGenerator">A selector which, in case of no match, generates the exception object to be thrown.</param>
+        /// <returns>The resulting regular expression.</returns>
+        /// <remarks>
+        /// Regular expressions created by this method cannot match backwards. The full set of affected methods is listed at
+        /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch, TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.
+        /// </remarks>
+        public Generex<T, TCombined> ThenExpect<TOther, TCombined>(Generex<T, TOther> expectation, Func<TResult, GenerexMatch<T, TOther>, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
         {
-            return thenExpect<Generex<T, TOther>, LengthAndResult<TOther>, GenerexMatch<T, TOther>, Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>>(other,
+            return thenExpect<Generex<T, TOther>, LengthAndResult<TOther>, GenerexMatch<T, TOther>, Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>>(expectation,
                 (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)),
-                (input, startIndex, m1, m2) => new LengthAndResult<TCombined>(selector(m1.Result, other.createMatch(input, startIndex, m2)), getLength(m1) + other.getLength(m2)));
+                (input, startIndex, m1, m2) => new LengthAndResult<TCombined>(selector(m1.Result, expectation.createMatch(input, startIndex, m2)), getLength(m1) + expectation.getLength(m2)));
         }
 
-        public Generex<T, TCombined> ThenExpectRaw<TOther, TCombined>(Generex<T, TOther> other, Func<TResult, TOther, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression, then attempts to match the specified
+        /// other regular expression and throws an exception if the second regular expression fails to match;
+        /// otherwise, a match object is generated from the match objects of the two matches.
+        /// </summary>
+        /// <typeparam name="TOther">Type of the result object of the <paramref name="expectation"/>.</typeparam>
+        /// <typeparam name="TCombined">Type of the result object for the resulting regular expression.</typeparam>
+        /// <param name="expectation">The regular expression that is expected to match after the current one.</param>
+        /// <param name="selector">A selector which, in case of a match, generates the new result given the current result and the result object of the match of the <paramref name="expectation"/>.</param>
+        /// <param name="exceptionGenerator">A selector which, in case of no match, generates the exception object to be thrown.</param>
+        /// <returns>The resulting regular expression.</returns>
+        /// <remarks>
+        /// Regular expressions created by this method cannot match backwards. The full set of affected methods is listed at
+        /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch, TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.
+        /// </remarks>
+        public Generex<T, TCombined> ThenExpectRaw<TOther, TCombined>(Generex<T, TOther> expectation, Func<TResult, TOther, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
         {
-            return thenExpect<Generex<T, TOther>, LengthAndResult<TOther>, GenerexMatch<T, TOther>, Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>>(other,
+            return thenExpect<Generex<T, TOther>, LengthAndResult<TOther>, GenerexMatch<T, TOther>, Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>>(expectation,
                 (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)),
-                (input, startIndex, m1, m2) => new LengthAndResult<TCombined>(selector(m1.Result, m2.Result), getLength(m1) + other.getLength(m2)));
+                (input, startIndex, m1, m2) => new LengthAndResult<TCombined>(selector(m1.Result, m2.Result), getLength(m1) + expectation.getLength(m2)));
         }
 
         /// <summary>

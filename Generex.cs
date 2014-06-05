@@ -395,7 +395,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="generex">The current regular expression.</param>
         /// <param name="selector">A delegate that creates a new regular expression from the result of a match of the current regular expression.</param>
-        /// <returns>The combined regular expression.</returns>
+        /// <returns>The resulting regular expression.</returns>
         /// <remarks>
         /// Regular expressions created by this method cannot match backwards. The full set of affected methods is listed at
         /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch, TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.
@@ -413,7 +413,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="generex">The current regular expression.</param>
         /// <param name="selector">A delegate that creates a new regular expression from the result of a match of the current regular expression.</param>
-        /// <returns>The combined regular expression.</returns>
+        /// <returns>The resulting regular expression.</returns>
         /// <remarks>
         /// Regular expressions created by this method cannot match backwards. The full set of affected methods is listed at
         /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch, TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.
@@ -431,7 +431,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="generex">The current regular expression.</param>
         /// <param name="selector">A delegate that creates a new regular expression from a match of the current regular expression.</param>
-        /// <returns>The combined regular expression.</returns>
+        /// <returns>The resulting regular expression.</returns>
         /// <remarks>
         /// Regular expressions created by this method cannot match backwards. The full set of affected methods is listed at
         /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch, TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.
@@ -450,7 +450,7 @@ namespace RT.Generexes
         /// </summary>
         /// <param name="generex">The current regular expression.</param>
         /// <param name="selector">A delegate that creates a new regular expression from the result of a match of the current regular expression.</param>
-        /// <returns>The combined regular expression.</returns>
+        /// <returns>The resulting regular expression.</returns>
         /// <remarks>
         /// Regular expressions created by this method cannot match backwards. The full set of affected methods is listed at
         /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch, TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.
@@ -638,6 +638,14 @@ namespace RT.Generexes
             return Generex.Ors(generex, new Generex<T>().Throw<TResult>(exceptionGenerator)).Atomic();
         }
 
+        /// <summary>
+        /// Determines whether the given input sequence matches this regular expression, and if so, returns the result of the first match;
+        /// otherwise, returns <c>null</c>.
+        /// </summary>
+        /// <param name="generex">The current regular expression.</param>
+        /// <param name="input">Input sequence to match the regular expression against.</param>
+        /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
+        /// <returns>The result of the first match in case of success; <c>null</c> if no match.</returns>
         public static TResult? RawMatchNullable<T, TResult>(this Generex<T, TResult> generex, T[] input, int startAt = 0) where TResult : struct
         {
             var match = generex.Match(input, startAt);
@@ -646,6 +654,14 @@ namespace RT.Generexes
             return match.Result;
         }
 
+        /// <summary>
+        /// Determines whether the given input sequence matches this regular expression, and if so, returns the result of the first match
+        /// found by matching the regular expression backwards; otherwise, returns <c>null</c>.
+        /// </summary>
+        /// <param name="generex">The current regular expression.</param>
+        /// <param name="input">Input sequence to match the regular expression against.</param>
+        /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included. (Default is the end of the input sequence.)</param>
+        /// <returns>The result of the match in case of success; <c>null</c> if no match.</returns>
         public static TResult? RawMatchReverseNullable<T, TResult>(this Generex<T, TResult> generex, T[] input, int? endAt = null) where TResult : struct
         {
             var match = generex.MatchReverse(input, endAt);
@@ -654,6 +670,14 @@ namespace RT.Generexes
             return match.Result;
         }
 
+        /// <summary>
+        /// Determines whether the given input string matches this regular expression, and if so, returns the result of the first match;
+        /// otherwise, returns <c>null</c>.
+        /// </summary>
+        /// <param name="stringerex">The current regular expression.</param>
+        /// <param name="input">Input string to match the regular expression against.</param>
+        /// <param name="startAt">Optional index at which to start the search. Matches that start before this index are not included.</param>
+        /// <returns>The result of the first match in case of success; <c>null</c> if no match.</returns>
         public static TResult? RawMatchNullable<TResult>(this Stringerex<TResult> stringerex, string input, int startAt = 0) where TResult : struct
         {
             var match = stringerex.Match(input, startAt);
@@ -662,6 +686,14 @@ namespace RT.Generexes
             return match.Result;
         }
 
+        /// <summary>
+        /// Determines whether the given input string matches this regular expression, and if so, returns the result of the first match
+        /// found by matching the regular expression backwards; otherwise, returns <c>null</c>.
+        /// </summary>
+        /// <param name="stringerex">The current regular expression.</param>
+        /// <param name="input">Input string to match the regular expression against.</param>
+        /// <param name="endAt">Optional index at which to end the search. Matches that end at or after this index are not included. (Default is the end of the input string.)</param>
+        /// <returns>The result of the match in case of success; <c>null</c> if no match.</returns>
         public static TResult? RawMatchReverseNullable<TResult>(this Stringerex<TResult> stringerex, string input, int? endAt = null) where TResult : struct
         {
             var match = stringerex.MatchReverse(input, endAt);

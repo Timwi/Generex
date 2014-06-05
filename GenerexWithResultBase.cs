@@ -167,7 +167,7 @@ namespace RT.Generexes
         /// create a new regular expression from the match, then matches the new regular expression and retains the result object from the first match.
         /// </summary>
         /// <param name="selector">A delegate that creates a new regular expression from a match of the current regular expression.</param>
-        /// <returns>The combined regular expression.</returns>
+        /// <returns>The resulting regular expression.</returns>
         /// <remarks>
         /// Regular expressions created by this method cannot match backwards. The full set of affected methods is listed at
         /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch, TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.
@@ -204,7 +204,7 @@ namespace RT.Generexes
         /// <typeparam name="TOtherMatch">Type of internal match information used by <typeparamref name="TOtherGenerex"/> (i.e. <c>int</c> or <c>LengthAndResult&lt;T&gt;</c>).</typeparam>
         /// <typeparam name="TOtherGenerexMatch">Type of match object returned by matches of <typeparamref name="TOtherGenerex"/>.</typeparam>
         /// <param name="selector">A delegate that creates a new regular expression from the result of a match of the current regular expression.</param>
-        /// <returns>The combined regular expression.</returns>
+        /// <returns>The resulting regular expression.</returns>
         /// <remarks>
         /// Regular expressions created by this method cannot match backwards. The full set of affected methods is listed at
         /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch, TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.
@@ -222,7 +222,7 @@ namespace RT.Generexes
         /// and retains the result object from the first match.
         /// </summary>
         /// <param name="selector">A delegate that creates a new regular expression from the result of a match of the current regular expression.</param>
-        /// <returns>The combined regular expression.</returns>
+        /// <returns>The resulting regular expression.</returns>
         /// <remarks>
         /// Regular expressions created by this method cannot match backwards. The full set of affected methods is listed at
         /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch, TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.
@@ -230,14 +230,6 @@ namespace RT.Generexes
         public Generex<T, TResult> ThenResultRaw(Func<TResult, Generex<T>> selector)
         {
             return then<Generex<T, TResult>, LengthAndResult<TResult>, GenerexMatch<T, TResult>, TResult>(m => selector(m).Process(_ => m), (input, startIndex, match) => match.Result);
-        }
-
-        public TGenerex ThenExpect<TOtherGenerex, TOtherGenerexMatch>(GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch> other, Func<TGenerexMatch, Exception> exceptionGenerator)
-            where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
-            where TOtherGenerexMatch : GenerexMatch<T>
-        {
-            return thenExpect<TOtherGenerex, int, TOtherGenerexMatch, TGenerex, LengthAndResult<TResult>, TGenerexMatch>(
-                other, (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)), (input, startIndex, m1, m2) => m1.Add(m2));
         }
 
         /// <summary>

@@ -215,12 +215,26 @@ namespace RT.Generexes
             );
         }
 
-        public TOtherGenerex ThenExpect<TOtherGenerex, TOtherGenerexMatch, TOtherResult>(GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch> other, Func<TGenerexMatch, Exception> exceptionGenerator)
+        /// <summary>
+        /// Returns a regular expression that matches this regular expression, then attempts to match the specified
+        /// other regular expression and throws an exception if the second regular expression fails to match.
+        /// </summary>
+        /// <typeparam name="TOtherGenerex">The type of <paramref name="expectation"/>. (This is either <see cref="Generex{T,TResult}"/> or <see cref="Stringerex{TResult}"/>.)</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">The type of the match object <paramref name="expectation"/>. (This is either <see cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
+        /// <typeparam name="TOtherResult">The type of the result object associated with each match of <paramref name="expectation"/>.</typeparam>
+        /// <param name="expectation">The regular expression that is expected to match after the current one.</param>
+        /// <param name="exceptionGenerator">A selector which, in case of no match, generates the exception object to be thrown.</param>
+        /// <returns>The resulting regular expression.</returns>
+        /// <remarks>
+        /// Regular expressions created by this method cannot match backwards. The full set of affected methods is listed at
+        /// <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch, TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.
+        /// </remarks>
+        public TOtherGenerex ThenExpect<TOtherGenerex, TOtherGenerexMatch, TOtherResult>(GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch> expectation, Func<TGenerexMatch, Exception> exceptionGenerator)
             where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T, TOtherResult>
         {
             return thenExpect<TOtherGenerex, LengthAndResult<TOtherResult>, TOtherGenerexMatch, TOtherGenerex, LengthAndResult<TOtherResult>, TOtherGenerexMatch>(
-                other, (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)), (input, startIndex, m1, m2) => m2.Add(m1));
+                expectation, (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)), (input, startIndex, m1, m2) => m2.Add(m1));
         }
 
         /// <summary>
