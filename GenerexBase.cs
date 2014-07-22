@@ -570,9 +570,9 @@ namespace RT.Generexes
         ///             <see cref="Generex.ThenResultRaw{TResult, TGenerex,
         ///             TGenerexMatch}(GenerexWithResultBase{char,TResult,TGenerex,TGenerexMatch},Func{TResult,Stringerex})"/></description></item>
         ///         <item><description>
-        ///             all overloads of <c>ThenExpect</c> and <c>ThenExpectRaw</c>, including the protected <see cref="Genere
-        ///             xBase{T,TMatch,TGenerex,TGenerexMatch}.thenExpect{TOtherGenerex,TOtherMatch,TOtherGenerexMatch,TCombin
-        ///             edGenerex,TCombinedMatch,TCombinedGenerexMatch}"/>.</description></item></list></remarks>
+        ///             all overloads of <c>ThenExpect</c> and <c>ThenExpectRaw</c>, including the protected <see
+        ///             cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.thenExpect{TOtherGenerex, TOtherMatch,
+        ///             TOtherGenerexMatch, TCombinedGenerex, TCombinedMatch, TCombinedGenerexMatch}"/>.</description></item></list></remarks>
         public TOtherGenerex Then<TOtherGenerex, TOtherMatch, TOtherGenerexMatch>(Func<TGenerexMatch, GenerexBase<T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch>> selector)
             where TOtherGenerex : GenerexBase<T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T>
@@ -768,6 +768,24 @@ namespace RT.Generexes
         public TGenerex ThenExpect(Predicate<T> predicate, Func<TGenerexMatch, Exception> exceptionGenerator)
         {
             return ThenExpect(new Generex<T>(predicate), exceptionGenerator);
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches this regular expression, then attempts to match a single element and
+        ///     throws an exception if that element fails to match.</summary>
+        /// <param name="element">
+        ///     The element that is expected to match after the current regular expression.</param>
+        /// <param name="exceptionGenerator">
+        ///     A selector which, in case of no match, generates the exception object to be thrown.</param>
+        /// <returns>
+        ///     The resulting regular expression.</returns>
+        /// <remarks>
+        ///     Regular expressions created by this method cannot match backwards. The full set of affected methods is listed
+        ///     at <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch,
+        ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
+        public TGenerex ThenExpect(T element, Func<TGenerexMatch, Exception> exceptionGenerator)
+        {
+            return ThenExpect(new Generex<T>(element), exceptionGenerator);
         }
 
         /// <summary>
