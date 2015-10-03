@@ -435,19 +435,7 @@ namespace RT.Generexes
         ///     Executes the specified code every time the regular expression engine encounters this expression. The return
         ///     value of the specified code determines whether the expression matches successfully (all matches are
         ///     zero-length).</summary>
-        public TGenerex DoRaw(Func<bool> code)
-        {
-            return Constructor(
-                (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => code()),
-                (input, startIndex) => _backwardMatcher(input, startIndex).Where(m => code())
-            );
-        }
-
-        /// <summary>
-        ///     Executes the specified code every time the regular expression engine encounters this expression. The return
-        ///     value of the specified code determines whether the expression matches successfully (all matches are
-        ///     zero-length).</summary>
-        public TGenerex DoRaw(Func<TResult, bool> code)
+        public TGenerex WhereRaw(Func<TResult, bool> code)
         {
             return Constructor(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => code(m.Result)),

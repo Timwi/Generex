@@ -957,17 +957,6 @@ namespace RT.Generexes
         /// <summary>
         ///     Executes the specified code every time the regular expression engine encounters this expression. (This always
         ///     matches successfully and all matches are zero-length.)</summary>
-        public TGenerex Do(Action code)
-        {
-            return Constructor(
-                (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => { code(); return m; }),
-                (input, startIndex) => _backwardMatcher(input, startIndex).Select(m => { code(); return m; })
-            );
-        }
-
-        /// <summary>
-        ///     Executes the specified code every time the regular expression engine encounters this expression. (This always
-        ///     matches successfully and all matches are zero-length.)</summary>
         /// <example>
         ///     <para>
         ///         You can use this to capture the match from a subexpression:</para>
@@ -988,19 +977,7 @@ namespace RT.Generexes
         ///     Executes the specified code every time the regular expression engine encounters this expression. The return
         ///     value of the specified code determines whether the expression matches successfully (all matches are
         ///     zero-length).</summary>
-        public TGenerex Do(Func<bool> code)
-        {
-            return Constructor(
-                (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => code()),
-                (input, startIndex) => _backwardMatcher(input, startIndex).Where(m => code())
-            );
-        }
-
-        /// <summary>
-        ///     Executes the specified code every time the regular expression engine encounters this expression. The return
-        ///     value of the specified code determines whether the expression matches successfully (all matches are
-        ///     zero-length).</summary>
-        public TGenerex Do(Func<TGenerexMatch, bool> code)
+        public TGenerex Where(Func<TGenerexMatch, bool> code)
         {
             return Constructor(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Where(m => code(createMatch(input, startIndex, m))),

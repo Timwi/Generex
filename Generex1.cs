@@ -58,8 +58,6 @@ namespace RT.Generexes
         private Generex(matcher forward, matcher backward) : base(forward, backward) { }
         static Generex() { Constructor = (forward, backward) => new Generex<T>(forward, backward); }
 
-        /// <summary>Implicitly converts an element into a regular expression that matches just that element.</summary>
-        public static implicit operator Generex<T>(T element) { return new Generex<T>(element); }
         /// <summary>
         ///     Implicitly converts a predicate into a regular expression that matches a single element satisfying the
         ///     predicate.</summary>
@@ -83,6 +81,21 @@ namespace RT.Generexes
         public Generex<T, TResult> Throw<TResult>(Func<GenerexMatch<T>, Exception> exceptionGenerator)
         {
             return Process<TResult>(m => { throw exceptionGenerator(m); });
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches a single object of the specified type.</summary>
+        /// <typeparam name="TResult">
+        ///     The type of object to match.</typeparam>
+        /// <example>
+        ///     <para>
+        ///         The following example code creates a regular expression that matches, within a collection of Animal
+        ///         objects, an object of type Giraffe.</para>
+        ///     <code>
+        ///         var regex = Generex&lt;Animal&gt;.Any&lt;Giraffe&gt;()</code></example>
+        public static Generex<T, TResult> AnyOfType<TResult>() where TResult : T
+        {
+            return new Generex<T>(obj => obj is TResult).Process(obj => (TResult) obj.Match[0]);
         }
     }
 }

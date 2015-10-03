@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace RT.Generexes
@@ -42,6 +43,28 @@ namespace RT.Generexes
         ///     Instantiates a regular expression that matches a single character that satisfies the given predicate (cf.
         ///     <c>[...]</c> in traditional regular expression syntax).</summary>
         public Stringerex(Predicate<char> predicate) : base(predicate) { }
+
+        /// <summary>
+        ///     Instantiates a regular expression that matches a single Unicode character according to a predicate that takes
+        ///     a string and index, such as <c>char.IsWhiteSpace</c> (cf. <c>[...]</c> in traditional regular expression
+        ///     syntax).</summary>
+        public Stringerex(Func<string, int, bool> charPredicate)
+            : base(
+                (input, startIndex) =>
+                    startIndex == input.Length ? Generex.NoMatch :
+                    startIndex == input.Length - 1 ? (charPredicate(input[startIndex].ToString(), 0) ? Generex.OneElementMatch : Generex.NoMatch) :
+                    charPredicate(input[startIndex].ToString() + input[startIndex + 1], 0) ? new[] { char.IsSurrogate(input[startIndex]) ? 2 : 1 } : Generex.NoMatch,
+                (input, startIndex) =>
+                    startIndex == 0 ? Generex.NoMatch :
+                    startIndex == 1 ? (charPredicate(input[0].ToString(), 0) ? Generex.OneElementMatch : Generex.NoMatch) :
+                    charPredicate(input[startIndex - 2].ToString() + input[startIndex - 1], 0) ? new[] { char.IsSurrogate(input[startIndex - 2]) ? 2 : 1 } : Generex.NoMatch
+            ) { }
+
+        /// <summary>
+        ///     Instantiates a regular expression that matches a single Unicode character of a specific Unicode character (cf.
+        ///     <c>[...]</c> in traditional regular expression syntax).</summary>
+        public Stringerex(UnicodeCategory category)
+            : this((s, i) => char.GetUnicodeCategory(s, i) == category) { }
 
         /// <summary>Instantiates a regular expression that matches a sequence of consecutive regular expressions.</summary>
         public Stringerex(params Stringerex[] generexSequence)
