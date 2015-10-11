@@ -19,6 +19,8 @@ namespace RT.Generexes
         where TGenerex : GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch>
         where TGenerexMatch : GenerexMatch<T, TResult>
     {
+        /// <summary>Returns a collection containing a zero-width match with the default value for the result object.</summary>
+        protected sealed override IEnumerable<LengthAndResult<TResult>> getZeroWidthMatch() { return new[] { new LengthAndResult<TResult>(default(TResult), 0) }; }
         /// <summary>Retrieves the length of the specified <paramref name="match"/>.</summary>
         protected sealed override int getLength(LengthAndResult<TResult> match) { return match.Length; }
         /// <summary>
@@ -273,6 +275,30 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, then uses a specified <paramref
+        ///     name="selector"/> to create a new regular expression from the match; then attempts to match the new regular
+        ///     expression and throws an exception if that regular expression fails to match. This regular expression’s result
+        ///     object remains unaltered.</summary>
+        /// <param name="selector">
+        ///     The selector that generates a new regular expression, which is expected to match after the current one.</param>
+        /// <param name="exceptionGenerator">
+        ///     A selector which, in case of no match, generates the exception object to be thrown.</param>
+        /// <returns>
+        ///     The resulting regular expression.</returns>
+        /// <remarks>
+        ///     Regular expressions created by this method cannot match backwards. The full set of affected methods is listed
+        ///     at <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch,
+        ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
+        public TGenerex ThenExpect<TOtherGenerex, TOtherGenerexMatch>(Func<TGenerexMatch, GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>> selector, Func<TGenerexMatch, Exception> exceptionGenerator)
+            where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T>
+        {
+            var zeroWidthMatch = getZeroWidthMatch();
+            matcher zeroWidthMatcher = (index, startIndex) => zeroWidthMatch;
+            return Then(m => Constructor(zeroWidthMatcher, zeroWidthMatcher).ThenExpect(selector(m), _ => exceptionGenerator(m)).processRaw<TGenerex, TGenerexMatch, TResult>(_ => m.Result));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches this regular expression, then uses a specified <paramref
         ///     name="selector"/> to create a new regular expression from the result object; then attempts to match the new
         ///     regular expression and throws an exception if that regular expression fails to match. This regular
         ///     expression’s result object remains unaltered.</summary>
@@ -290,16 +316,16 @@ namespace RT.Generexes
             where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T>
         {
-            var zeroWidthMatch = new[] { new LengthAndResult<TResult>(default(TResult), 0) };
+            var zeroWidthMatch = getZeroWidthMatch();
             matcher zeroWidthMatcher = (input, startIndex) => zeroWidthMatch;
-            return ThenRaw(result => Constructor(zeroWidthMatcher, zeroWidthMatcher).ThenExpect(selector(result), _ => exceptionGenerator(result)));
+            return ThenRaw(result => Constructor(zeroWidthMatcher, zeroWidthMatcher).ThenExpect(selector(result), _ => exceptionGenerator(result)).processRaw<TGenerex, TGenerexMatch, TResult>(_ => result));
         }
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, then uses a specified <paramref
         ///     name="selector"/> to create a new regular expression from the result object; then attempts to match the new
         ///     regular expression and throws an exception if that regular expression fails to match. The new regular
-        ///     expression’s result object replaces this one’s.</summary>
+        ///     expression’s result object replaces the current one’s.</summary>
         /// <typeparam name="TOtherResult">
         ///     The type of the result object returned by the new regular expression.</typeparam>
         /// <param name="selector">
@@ -322,7 +348,7 @@ namespace RT.Generexes
             matcher zeroWidthMatcher = (input, startIndex) => zeroWidthMatch;
             return ThenRaw(result => Constructor(zeroWidthMatcher, zeroWidthMatcher)
                 .thenExpect<TOtherGenerex, LengthAndResult<TOtherResult>, TOtherGenerexMatch, TOtherGenerex, LengthAndResult<TOtherResult>, TOtherGenerexMatch>(
-                    selector(result), (input, startIndex, match) => exceptionGenerator(match.Result), (input, startIndex, m1, m2) => m2));
+                    selector(result), (input, startIndex, match) => exceptionGenerator(match.Result), (input, startIndex, m1, m2) => m2.Add(m1.Length)));
         }
 
         /// <summary>
