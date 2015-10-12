@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generex", "Src\Generex.csproj", "{AD37F193-49A3-4A3D-8BF1-122D5457C7A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerexTests", "Tests\GenerexTests.csproj", "{D03FD04B-23A0-430F-B9C2-FFBC199838A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitDirect", "..\NUnitDirect\Src\NUnitDirect.csproj", "{275ECB9D-F75E-45F8-BB34-AD122589D2CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +17,14 @@ Global
 		{AD37F193-49A3-4A3D-8BF1-122D5457C7A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD37F193-49A3-4A3D-8BF1-122D5457C7A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD37F193-49A3-4A3D-8BF1-122D5457C7A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D03FD04B-23A0-430F-B9C2-FFBC199838A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D03FD04B-23A0-430F-B9C2-FFBC199838A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D03FD04B-23A0-430F-B9C2-FFBC199838A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D03FD04B-23A0-430F-B9C2-FFBC199838A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{275ECB9D-F75E-45F8-BB34-AD122589D2CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{275ECB9D-F75E-45F8-BB34-AD122589D2CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{275ECB9D-F75E-45F8-BB34-AD122589D2CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{275ECB9D-F75E-45F8-BB34-AD122589D2CC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
