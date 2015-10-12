@@ -140,6 +140,11 @@ namespace RT.Generexes
         ///     The elements to match.</param>
         public static Generex<T> InAnyOrder<T>(IEqualityComparer<T> comparer, params T[] elements)
         {
+            if (comparer == null)
+                throw new ArgumentNullException("comparer");
+            if (elements == null)
+                throw new ArgumentNullException("elements");
+
             return InAnyOrder<T>(elements.Select(elem => new Generex<T>(comparer, elem)).ToArray());
         }
 
@@ -151,7 +156,7 @@ namespace RT.Generexes
         ///     The regular expressions to match.</param>
         public static Generex<T> InAnyOrder<T>(params Generex<T>[] generexes)
         {
-            if (generexes == null)
+            if (generexes == null || generexes.Contains(null))
                 throw new ArgumentNullException("generexes");
 
             return InAnyOrder<Generex<T>, Generex<T>>(
@@ -171,7 +176,7 @@ namespace RT.Generexes
         ///     The regular expressions to match.</param>
         public static Generex<T, IEnumerable<TResult>> InAnyOrder<T, TResult>(params Generex<T, TResult>[] generexes)
         {
-            if (generexes == null)
+            if (generexes == null || generexes.Contains(null))
                 throw new ArgumentNullException("generexes");
 
             return InAnyOrder<Generex<T, TResult>, Generex<T, IEnumerable<TResult>>>(
@@ -179,6 +184,21 @@ namespace RT.Generexes
                 orer: (one, two) => one.Or(two),
                 constructor: () => new Generex<T, IEnumerable<TResult>>(Enumerable.Empty<TResult>()),
                 generexes: generexes);
+        }
+
+        /// <summary>
+        ///     Generates a regular expression that matches the specified regular expressions in any order.</summary>
+        /// <typeparam name="T">
+        ///     Type of the elements to match.</typeparam>
+        /// <typeparam name="TResult">
+        ///     Type of the result object associated with each match of the regular expression.</typeparam>
+        /// <param name="generexes">
+        ///     The regular expressions to match.</param>
+        public static Generex<T, IEnumerable<TResult>> InAnyOrder<T, TResult>(IEnumerable<Generex<T, TResult>> generexes)
+        {
+            if (generexes == null)
+                throw new ArgumentNullException("generexes");
+            return InAnyOrder<T, TResult>(generexes.ToArray());
         }
 
         internal static TResultGenerex InAnyOrder<TInputGenerex, TResultGenerex>(
@@ -553,90 +573,6 @@ namespace RT.Generexes
         public static Generex<T, TResult> CreateRecursiveGenerex<T, TResult>(this T[] input, TResult example, Func<Generex<T, TResult>, Generex<T, TResult>> generator) { return Generex.Recursive<T, TResult>(generator); }
 
         /// <summary>
-        ///     Returns a regular expression that matches this regular expression, then uses a specified <paramref
-        ///     name="selector"/> to create a new regular expression from the result of the match, and then matches the new
-        ///     regular expression.</summary>
-        /// <param name="generex">
-        ///     The current regular expression.</param>
-        /// <param name="selector">
-        ///     A delegate that creates a new regular expression from the result of a match of the current regular expression.</param>
-        /// <returns>
-        ///     The resulting regular expression.</returns>
-        /// <remarks>
-        ///     Regular expressions created by this method cannot match backwards. The full set of affected methods is listed
-        ///     at <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch,
-        ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
-        public static Stringerex ThenRaw<TResult, TGenerex, TGenerexMatch>(this GenerexWithResultBase<char, TResult, TGenerex, TGenerexMatch> generex, Func<TGenerexMatch, Stringerex> selector)
-            where TGenerex : GenerexWithResultBase<char, TResult, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<char, TResult>
-        {
-            return generex.Then<Stringerex, int, StringerexMatch>(selector);
-        }
-
-        /// <summary>
-        ///     Returns a regular expression that matches this regular expression, then uses a specified <paramref
-        ///     name="selector"/> to create a new regular expression from the result of the match, and then matches the new
-        ///     regular expression.</summary>
-        /// <param name="generex">
-        ///     The current regular expression.</param>
-        /// <param name="selector">
-        ///     A delegate that creates a new regular expression from the result of a match of the current regular expression.</param>
-        /// <returns>
-        ///     The resulting regular expression.</returns>
-        /// <remarks>
-        ///     Regular expressions created by this method cannot match backwards. The full set of affected methods is listed
-        ///     at <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch,
-        ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
-        public static Stringerex<TOtherResult> ThenRaw<TResult, TGenerex, TGenerexMatch, TOtherResult>(this GenerexWithResultBase<char, TResult, TGenerex, TGenerexMatch> generex, Func<TGenerexMatch, Stringerex<TOtherResult>> selector)
-            where TGenerex : GenerexWithResultBase<char, TResult, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<char, TResult>
-        {
-            return generex.Then<Stringerex<TOtherResult>, LengthAndResult<TOtherResult>, StringerexMatch<TOtherResult>>(selector);
-        }
-
-        /// <summary>
-        ///     Returns a regular expression that matches this regular expression, then uses a specified <paramref
-        ///     name="selector"/> to create a new regular expression from the match, then matches the new regular expression
-        ///     and retains the result object from the first match.</summary>
-        /// <param name="generex">
-        ///     The current regular expression.</param>
-        /// <param name="selector">
-        ///     A delegate that creates a new regular expression from a match of the current regular expression.</param>
-        /// <returns>
-        ///     The resulting regular expression.</returns>
-        /// <remarks>
-        ///     Regular expressions created by this method cannot match backwards. The full set of affected methods is listed
-        ///     at <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch,
-        ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
-        public static Stringerex<TResult> ThenResult<TResult, TGenerex, TGenerexMatch>(this GenerexWithResultBase<char, TResult, TGenerex, TGenerexMatch> generex, Func<TGenerexMatch, Stringerex> selector)
-            where TGenerex : GenerexWithResultBase<char, TResult, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<char, TResult>
-        {
-            return generex.then<Stringerex<TResult>, LengthAndResult<TResult>, StringerexMatch<TResult>, TGenerexMatch>(m => selector(m).Process(_ => m.Result), generex.createMatch);
-        }
-
-        /// <summary>
-        ///     Returns a regular expression that matches this regular expression, then uses a specified <paramref
-        ///     name="selector"/> to create a new regular expression from the result of the match, then matches the new
-        ///     regular expression and retains the result object from the first match.</summary>
-        /// <param name="generex">
-        ///     The current regular expression.</param>
-        /// <param name="selector">
-        ///     A delegate that creates a new regular expression from the result of a match of the current regular expression.</param>
-        /// <returns>
-        ///     The resulting regular expression.</returns>
-        /// <remarks>
-        ///     Regular expressions created by this method cannot match backwards. The full set of affected methods is listed
-        ///     at <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch,
-        ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
-        public static Stringerex<TResult> ThenResultRaw<TResult, TGenerex, TGenerexMatch>(this GenerexWithResultBase<char, TResult, TGenerex, TGenerexMatch> generex, Func<TResult, Stringerex> selector)
-            where TGenerex : GenerexWithResultBase<char, TResult, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<char, TResult>
-        {
-            return generex.then<Stringerex<TResult>, LengthAndResult<TResult>, StringerexMatch<TResult>, TResult>(m => selector(m).Process(_ => m), (input, startIndex, match) => match.Result);
-        }
-
-        /// <summary>
         ///     Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf.
         ///     <c>?</c> in traditional regular expression syntax).</summary>
         /// <typeparam name="T">
@@ -649,6 +585,8 @@ namespace RT.Generexes
         ///     A regular expression whose result object is a nullable version of the original result object.</returns>
         public static Generex<T, TResult?> OrNullGreedy<T, TResult>(this Generex<T, TResult> inner) where TResult : struct
         {
+            if (inner == null)
+                throw new ArgumentNullException("inner");
             return inner.ProcessRaw(result => (TResult?) result).Or(new Generex<T, TResult?>(null));
         }
 
@@ -665,6 +603,8 @@ namespace RT.Generexes
         ///     A regular expression whose result object is the original result object or <c>default(TResult)</c>.</returns>
         public static Generex<T, TResult> OrDefaultGreedy<T, TResult>(this Generex<T, TResult> inner)
         {
+            if (inner == null)
+                throw new ArgumentNullException("inner");
             return inner.Or(new Generex<T, TResult>(default(TResult)));
         }
 
@@ -679,6 +619,8 @@ namespace RT.Generexes
         ///     A regular expression whose result object is a nullable version of the original result object.</returns>
         public static Stringerex<TResult?> OrNullGreedy<TResult>(this Stringerex<TResult> inner) where TResult : struct
         {
+            if (inner == null)
+                throw new ArgumentNullException("inner");
             return inner.ProcessRaw(result => (TResult?) result).Or(new Stringerex<TResult?>(null));
         }
 
@@ -693,6 +635,8 @@ namespace RT.Generexes
         ///     A regular expression whose result object is the original result object or <c>default(TResult)</c>.</returns>
         public static Stringerex<TResult> OrDefaultGreedy<TResult>(this Stringerex<TResult> inner)
         {
+            if (inner == null)
+                throw new ArgumentNullException("inner");
             return inner.Or(new Stringerex<TResult>(default(TResult)));
         }
 
@@ -709,6 +653,8 @@ namespace RT.Generexes
         ///     A regular expression whose result object is a nullable version of the original result object.</returns>
         public static Generex<T, TResult?> OrNull<T, TResult>(this Generex<T, TResult> inner) where TResult : struct
         {
+            if (inner == null)
+                throw new ArgumentNullException("inner");
             return new Generex<T, TResult?>(null).Or(inner.ProcessRaw(result => (TResult?) result));
         }
 
@@ -725,6 +671,8 @@ namespace RT.Generexes
         ///     A regular expression whose result object is the original result object or <c>default(TResult)</c>.</returns>
         public static Generex<T, TResult> OrDefault<T, TResult>(this Generex<T, TResult> inner)
         {
+            if (inner == null)
+                throw new ArgumentNullException("inner");
             return new Generex<T, TResult>(default(TResult)).Or(inner);
         }
 
@@ -739,6 +687,8 @@ namespace RT.Generexes
         ///     A regular expression whose result object is a nullable version of the original result object.</returns>
         public static Stringerex<TResult?> OrNull<TResult>(this Stringerex<TResult> inner) where TResult : struct
         {
+            if (inner == null)
+                throw new ArgumentNullException("inner");
             return new Stringerex<TResult?>(null).Or(inner.ProcessRaw(result => (TResult?) result));
         }
 
@@ -753,6 +703,8 @@ namespace RT.Generexes
         ///     A regular expression whose result object is the original result object or <c>default(TResult)</c>.</returns>
         public static Stringerex<TResult> OrDefault<TResult>(this Stringerex<TResult> inner)
         {
+            if (inner == null)
+                throw new ArgumentNullException("inner");
             return new Stringerex<TResult>(default(TResult)).Or(inner);
         }
 
@@ -774,70 +726,6 @@ namespace RT.Generexes
             return Stringerex<TResult>.Constructor(
                 (input, startIndex) => generex._forwardMatcher(input, startIndex),
                 (input, startIndex) => generex._backwardMatcher(input, startIndex));
-        }
-
-        /// <summary>
-        ///     Attempts to match the specified regular expression and throws an exception generated by the specified code if
-        ///     the regular expression does not match.</summary>
-        public static Generex<T> Expect<T>(Generex<T> generex, Func<GenerexMatch<T>, Exception> exceptionGenerator)
-        {
-            return Generex.Ors(generex, new Generex<T>().Throw(exceptionGenerator)).Atomic();
-        }
-
-        /// <summary>
-        ///     Attempts to match the specified sequence of consecutive regular expressions and throws an exception generated
-        ///     by the specified code if the regular expression does not match.</summary>
-        public static Generex<T> Expect<T>(Generex<T>[] generexes, Func<GenerexMatch<T>, Exception> exceptionGenerator)
-        {
-            return Generex.Ors(new Generex<T>(generexes), new Generex<T>().Throw(exceptionGenerator)).Atomic();
-        }
-
-        /// <summary>
-        ///     Attempts to match an element with the specified predicate and throws an exception generated by the specified
-        ///     code if the regular expression does not match.</summary>
-        public static Generex<T> Expect<T>(Predicate<T> predicate, Func<GenerexMatch<T>, Exception> exceptionGenerator)
-        {
-            return Generex.Ors(new Generex<T>(predicate), new Generex<T>().Throw(exceptionGenerator)).Atomic();
-        }
-
-        /// <summary>
-        ///     Attempts to match the specified element and throws an exception generated by the specified code if the regular
-        ///     expression does not match.</summary>
-        public static Generex<T> Expect<T>(T element, Func<GenerexMatch<T>, Exception> exceptionGenerator)
-        {
-            return Generex.Ors(new Generex<T>(element), new Generex<T>().Throw(exceptionGenerator)).Atomic();
-        }
-
-        /// <summary>
-        ///     Attempts to match the specified element using the specified comparer and throws an exception generated by the
-        ///     specified code if the regular expression does not match.</summary>
-        public static Generex<T> Expect<T>(T element, IEqualityComparer<T> comparer, Func<GenerexMatch<T>, Exception> exceptionGenerator)
-        {
-            return Generex.Ors(new Generex<T>(comparer, element), new Generex<T>().Throw(exceptionGenerator)).Atomic();
-        }
-
-        /// <summary>
-        ///     Attempts to match the specified sequence of elements and throws an exception generated by the specified code
-        ///     if the regular expression does not match.</summary>
-        public static Generex<T> Expect<T>(IEnumerable<T> elements, Func<GenerexMatch<T>, Exception> exceptionGenerator)
-        {
-            return Generex.Ors(new Generex<T>(elements), new Generex<T>().Throw(exceptionGenerator)).Atomic();
-        }
-
-        /// <summary>
-        ///     Attempts to match the specified sequence of elements using the specified comparer and throws an exception
-        ///     generated by the specified code if the regular expression does not match.</summary>
-        public static Generex<T> Expect<T>(IEnumerable<T> elements, IEqualityComparer<T> comparer, Func<GenerexMatch<T>, Exception> exceptionGenerator)
-        {
-            return Generex.Ors(new Generex<T>(comparer, elements), new Generex<T>().Throw(exceptionGenerator)).Atomic();
-        }
-
-        /// <summary>
-        ///     Attempts to match the specified regular expression and throws an exception generated by the specified code if
-        ///     the regular expression does not match.</summary>
-        public static Generex<T, TResult> Expect<T, TResult>(Generex<T, TResult> generex, Func<GenerexMatch<T>, Exception> exceptionGenerator)
-        {
-            return Generex.Ors(generex, new Generex<T>().Throw<TResult>(exceptionGenerator)).Atomic();
         }
 
         /// <summary>

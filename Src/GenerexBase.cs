@@ -361,6 +361,9 @@ namespace RT.Generexes
             where TOtherGenerex : GenerexBase<T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T>
         {
+            if (selector == null)
+                throw new ArgumentNullException("selector");
+
             return GenerexBase<T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch>.Constructor(
 
                 // forward matcher: instantiate the new Generex at every match
@@ -386,11 +389,25 @@ namespace RT.Generexes
             where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T>
         {
+            if (other == null || other.Contains(null))
+                throw new ArgumentNullException("other");
             var backwardFirst = other.Reverse().Select(o => o._backwardMatcher).Aggregate(GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>.then);
             return Constructor(
                 other.Select(o => o._forwardMatcher).Aggregate(_forwardMatcher, (prev, next) => (input, startIndex) => prev(input, startIndex).SelectMany(m => next(input, startIndex + getLength(m)).Select(m2 => add(m, m2)))),
                 (input, startIndex) => backwardFirst(input, startIndex).SelectMany(m => _backwardMatcher(input, startIndex + m).Select(m2 => add(m2, m)))
             );
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches a consecutive sequence of regular expressions, beginning with this
+        ///     one, followed by the specified ones.</summary>
+        public TGenerex Then<TOtherGenerex, TOtherGenerexMatch>(IEnumerable<GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>> other)
+            where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T>
+        {
+            if (other == null)
+                throw new ArgumentNullException("other");
+            return Then<TOtherGenerex, TOtherGenerexMatch>(other.ToArray());
         }
 
         /// <summary>
@@ -551,26 +568,11 @@ namespace RT.Generexes
         ///             TOtherGenerexMatch}})"/> (this method)</description></item>
         ///         <item><description>
         ///             <see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.ThenRaw{TOtherGenerex,
-        ///             TOtherMatch, TOtherGenerexMatch}(Func{TResult, GenerexBase{T, TOtherMatch, TOtherGenerex,
+        ///             TOtherGenerexMatch}(Func{TResult, GenerexNoResultBase{T, TOtherGenerex, TOtherGenerexMatch}})"/></description></item>
+        ///         <item><description>
+        ///             <see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.ThenRaw{TOtherGenerex,
+        ///             TOtherResult, TOtherGenerexMatch}(Func{TResult, GenerexWithResultBase{T, TOtherResult, TOtherGenerex,
         ///             TOtherGenerexMatch}})"/></description></item>
-        ///         <item><description>
-        ///             <see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.ThenResult(Func{TGenerexMatch,
-        ///             Generex{T}})"/></description></item>
-        ///         <item><description>
-        ///             <see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.ThenResultRaw(Func{TResult,
-        ///             Generex{T}})"/></description></item>
-        ///         <item><description>
-        ///             <see cref="Generex.ThenRaw{TResult, TGenerex, TGenerexMatch}(GenerexWithResultBase{char, TResult,
-        ///             TGenerex, TGenerexMatch}, Func{TGenerexMatch, Stringerex})"/></description></item>
-        ///         <item><description>
-        ///             <see cref="Generex.ThenRaw{TResult, TGenerex, TGenerexMatch, TOtherResult}(GenerexWithResultBase{char,
-        ///             TResult, TGenerex, TGenerexMatch}, Func{TGenerexMatch, Stringerex{TOtherResult}})"/></description></item>
-        ///         <item><description>
-        ///             <see cref="Generex.ThenResult{TResult, TGenerex,
-        ///             TGenerexMatch}(GenerexWithResultBase{char,TResult,TGenerex,TGenerexMatch},Func{TGenerexMatch,Stringerex})"/></description></item>
-        ///         <item><description>
-        ///             <see cref="Generex.ThenResultRaw{TResult, TGenerex,
-        ///             TGenerexMatch}(GenerexWithResultBase{char,TResult,TGenerex,TGenerexMatch},Func{TResult,Stringerex})"/></description></item>
         ///         <item><description>
         ///             all overloads of <c>ThenExpect</c> and <c>ThenExpectRaw</c>, including the protected <see
         ///             cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.thenExpect{TOtherGenerex, TOtherMatch,
@@ -647,6 +649,31 @@ namespace RT.Generexes
                     throw exceptionGenerator(input, startIndex, prevMatch);
                 do
                     yield return matchCombiner(input, startIndex, prevMatch, e.Current);
+                while (e.MoveNext());
+            }
+        }
+
+        internal TGenerex expect(Func<Exception> exceptionGenerator)
+        {
+            return Constructor(
+                // forward matcher
+                (input, startIndex) => expectHelper(input, startIndex, exceptionGenerator),
+
+                // backward matcher: impossible
+                (input, startIndex) =>
+                {
+                    throw new InvalidOperationException("A Generex created by .ThenExpect() cannot match backwards (i.e., cannot be used in MatchReverse, IsMatchReverse, MatchesReverse, ReplaceReverse, AndReverse, or zero-width look-behind assertions).");
+                });
+        }
+
+        private IEnumerable<TMatch> expectHelper(T[] input, int startIndex, Func<Exception> exceptionGenerator)
+        {
+            using (var e = _forwardMatcher(input, startIndex).GetEnumerator())
+            {
+                if (!e.MoveNext())
+                    throw exceptionGenerator();
+                do
+                    yield return e.Current;
                 while (e.MoveNext());
             }
         }
@@ -791,51 +818,36 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        ///     Returns a regular expression that matches this regular expression, then uses a specified <paramref
-        ///     name="selector"/> to create a new regular expression from the match; then attempts to match the new regular
-        ///     expression and throws an exception if that regular expression fails to match. The new regular expression’s
-        ///     result object replaces the current one’s.</summary>
-        /// <param name="selector">
-        ///     The selector that generates a new regular expression, which is expected to match after the current one.</param>
-        /// <param name="exceptionGenerator">
-        ///     A selector which, in case of no match, generates the exception object to be thrown.</param>
-        /// <returns>
-        ///     The resulting regular expression.</returns>
-        /// <remarks>
-        ///     Regular expressions created by this method cannot match backwards. The full set of affected methods is listed
-        ///     at <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch,
-        ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
-        public TOtherGenerex ThenExpect<TOtherGenerex, TOtherResult, TOtherGenerexMatch>(Func<TGenerexMatch, GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>> selector, Func<TGenerexMatch, Exception> exceptionGenerator)
-            where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
-            where TOtherGenerexMatch : GenerexMatch<T, TOtherResult>
-        {
-            var zeroWidthMatch = getZeroWidthMatch();
-            matcher zeroWidthMatcher = (index, startIndex) => zeroWidthMatch;
-            var empty = Constructor(zeroWidthMatcher, zeroWidthMatcher);
-            return Then(m =>
-                empty.thenExpect<TOtherGenerex, LengthAndResult<TOtherResult>, TOtherGenerexMatch, TOtherGenerex, LengthAndResult<TOtherResult>, TOtherGenerexMatch>(
-                selector(m), (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)), (input, startIndex, m1, m2) => new LengthAndResult<TOtherResult>(m2.Result, getLength(m1) + m2.Length)));
-        }
-
-        /// <summary>
         ///     Returns a regular expression that matches either this regular expression or the specified other regular
         ///     expression (cf. <c>|</c> in traditional regular expression syntax).</summary>
         public TGenerex Or<TOtherGenerex, TOtherGenerexMatch>(GenerexBase<T, TMatch, TOtherGenerex, TOtherGenerexMatch> other)
             where TOtherGenerex : GenerexBase<T, TMatch, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T>
         {
+            if (other == null)
+                throw new ArgumentNullException("other");
             return Constructor(or(_forwardMatcher, other._forwardMatcher), or(_backwardMatcher, other._backwardMatcher));
         }
 
         /// <summary>
         ///     Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in
         ///     traditional regular expression syntax).</summary>
-        public static TGenerex Ors(params TGenerex[] other) { return other.Aggregate((prev, next) => prev.Or(next)); }
+        public static TGenerex Ors(params TGenerex[] other)
+        {
+            if (other == null || other.Contains(null))
+                throw new ArgumentNullException("other");
+            return other.Aggregate((prev, next) => prev.Or(next));
+        }
 
         /// <summary>
         ///     Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in
         ///     traditional regular expression syntax).</summary>
-        public static TGenerex Ors(IEnumerable<TGenerex> other) { return other.Aggregate((prev, next) => prev.Or(next)); }
+        public static TGenerex Ors(IEnumerable<TGenerex> other)
+        {
+            if (other == null)
+                throw new ArgumentNullException("other");
+            return Ors(other.ToArray());
+        }
 
         /// <summary>
         ///     Matches this regular expression atomically (without backtracking into it) (cf. <c>(?&gt;...)</c> in
@@ -867,6 +879,9 @@ namespace RT.Generexes
         ///     The set of result objects generated by <paramref name="selector"/> for each match.</returns>
         protected IEnumerable<TResult> matches<TResult>(T[] input, int startAt, Func<int, TMatch, TResult> selector, bool backward)
         {
+            if (input == null)
+                throw new ArgumentNullException("input");
+
             int i = startAt;
             int step = backward ? -1 : 1;
             while (backward ? (i >= 0) : (i <= input.Length))
@@ -1096,6 +1111,8 @@ namespace RT.Generexes
         ///     expression.</summary>
         public TGenerex Throw(Func<TGenerexMatch, Exception> exceptionGenerator)
         {
+            if (exceptionGenerator == null)
+                throw new ArgumentNullException("exceptionGenerator");
             return Do(m => { throw exceptionGenerator(m); });
         }
     }
