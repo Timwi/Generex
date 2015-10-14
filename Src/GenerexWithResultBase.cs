@@ -92,6 +92,8 @@ namespace RT.Generexes
         ///     The result of the match in case of success; <c>default(TResult)</c> if no match.</returns>
         public TResult RawMatchExact(T[] input, int mustStartAt = 0, int? mustEndAt = null)
         {
+            if (input == null)
+                throw new ArgumentNullException("input");
             return matchExact(input, mustStartAt, mustEndAt ?? input.Length, m => m.Result);
         }
 
@@ -107,6 +109,8 @@ namespace RT.Generexes
         ///     claims that it returns “all occurrences of the regular expression”, but this is false.</remarks>
         public IEnumerable<TResult> RawMatches(T[] input, int startAt = 0)
         {
+            if (input == null)
+                throw new ArgumentNullException("input");
             return matches(input, startAt, (index, resultInfo) => resultInfo.Result, backward: false);
         }
 
@@ -120,6 +124,8 @@ namespace RT.Generexes
         ///     (Default is the end of the input sequence.)</param>
         public IEnumerable<TResult> RawMatchesReverse(T[] input, int? endAt = null)
         {
+            if (input == null)
+                throw new ArgumentNullException("input");
             return matches(input, endAt ?? input.Length, (index, resultInfo) => resultInfo.Result, backward: true);
         }
 

@@ -91,7 +91,12 @@ namespace RT.Generexes
         ///     String to match the regular expression against.</param>
         /// <param name="startAt">
         ///     Optional character index at which to start the search. Matches that start before this index are not included.</param>
-        public bool IsMatch(string input, int startAt = 0) { return base.IsMatch(input.ToCharArray(), startAt); }
+        public bool IsMatch(string input, int startAt = 0)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            return base.IsMatch(input.ToCharArray(), startAt);
+        }
 
         /// <summary>
         ///     Determines whether the given string matches this regular expression at a specific character index.</summary>
@@ -102,7 +107,12 @@ namespace RT.Generexes
         /// <returns>
         ///     <c>true</c> if a match starting at the specified index exists (which need not run all the way to the end of
         ///     the string); otherwise, <c>false</c>.</returns>
-        public bool IsMatchAt(string input, int mustStartAt = 0) { return base.IsMatchAt(input.ToCharArray(), mustStartAt); }
+        public bool IsMatchAt(string input, int mustStartAt = 0)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            return base.IsMatchAt(input.ToCharArray(), mustStartAt);
+        }
 
         /// <summary>
         ///     Determines whether the given string matches this regular expression up to a specific character index.</summary>
@@ -113,7 +123,12 @@ namespace RT.Generexes
         /// <returns>
         ///     <c>true</c> if a match ending at the specified index exists (which need not begin at the start of the string);
         ///     otherwise, <c>false</c>.</returns>
-        public bool IsMatchUpTo(string input, int? mustEndAt = null) { return base.IsMatchUpTo(input.ToCharArray(), mustEndAt); }
+        public bool IsMatchUpTo(string input, int? mustEndAt = null)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            return base.IsMatchUpTo(input.ToCharArray(), mustEndAt);
+        }
 
         /// <summary>
         ///     Determines whether the given string matches this regular expression exactly.</summary>
@@ -125,7 +140,12 @@ namespace RT.Generexes
         ///     Index at which the match must end (default is the end of the string).</param>
         /// <returns>
         ///     <c>true</c> if a match starting and ending at the specified indexes exists; otherwise, <c>false</c>.</returns>
-        public bool IsMatchExact(string input, int mustStartAt = 0, int? mustEndAt = null) { return base.IsMatchExact(input.ToCharArray(), mustStartAt, mustEndAt); }
+        public bool IsMatchExact(string input, int mustStartAt = 0, int? mustEndAt = null)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            return base.IsMatchExact(input.ToCharArray(), mustStartAt, mustEndAt);
+        }
 
         /// <summary>
         ///     Determines whether the given string contains a match for this regular expression that ends before the
@@ -135,7 +155,12 @@ namespace RT.Generexes
         /// <param name="endAt">
         ///     Optional index before which a match must end. The search begins by matching from this index backwards, and
         ///     then proceeds towards the start of the string.</param>
-        public bool IsMatchReverse(string input, int? endAt = null) { return base.IsMatchReverse(input.ToCharArray(), endAt); }
+        public bool IsMatchReverse(string input, int? endAt = null)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            return base.IsMatchReverse(input.ToCharArray(), endAt);
+        }
 
         /// <summary>
         ///     Determines whether the given string matches this regular expression, and if so, returns information about the
@@ -146,7 +171,12 @@ namespace RT.Generexes
         ///     Optional index at which to start the search. Matches that start before this index are not included.</param>
         /// <returns>
         ///     An object describing a regular expression match in case of success; <c>null</c> if no match.</returns>
-        public StringerexMatch Match(string input, int startAt = 0) { return base.Match(input.ToCharArray(), startAt); }
+        public StringerexMatch Match(string input, int startAt = 0)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            return base.Match(input.ToCharArray(), startAt);
+        }
 
         /// <summary>
         ///     Determines whether the given string matches this regular expression exactly, and if so, returns information
@@ -159,7 +189,12 @@ namespace RT.Generexes
         ///     Index at which the match must end (default is the end of the string).</param>
         /// <returns>
         ///     An object describing the regular expression match in case of success; <c>null</c> if no match.</returns>
-        public StringerexMatch MatchExact(string input, int mustStartAt = 0, int? mustEndAt = null) { return base.MatchExact(input.ToCharArray(), mustStartAt, mustEndAt); }
+        public StringerexMatch MatchExact(string input, int mustStartAt = 0, int? mustEndAt = null)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            return base.MatchExact(input.ToCharArray(), mustStartAt, mustEndAt);
+        }
 
         /// <summary>
         ///     Determines whether the given string matches this regular expression, and if so, returns information about the
@@ -170,7 +205,12 @@ namespace RT.Generexes
         ///     Optional index at which to end the search. Matches that end at or after this index are not included.</param>
         /// <returns>
         ///     An object describing a regular expression match in case of success; <c>null</c> if no match.</returns>
-        public StringerexMatch MatchReverse(string input, int? endAt = null) { return base.MatchReverse(input.ToCharArray(), endAt); }
+        public StringerexMatch MatchReverse(string input, int? endAt = null)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            return base.MatchReverse(input.ToCharArray(), endAt);
+        }
 
         /// <summary>
         ///     Returns a sequence of non-overlapping regular expression matches going backwards (starting at the end of the
@@ -179,7 +219,12 @@ namespace RT.Generexes
         ///     String to match the regular expression against.</param>
         /// <param name="endAt">
         ///     Optional index at which to begin the reverse search. Matches that end at or after this index are not included.</param>
-        public IEnumerable<StringerexMatch> MatchesReverse(string input, int? endAt = null) { return base.MatchesReverse(input.ToCharArray(), endAt); }
+        public IEnumerable<StringerexMatch> MatchesReverse(string input, int? endAt = null)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            return base.MatchesReverse(input.ToCharArray(), endAt);
+        }
 
         /// <summary>
         ///     Returns a sequence of non-overlapping regular expression matches, optionally starting the search at the
@@ -192,7 +237,12 @@ namespace RT.Generexes
         ///     The behaviour is analogous to <see cref="System.Text.RegularExpressions.Regex.Matches(string,string)"/>. The
         ///     documentation for that method claims that it returns “all occurrences of the regular expression”, but this is
         ///     false.</remarks>
-        public IEnumerable<StringerexMatch> Matches(string input, int startAt = 0) { return base.Matches(input.ToCharArray(), startAt); }
+        public IEnumerable<StringerexMatch> Matches(string input, int startAt = 0)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            return base.Matches(input.ToCharArray(), startAt);
+        }
 
         /// <summary>
         ///     Returns a regular expression that matches either this regular expression or the specified string using the
