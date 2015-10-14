@@ -13,30 +13,40 @@ namespace RT.Generexes.Tests
     {
         protected static object[] _expectException = new object[] { new ExpectedException() };
         protected static object[] _expectInvOp = new object[] { new InvalidOperationException() };
+        protected static object[] _expectInvCast = new object[] { new InvalidCastException() };
 
-        protected static int? _expectException2 = null;
-        protected static int? _expectInvOp2 = -1;
+        protected const int _expException = -1;
+        protected const int _expInvOp = -2;
+        protected const int _expInvCast = -3;
 
         protected static Expectation True = Expectation.True;
         protected static Expectation False = Expectation.False;
         protected static Expectation Exception = Expectation.ExpectedException;
         protected static Expectation InvOp = Expectation.InvalidOperationException;
+        protected static Expectation InvCast = Expectation.InvalidCastException;
 
-        public static void AssertMatches<TGenerex, TGenerexMatch>(GenerexNoResultBase<char, TGenerex, TGenerexMatch> generex, string input, Expectation isMatch, Expectation isMatchAt1, Expectation isMatchUpTo1, Expectation isMatchExact, Expectation isMatchReverse, object[] match, object[] matchExact, object[] matchReverse, int? matches, int? matchesReverse)
+        protected Generex<int> _g = new Generex<int>(47);
+        protected Generex<int, int> _gr = new Generex<int>(47).Process(_ => 1);
+        protected Stringerex _s = new Stringerex('M');
+        protected Stringerex<int> _sr = new Stringerex('M').Process(_ => 1);
+
+        protected int[] _input = new int[] { 47, 24567837, 1701 };
+
+        public static void AssertMatches<TGenerex, TGenerexMatch>(GenerexNoResultBase<char, TGenerex, TGenerexMatch> generex, string input, Expectation isMatch, Expectation isMatchAt1, Expectation isMatchUpTo1, Expectation isMatchExact, Expectation isMatchReverse, object[] match, object[] matchExact, object[] matchReverse, int matches, int matchesReverse)
             where TGenerex : GenerexNoResultBase<char, TGenerex, TGenerexMatch>
             where TGenerexMatch : GenerexMatch<char>
         {
             AssertMatches(generex, input.ToCharArray(), isMatch, isMatchAt1, isMatchUpTo1, isMatchExact, isMatchReverse, match, matchExact, matchReverse, matches, matchesReverse);
         }
 
-        public static void AssertMatches<TGenerex, TResult, TGenerexMatch>(GenerexWithResultBase<char, TResult, TGenerex, TGenerexMatch> generex, string input, Expectation isMatch, Expectation isMatchAt1, Expectation isMatchUpTo1, Expectation isMatchExact, Expectation isMatchReverse, object[] match, object[] matchExact, object[] matchReverse, int? matches, int? matchesReverse)
+        public static void AssertMatches<TGenerex, TResult, TGenerexMatch>(GenerexWithResultBase<char, TResult, TGenerex, TGenerexMatch> generex, string input, Expectation isMatch, Expectation isMatchAt1, Expectation isMatchUpTo1, Expectation isMatchExact, Expectation isMatchReverse, object[] match, object[] matchExact, object[] matchReverse, int matches, int matchesReverse)
             where TGenerex : GenerexWithResultBase<char, TResult, TGenerex, TGenerexMatch>
             where TGenerexMatch : GenerexMatch<char, TResult>
         {
             AssertMatches(generex, input.ToCharArray(), isMatch, isMatchAt1, isMatchUpTo1, isMatchExact, isMatchReverse, match, matchExact, matchReverse, matches, matchesReverse);
         }
 
-        public static void AssertMatches<T, TGenerex, TGenerexMatch>(GenerexNoResultBase<T, TGenerex, TGenerexMatch> generex, T[] input, Expectation isMatch, Expectation isMatchAt1, Expectation isMatchUpTo1, Expectation isMatchExact, Expectation isMatchReverse, object[] match, object[] matchExact, object[] matchReverse, int? matches, int? matchesReverse)
+        public static void AssertMatches<T, TGenerex, TGenerexMatch>(GenerexNoResultBase<T, TGenerex, TGenerexMatch> generex, T[] input, Expectation isMatch, Expectation isMatchAt1, Expectation isMatchUpTo1, Expectation isMatchExact, Expectation isMatchReverse, object[] match, object[] matchExact, object[] matchReverse, int matches, int matchesReverse)
             where TGenerex : GenerexNoResultBase<T, TGenerex, TGenerexMatch>
             where TGenerexMatch : GenerexMatch<T>
         {
@@ -53,7 +63,7 @@ namespace RT.Generexes.Tests
             assertMatch<T, TGenerexMatch>(matchReverse, () => input.MatchReverse(generex));
         }
 
-        public static void AssertMatches<T, TResult, TGenerex, TGenerexMatch>(GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch> generex, T[] input, Expectation isMatch, Expectation isMatchAt1, Expectation isMatchUpTo1, Expectation isMatchExact, Expectation isMatchReverse, object[] match, object[] matchExact, object[] matchReverse, int? matches, int? matchesReverse)
+        public static void AssertMatches<T, TResult, TGenerex, TGenerexMatch>(GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch> generex, T[] input, Expectation isMatch, Expectation isMatchAt1, Expectation isMatchUpTo1, Expectation isMatchExact, Expectation isMatchReverse, object[] match, object[] matchExact, object[] matchReverse, int matches, int matchesReverse)
             where TGenerex : GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch>
             where TGenerexMatch : GenerexMatch<T, TResult>
         {
@@ -64,7 +74,7 @@ namespace RT.Generexes.Tests
             assertMatch<T, TResult, TGenerexMatch>(matchReverse, () => generex.MatchReverse(input), () => generex.RawMatchReverse(input));
         }
 
-        static void assertMatchesBase<T, TMatch, TGenerex, TGenerexMatch>(GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, T[] input, Expectation isMatch, Expectation isMatchAt1, Expectation isMatchUpTo1, Expectation isMatchExact, Expectation isMatchReverse, object[] match, object[] matchExact, object[] matchReverse, int? matches, int? matchesReverse)
+        static void assertMatchesBase<T, TMatch, TGenerex, TGenerexMatch>(GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, T[] input, Expectation isMatch, Expectation isMatchAt1, Expectation isMatchUpTo1, Expectation isMatchExact, Expectation isMatchReverse, object[] match, object[] matchExact, object[] matchReverse, int matches, int matchesReverse)
             where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
             where TGenerexMatch : GenerexMatch<T>
         {
@@ -87,14 +97,15 @@ namespace RT.Generexes.Tests
             assertIntOrThrow(matchesReverse, () => input.MatchesReverse(generex).Count());
         }
 
-        static void assertIntOrThrow(int? expected, Func<int> getActual)
+        static void assertIntOrThrow(int expected, Func<int> getActual)
         {
-            if (expected == null)
-                Assert.Throws<ExpectedException>(() => { getActual(); });
-            else if (expected == -1)
-                Assert.Throws<InvalidOperationException>(() => { getActual(); });
-            else
-                Assert.AreEqual(expected.Value, getActual());
+            switch (expected)
+            {
+                case _expException: Assert.Throws<ExpectedException>(() => { getActual(); }); break;
+                case _expInvOp: Assert.Throws<InvalidOperationException>(() => { getActual(); }); break;
+                case _expInvCast: Assert.Throws<InvalidCastException>(() => { getActual(); }); break;
+                default: Assert.AreEqual(expected, getActual()); break;
+            }
         }
 
         static void assertMatch<T, TResult, TGenerexMatch>(object[] expected, Func<TGenerexMatch> getActual, Func<TResult> getActualRaw)
@@ -158,6 +169,7 @@ namespace RT.Generexes.Tests
                 case Expectation.True: Assert.IsTrue(action()); break;
                 case Expectation.False: Assert.IsFalse(action()); break;
                 case Expectation.ExpectedException: Assert.Throws<ExpectedException>(() => { action(); }); break;
+                case Expectation.InvalidCastException: Assert.Throws<InvalidCastException>(() => { action(); }); break;
                 case Expectation.InvalidOperationException: Assert.Throws<InvalidOperationException>(() => { action(); }); break;
             }
         }

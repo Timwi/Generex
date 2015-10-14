@@ -75,6 +75,8 @@ namespace RT.Generexes
         ///     expression.</summary>
         public Generex<T, TResult> Throw<TResult>(Func<GenerexMatch<T>, Exception> exceptionGenerator)
         {
+            if (exceptionGenerator == null)
+                throw new ArgumentNullException("exceptionGenerator");
             return Process<TResult>(m => { throw exceptionGenerator(m); });
         }
 

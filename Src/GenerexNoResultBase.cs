@@ -516,6 +516,8 @@ namespace RT.Generexes
             where TGenerexWithResult : GenerexWithResultBase<T, TResult, TGenerexWithResult, TGenerexWithResultMatch>
             where TGenerexWithResultMatch : GenerexMatch<T, TResult>
         {
+            if (selector == null)
+                throw new ArgumentNullException("selector");
             return GenerexWithResultBase<T, TResult, TGenerexWithResult, TGenerexWithResultMatch>.Constructor(
                 (input, startIndex) => _forwardMatcher(input, startIndex).Select(m => new LengthAndResult<TResult>(selector(createMatch(input, startIndex, m)), m)),
                 (input, startIndex) => _backwardMatcher(input, startIndex).Select(m => new LengthAndResult<TResult>(selector(createBackwardsMatch(input, startIndex, m)), m))

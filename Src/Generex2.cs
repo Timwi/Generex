@@ -101,6 +101,12 @@ namespace RT.Generexes
         ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
         public Generex<T, TCombined> ThenExpect<TCombined>(Generex<T> expectation, Func<TResult, GenerexMatch<T>, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
         {
+            if (expectation == null)
+                throw new ArgumentNullException("expectation");
+            if (selector == null)
+                throw new ArgumentNullException("selector");
+            if (exceptionGenerator == null)
+                throw new ArgumentNullException("exceptionGenerator");
             return then<Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>, GenerexMatch<T, TResult>>(m =>
                 expectation.expect(() => exceptionGenerator(m)).process<Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(m2 => selector(m.Result, m2)), createMatch);
         }

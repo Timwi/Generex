@@ -6,6 +6,7 @@ namespace RT.Generexes.Tests
         False,
         True,
         ExpectedException,
+        InvalidCastException,
         InvalidOperationException
     }
 }

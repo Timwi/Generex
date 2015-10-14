@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestPolymorphism.cs" />
     <Compile Include="TestThenExpect.cs" />
     <Compile Include="Mod7IntEqualityComparer.cs" />
     <Compile Include="TestBase.cs" />
@@ -48,8 +49,9 @@
     <Compile Include="ExpectedException.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TestGenerexStatic.cs" />
+    <Compile Include="TestStatic.cs" />
     <Compile Include="TestThen.cs" />
+    <Compile Include="TestThrow.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\NUnitDirect\Src\NUnitDirect.csproj">
