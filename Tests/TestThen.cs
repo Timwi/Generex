@@ -141,17 +141,17 @@ namespace RT.Generexes.Tests
             Assert.Throws<ArgumentNullException>(() => { _gr.Then((Func<GenerexMatch<int, int>, Generex<int, string>>) null); });
             Assert.Throws<ArgumentNullException>(() => { _gr.ThenRaw((Func<int, Generex<int, string>>) null); });
 
-            AssertMatches(_g.Then(m => new Generex<int>(i => i % 7 == 0).Process(_ => 2)), _input, True, False, InvOp, False, InvOp, new object[] { 0, 2, 2 }, null, _expectInvOp, 1, -1);
-            AssertMatches(_gr.Then(m => new Generex<int>(i => i % 7 == 0).Process(_ => 2 + m.Result)), _input, True, False, InvOp, False, InvOp, new object[] { 0, 2, 3 }, null, _expectInvOp, 1, -1);
-            AssertMatches(_gr.ThenRaw(m => new Generex<int>(i => i % 7 == 0).Process(_ => 2 + m)), _input, True, False, InvOp, False, InvOp, new object[] { 0, 2, 3 }, null, _expectInvOp, 1, -1);
+            AssertMatches(_g.Then(m => new Generex<int>(i => i % 7 == 0).Process(m2 => m2.Index + 2)), _input, True, False, InvOp, False, InvOp, new object[] { 0, 2, 3 }, null, _expectInvOp, 1, -1);
+            AssertMatches(_gr.Then(m => new Generex<int>(i => i % 7 == 0).Process(m2 => m2.Index + 2 + m.Result)), _input, True, False, InvOp, False, InvOp, new object[] { 0, 2, 4 }, null, _expectInvOp, 1, -1);
+            AssertMatches(_gr.ThenRaw(m => new Generex<int>(i => i % 7 == 0).Process(m2 => m2.Index + 2 + m)), _input, True, False, InvOp, False, InvOp, new object[] { 0, 2, 4 }, null, _expectInvOp, 1, -1);
 
             Assert.Throws<ArgumentNullException>(() => { _s.Then((Func<StringerexMatch, Stringerex<int>>) null); });
             Assert.Throws<ArgumentNullException>(() => { _sr.Then((Func<StringerexMatch<int>, Stringerex<string>>) null); });
             Assert.Throws<ArgumentNullException>(() => { _sr.ThenRaw((Func<int, Stringerex<string>>) null); });
 
-            AssertMatches(_s.Then(m => new Stringerex('L').Process(_ => 2)), "MLP", True, False, InvOp, False, InvOp, new object[] { 0, 2, 2 }, null, _expectInvOp, 1, -1);
-            AssertMatches(_sr.Then(m => new Stringerex('L').Process(_ => 2 + m.Result)), "MLP", True, False, InvOp, False, InvOp, new object[] { 0, 2, 3 }, null, _expectInvOp, 1, -1);
-            AssertMatches(_sr.ThenRaw(m => new Stringerex('L').Process(_ => 2 + m)), "MLP", True, False, InvOp, False, InvOp, new object[] { 0, 2, 3 }, null, _expectInvOp, 1, -1);
+            AssertMatches(_s.Then(m => new Stringerex('L').Process(m2 => m2.Index + 2)), "MLP", True, False, InvOp, False, InvOp, new object[] { 0, 2, 3 }, null, _expectInvOp, 1, -1);
+            AssertMatches(_sr.Then(m => new Stringerex('L').Process(m2 => m2.Index + 2 + m.Result)), "MLP", True, False, InvOp, False, InvOp, new object[] { 0, 2, 4 }, null, _expectInvOp, 1, -1);
+            AssertMatches(_sr.ThenRaw(m => new Stringerex('L').Process(m2 => m2.Index + 2 + m)), "MLP", True, False, InvOp, False, InvOp, new object[] { 0, 2, 4 }, null, _expectInvOp, 1, -1);
         }
     }
 }
