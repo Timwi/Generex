@@ -59,11 +59,6 @@ namespace RT.Generexes
         static Generex() { Constructor = (forward, backward) => new Generex<T>(forward, backward); }
 
         /// <summary>
-        ///     Implicitly converts a predicate into a regular expression that matches a single element satisfying the
-        ///     predicate.</summary>
-        public static implicit operator Generex<T>(Predicate<T> predicate) { return new Generex<T>(predicate); }
-
-        /// <summary>
         ///     Processes each match of this regular expression by running it through a provided selector.</summary>
         /// <typeparam name="TResult">
         ///     Type of the object returned by <paramref name="selector"/>, which is a result object associated with each
