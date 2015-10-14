@@ -61,7 +61,7 @@ namespace RT.Generexes
         ///     generates a result object that combines the result of this regular expression with the match of the other.</summary>
         public Generex<T, TCombined> Then<TCombined>(Generex<T> other, Func<TResult, GenerexMatch<T>, TCombined> selector)
         {
-            return then<Generex<T>, GenerexMatch<T>, Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(other, selector);
+            return then<Generex<T>, GenerexMatch<T>, int, Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(other, selector);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace RT.Generexes
         ///     generates a result object that combines the result of this regular expression with the match of the other.</summary>
         public Generex<T, TCombined> Then<TOther, TCombined>(Generex<T, TOther> other, Func<TResult, GenerexMatch<T, TOther>, TCombined> selector)
         {
-            return then<Generex<T, TOther>, GenerexMatch<T, TOther>, TOther, Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(other, selector);
+            return then<Generex<T, TOther>, GenerexMatch<T, TOther>, LengthAndResult<TOther>, Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(other, selector);
         }
 
         /// <summary>
@@ -101,9 +101,8 @@ namespace RT.Generexes
         ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
         public Generex<T, TCombined> ThenExpect<TCombined>(Generex<T> expectation, Func<TResult, GenerexMatch<T>, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
         {
-            return thenExpect<Generex<T>, int, GenerexMatch<T>, Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>>(expectation,
-                (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)),
-                (input, startIndex, m1, m2) => new LengthAndResult<TCombined>(selector(m1.Result, expectation.createMatch(input, startIndex, m2)), getLength(m1) + m2));
+            return then<Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>, GenerexMatch<T, TResult>>(m =>
+                expectation.expect(() => exceptionGenerator(m)).process<Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(m2 => selector(m.Result, m2)), createMatch);
         }
 
         /// <summary>
@@ -129,9 +128,12 @@ namespace RT.Generexes
         ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
         public Generex<T, TCombined> ThenExpect<TOther, TCombined>(Generex<T, TOther> expectation, Func<TResult, GenerexMatch<T, TOther>, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
         {
-            return thenExpect<Generex<T, TOther>, LengthAndResult<TOther>, GenerexMatch<T, TOther>, Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>>(expectation,
-                (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)),
-                (input, startIndex, m1, m2) => new LengthAndResult<TCombined>(selector(m1.Result, expectation.createMatch(input, startIndex, m2)), getLength(m1) + expectation.getLength(m2)));
+            if (expectation == null)
+                throw new ArgumentNullException("expectation");
+            if (selector == null)
+                throw new ArgumentNullException("selector");
+            return then<Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>, GenerexMatch<T, TResult>>(m =>
+                expectation.process<Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(m2 => selector(m.Result, m2)).expect(() => exceptionGenerator(m)), createMatch);
         }
 
         /// <summary>
@@ -157,9 +159,12 @@ namespace RT.Generexes
         ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
         public Generex<T, TCombined> ThenExpectRaw<TOther, TCombined>(Generex<T, TOther> expectation, Func<TResult, TOther, TCombined> selector, Func<GenerexMatch<T, TResult>, Exception> exceptionGenerator)
         {
-            return thenExpect<Generex<T, TOther>, LengthAndResult<TOther>, GenerexMatch<T, TOther>, Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>>(expectation,
-                (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)),
-                (input, startIndex, m1, m2) => new LengthAndResult<TCombined>(selector(m1.Result, m2.Result), getLength(m1) + expectation.getLength(m2)));
+            if (expectation == null)
+                throw new ArgumentNullException("expectation");
+            if (selector == null)
+                throw new ArgumentNullException("selector");
+            return then<Generex<T, TCombined>, LengthAndResult<TCombined>, GenerexMatch<T, TCombined>, GenerexMatch<T, TResult>>(m =>
+                expectation.process<Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(m2 => selector(m.Result, m2.Result)).expect(() => exceptionGenerator(m)), createMatch);
         }
 
         /// <summary>

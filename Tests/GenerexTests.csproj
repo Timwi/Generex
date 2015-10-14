@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestThenExpect.cs" />
     <Compile Include="Mod7IntEqualityComparer.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="Expectation.cs" />

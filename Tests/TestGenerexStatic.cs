@@ -129,14 +129,10 @@ namespace RT.Generexes.Tests
             Assert.AreEqual(1, Stringerex.New('M').Process(m => 1).RawMatchReverseNullable("MLP"));
             Assert.AreEqual(1, Stringerex.New('M').Process(m => 1).RawMatchReverseNullable("MLP", 1));
 
-            // Generex.Recursive<>(): skip here. See TestRecursive.
-
-            // Possibly TODO?
-            // Generex.ThenRaw<>()
-            // Generex.ThenResult<>()
-            // Generex.ThenResultRaw<>()
             // Generex.ToStringerex()
-            // Generex.ToStringerex<>()
+            var ch = new Generex<char>('M').Then('L');
+            AssertMatches(ch.ToStringerex(), "MLP", True, False, True, False, True, new object[] { 0, 2 }, null, new object[] { 0, 2 }, 1, 1);
+            AssertMatches(ch.Process(m => string.Join(",", m.Match)).ToStringerex(), "MLP", True, False, True, False, True, new object[] { 0, 2, "M,L" }, null, new object[] { 0, 2, "M,L" }, 1, 1);
         }
     }
 }

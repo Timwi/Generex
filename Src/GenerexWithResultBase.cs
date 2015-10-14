@@ -19,10 +19,8 @@ namespace RT.Generexes
         where TGenerex : GenerexWithResultBase<T, TResult, TGenerex, TGenerexMatch>
         where TGenerexMatch : GenerexMatch<T, TResult>
     {
-        /// <summary>Returns a collection containing a zero-width match with the default value for the result object.</summary>
-        protected sealed override IEnumerable<LengthAndResult<TResult>> getZeroWidthMatch() { return new[] { new LengthAndResult<TResult>(default(TResult), 0) }; }
         /// <summary>Retrieves the length of the specified <paramref name="match"/>.</summary>
-        protected sealed override int getLength(LengthAndResult<TResult> match) { return match.Length; }
+        internal sealed override int getLength(LengthAndResult<TResult> match) { return match.Length; }
         /// <summary>
         ///     Returns a new match that is longer than the specified <paramref name="match"/> by the specified <paramref
         ///     name="extra"/> amount.</summary>
@@ -163,27 +161,10 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, followed by the specified one, and
-        ///     generates a match object that combines the result of this regular expression with the match of the other.</summary>
-        protected TCombinedGenerex then<TGenerexNoResult, TGenerexNoResultMatch, TCombinedGenerex, TCombinedGenerexMatch, TCombinedResult>(TGenerexNoResult other, Func<TResult, TGenerexNoResultMatch, TCombinedResult> selector)
-            where TGenerexNoResult : GenerexNoResultBase<T, TGenerexNoResult, TGenerexNoResultMatch>
-            where TGenerexNoResultMatch : GenerexMatch<T>
-            where TCombinedGenerex : GenerexWithResultBase<T, TCombinedResult, TCombinedGenerex, TCombinedGenerexMatch>
-            where TCombinedGenerexMatch : GenerexMatch<T, TCombinedResult>
-        {
-            return GenerexWithResultBase<T, TCombinedResult, TCombinedGenerex, TCombinedGenerexMatch>.Constructor(
-                (input, startIndex) => _forwardMatcher(input, startIndex).SelectMany(m => other._forwardMatcher(input, startIndex + m.Length)
-                    .Select(m2 => new LengthAndResult<TCombinedResult>(selector(m.Result, other.createMatch(input, startIndex + m.Length, m2)), m.Length + m2))),
-                (input, startIndex) => other._backwardMatcher(input, startIndex).Select(m2 => new { Match = other.createBackwardsMatch(input, startIndex, m2), Length = m2 })
-                    .SelectMany(inf => _backwardMatcher(input, startIndex + inf.Length).Select(m => new LengthAndResult<TCombinedResult>(selector(m.Result, inf.Match), m.Length + inf.Length)))
-            );
-        }
-
-        /// <summary>
-        ///     Returns a regular expression that matches this regular expression, followed by the specified one, and
-        ///     generates a match object that combines the result of this regular expression with the match of the other.</summary>
-        protected TCombinedGenerex then<TOtherGenerex, TOtherGenerexMatch, TOtherResult, TCombinedGenerex, TCombinedGenerexMatch, TCombinedResult>(TOtherGenerex other, Func<TResult, TOtherGenerexMatch, TCombinedResult> selector)
-            where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
-            where TOtherGenerexMatch : GenerexMatch<T, TOtherResult>
+        ///     generates a result object that combines the result of this regular expression with the match of the other.</summary>
+        protected TCombinedGenerex then<TOtherGenerex, TOtherGenerexMatch, TOtherMatch, TCombinedGenerex, TCombinedGenerexMatch, TCombinedResult>(TOtherGenerex other, Func<TResult, TOtherGenerexMatch, TCombinedResult> selector)
+            where TOtherGenerex : GenerexBase<T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T>
             where TCombinedGenerex : GenerexWithResultBase<T, TCombinedResult, TCombinedGenerex, TCombinedGenerexMatch>
             where TCombinedGenerexMatch : GenerexMatch<T, TCombinedResult>
         {
@@ -192,10 +173,10 @@ namespace RT.Generexes
             if (selector == null)
                 throw new ArgumentNullException("selector");
 
-            return GenerexWithResultBase<T, TCombinedResult, TCombinedGenerex, TCombinedGenerexMatch>.Constructor(
+            return GenerexBase<T, LengthAndResult<TCombinedResult>, TCombinedGenerex, TCombinedGenerexMatch>.Constructor(
                 (input, startIndex) => _forwardMatcher(input, startIndex).SelectMany(m => other._forwardMatcher(input, startIndex + m.Length)
-                    .Select(m2 => new LengthAndResult<TCombinedResult>(selector(m.Result, other.createMatch(input, startIndex + m.Length, m2)), m.Length + m2.Length))),
-                (input, startIndex) => other._backwardMatcher(input, startIndex).Select(m2 => new { Match = other.createBackwardsMatch(input, startIndex, m2), Length = m2.Length })
+                    .Select(m2 => new LengthAndResult<TCombinedResult>(selector(m.Result, other.createMatch(input, startIndex + m.Length, m2)), m.Length + other.getLength(m2)))),
+                (input, startIndex) => other._backwardMatcher(input, startIndex).Select(m2 => new { Match = other.createBackwardsMatch(input, startIndex, m2), Length = other.getLength(m2) })
                     .SelectMany(inf => _backwardMatcher(input, startIndex + inf.Length).Select(m => new LengthAndResult<TCombinedResult>(selector(m.Result, inf.Match), m.Length + inf.Length)))
             );
         }
@@ -315,6 +296,8 @@ namespace RT.Generexes
             where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T>
         {
+            if (selector == null)
+                throw new ArgumentNullException("selector");
             return Then(m => selector(m).expect(() => exceptionGenerator(m)));
         }
 
@@ -337,6 +320,32 @@ namespace RT.Generexes
             where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T>
         {
+            if (selector == null)
+                throw new ArgumentNullException("selector");
+            return ThenRaw(r => selector(r).expect(() => exceptionGenerator(r)));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches this regular expression, then uses a specified <paramref
+        ///     name="selector"/> to create a new regular expression from the result object; then attempts to match the new
+        ///     regular expression and throws an exception if that regular expression fails to match. The new regular
+        ///     expression’s result object replaces the current one’s.</summary>
+        /// <param name="selector">
+        ///     The selector that generates a new regular expression, which is expected to match after the current one.</param>
+        /// <param name="exceptionGenerator">
+        ///     A selector which, in case of no match, generates the exception object to be thrown.</param>
+        /// <returns>
+        ///     The resulting regular expression.</returns>
+        /// <remarks>
+        ///     Regular expressions created by this method cannot match backwards. The full set of affected methods is listed
+        ///     at <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch,
+        ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
+        public TOtherGenerex ThenExpectRaw<TOtherGenerex, TOtherResult, TOtherGenerexMatch>(Func<TResult, GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>> selector, Func<TResult, Exception> exceptionGenerator)
+            where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T, TOtherResult>
+        {
+            if (selector == null)
+                throw new ArgumentNullException("selector");
             return ThenRaw(r => selector(r).expect(() => exceptionGenerator(r)));
         }
 

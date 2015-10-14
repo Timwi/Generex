@@ -14,6 +14,9 @@ namespace RT.Generexes.Tests
         protected static object[] _expectException = new object[] { new ExpectedException() };
         protected static object[] _expectInvOp = new object[] { new InvalidOperationException() };
 
+        protected static int? _expectException2 = null;
+        protected static int? _expectInvOp2 = -1;
+
         protected static Expectation True = Expectation.True;
         protected static Expectation False = Expectation.False;
         protected static Expectation Exception = Expectation.ExpectedException;

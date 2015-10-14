@@ -43,10 +43,8 @@ namespace RT.Generexes
             }
         }
 
-        /// <summary>Returns a single zero-width match.</summary>
-        protected abstract IEnumerable<TMatch> getZeroWidthMatch();
         /// <summary>Retrieves the length of the specified <paramref name="match"/>.</summary>
-        protected abstract int getLength(TMatch match);
+        internal abstract int getLength(TMatch match);
         /// <summary>
         ///     Returns a new match that is longer than the specified <paramref name="match"/> by the specified <paramref
         ///     name="extra"/> amount.</summary>
@@ -391,10 +389,11 @@ namespace RT.Generexes
         {
             if (other == null || other.Contains(null))
                 throw new ArgumentNullException("other");
-            var backwardFirst = other.Reverse().Select(o => o._backwardMatcher).Aggregate(GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>.then);
+            var backwardFirst = other.Length == 0 ? null : other.Reverse().Select(o => o._backwardMatcher).Aggregate(GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>.then);
             return Constructor(
                 other.Select(o => o._forwardMatcher).Aggregate(_forwardMatcher, (prev, next) => (input, startIndex) => prev(input, startIndex).SelectMany(m => next(input, startIndex + getLength(m)).Select(m2 => add(m, m2)))),
-                (input, startIndex) => backwardFirst(input, startIndex).SelectMany(m => _backwardMatcher(input, startIndex + m).Select(m2 => add(m2, m)))
+                backwardFirst == null ? _backwardMatcher :
+                    (input, startIndex) => backwardFirst(input, startIndex).SelectMany(m => _backwardMatcher(input, startIndex + m).Select(m2 => add(m2, m)))
             );
         }
 
@@ -582,75 +581,6 @@ namespace RT.Generexes
             return then<TOtherGenerex, TOtherMatch, TOtherGenerexMatch, TGenerexMatch>(selector, createMatch);
         }
 
-        /// <summary>
-        ///     Returns a regular expression that matches this regular expression, then attempts to match the specified other
-        ///     regular expression and throws an exception if the second regular expression fails to match.</summary>
-        /// <typeparam name="TOtherGenerex">
-        ///     Type of the second regular expression (<paramref name="expectation"/>).</typeparam>
-        /// <typeparam name="TOtherMatch">
-        ///     Type of internal match information used by <typeparamref name="TOtherGenerex"/> (i.e. <c>int</c> or
-        ///     <c>LengthAndResult&lt;T&gt;</c>).</typeparam>
-        /// <typeparam name="TOtherGenerexMatch">
-        ///     Type of match object returned by matches of <typeparamref name="TOtherGenerex"/>.</typeparam>
-        /// <typeparam name="TCombinedGenerex">
-        ///     Type of the resulting regular expression.</typeparam>
-        /// <typeparam name="TCombinedMatch">
-        ///     Type of internal match information used by <typeparamref name="TCombinedGenerex"/> (i.e. <c>int</c> or
-        ///     <c>LengthAndResult&lt;T&gt;</c>).</typeparam>
-        /// <typeparam name="TCombinedGenerexMatch">
-        ///     Type of match object returned by matches of <typeparamref name="TCombinedGenerex"/>.</typeparam>
-        /// <param name="expectation">
-        ///     The regular expression that is expected to match after the current one.</param>
-        /// <param name="exceptionGenerator">
-        ///     A selector which, in case of no match, generates the exception object to be thrown.</param>
-        /// <param name="matchCombiner">
-        ///     A selector which, in case of a match, generates the internal match information for the combined match given a
-        ///     match of the current regular expression and one of the <paramref name="expectation"/>.</param>
-        /// <returns>
-        ///     The resulting regular expression.</returns>
-        /// <remarks>
-        ///     Regular expressions created by this method cannot match backwards. The full set of affected methods is listed
-        ///     at <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch,
-        ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
-        protected TCombinedGenerex thenExpect<TOtherGenerex, TOtherMatch, TOtherGenerexMatch, TCombinedGenerex, TCombinedMatch, TCombinedGenerexMatch>(
-            GenerexBase<T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch> expectation,
-            Func<T[], int, TMatch, Exception> exceptionGenerator,
-            Func<T[], int, TMatch, TOtherMatch, TCombinedMatch> matchCombiner)
-            where TOtherGenerex : GenerexBase<T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch>
-            where TOtherGenerexMatch : GenerexMatch<T>
-            where TCombinedGenerex : GenerexBase<T, TCombinedMatch, TCombinedGenerex, TCombinedGenerexMatch>
-            where TCombinedGenerexMatch : GenerexMatch<T>
-        {
-            return GenerexBase<T, TCombinedMatch, TCombinedGenerex, TCombinedGenerexMatch>.Constructor(
-
-                // forward matcher: very much like .then(), but with an extra helper to throw the exception if the expectation is not met
-                (input, startIndex) => _forwardMatcher(input, startIndex).SelectMany(m => thenExpectHelper(
-                        expectation._forwardMatcher(input, startIndex + getLength(m)),
-                        input, startIndex, m, exceptionGenerator, matchCombiner)),
-
-                // backward matcher: impossible
-                (input, startIndex) =>
-                {
-                    throw new InvalidOperationException("A Generex created by .ThenExpect() cannot match backwards (i.e., cannot be used in MatchReverse, IsMatchReverse, MatchesReverse, ReplaceReverse, AndReverse, or zero-width look-behind assertions).");
-                }
-            );
-        }
-
-        private IEnumerable<TResultMatch> thenExpectHelper<TOtherMatch, TResultMatch>(
-            IEnumerable<TOtherMatch> expectationMatches, T[] input, int startIndex, TMatch prevMatch,
-            Func<T[], int, TMatch, Exception> exceptionGenerator, Func<T[], int, TMatch, TOtherMatch, TResultMatch> matchCombiner)
-        {
-            var prevLength = getLength(prevMatch);
-            using (var e = expectationMatches.GetEnumerator())
-            {
-                if (!e.MoveNext())
-                    throw exceptionGenerator(input, startIndex, prevMatch);
-                do
-                    yield return matchCombiner(input, startIndex, prevMatch, e.Current);
-                while (e.MoveNext());
-            }
-        }
-
         internal TGenerex expect(Func<Exception> exceptionGenerator)
         {
             return Constructor(
@@ -658,10 +588,15 @@ namespace RT.Generexes
                 (input, startIndex) => expectHelper(input, startIndex, exceptionGenerator),
 
                 // backward matcher: impossible
-                (input, startIndex) =>
-                {
-                    throw new InvalidOperationException("A Generex created by .ThenExpect() cannot match backwards (i.e., cannot be used in MatchReverse, IsMatchReverse, MatchesReverse, ReplaceReverse, AndReverse, or zero-width look-behind assertions).");
-                });
+                throwingBackwardMatcher);
+        }
+
+        /// <summary>
+        ///     Throws an <c>InvalidOperationException</c> indicating that backwards matching is not possible for this
+        ///     Generex.</summary>
+        protected IEnumerable<TMatch> throwingBackwardMatcher(T[] input, int startIndex)
+        {
+            throw new InvalidOperationException("A Generex created by .ThenExpect() cannot match backwards (i.e., cannot be used in MatchReverse, IsMatchReverse, MatchesReverse, ReplaceReverse, AndReverse, or zero-width look-behind assertions).");
         }
 
         private IEnumerable<TMatch> expectHelper(T[] input, int startIndex, Func<Exception> exceptionGenerator)
@@ -677,14 +612,81 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        ///     Returns a regular expression that matches this regular expression, then attempts to match the specified other
-        ///     regular expression and throws an exception if the second regular expression fails to match.</summary>
+        ///     Returns a regular expression that matches this regular expression, then attempts to match the specified
+        ///     sequence of other regular expressions and throws an exception if the sequence fails to match.</summary>
         /// <typeparam name="TOtherGenerex">
-        ///     The type of <paramref name="expectation"/>. (This is either <see cref="Generex{T}"/> or <see
+        ///     The type of regular expressions in the <paramref name="expectation"/> sequence. (This is either <see
+        ///     cref="Generex{T}"/> or <see cref="Stringerex"/>.)</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">
+        ///     The type of the match object of the regular expressions in the <paramref name="expectation"/>. (This is either
+        ///     <see cref="GenerexMatch{T}"/> or <see cref="StringerexMatch"/>.)</typeparam>
+        /// <param name="expectation">
+        ///     The sequence of regular expressions that are expected to match after the current one.</param>
+        /// <param name="exceptionGenerator">
+        ///     A selector which, in case of no match, generates the exception object to be thrown.</param>
+        /// <returns>
+        ///     The resulting regular expression.</returns>
+        /// <remarks>
+        ///     Regular expressions created by this method cannot match backwards. The full set of affected methods is listed
+        ///     at <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch,
+        ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
+        public TGenerex ThenExpect<TOtherGenerex, TOtherGenerexMatch>(Func<TGenerexMatch, Exception> exceptionGenerator, params GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>[] expectation)
+            where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T>
+        {
+            if (expectation == null || expectation.Contains(null))
+                throw new ArgumentNullException("expectation");
+            if (expectation.Length == 0)
+                return (TGenerex) this;
+            var expectation2 = expectation[0].Then(expectation.Skip(1));
+
+            return Constructor(
+                (input, startIndex) => _forwardMatcher(input, startIndex).SelectMany(m =>
+                {
+                    var otherGenerex = expectation2.expect(() => exceptionGenerator(createMatch(input, startIndex, m)));
+                    return otherGenerex._forwardMatcher(input, startIndex + getLength(m)).Select(m2 => add(m, m2));
+                }),
+                throwingBackwardMatcher
+            );
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches this regular expression, then attempts to match the specified
+        ///     sequence of other regular expressions and throws an exception if the sequence fails to match.</summary>
+        /// <typeparam name="TOtherGenerex">
+        ///     The type of regular expressions in the <paramref name="expectation"/> sequence. (This is either <see
+        ///     cref="Generex{T}"/> or <see cref="Stringerex"/>.)</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">
+        ///     The type of the match object of the regular expressions in the <paramref name="expectation"/>. (This is either
+        ///     <see cref="GenerexMatch{T}"/> or <see cref="StringerexMatch"/>.)</typeparam>
+        /// <param name="exceptionGenerator">
+        ///     A selector which, in case of no match, generates the exception object to be thrown.</param>
+        /// <param name="expectation">
+        ///     The sequence of regular expressions that are expected to match after the current one.</param>
+        /// <returns>
+        ///     The resulting regular expression.</returns>
+        /// <remarks>
+        ///     Regular expressions created by this method cannot match backwards. The full set of affected methods is listed
+        ///     at <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch,
+        ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
+        public TGenerex ThenExpect<TOtherGenerex, TOtherGenerexMatch>(IEnumerable<GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>> expectation, Func<TGenerexMatch, Exception> exceptionGenerator)
+            where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T>
+        {
+            if (expectation == null)
+                throw new ArgumentNullException("expectation");
+            return ThenExpect(exceptionGenerator, expectation.ToArray());
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches this regular expression, then attempts to match the specified other
+        ///     regular expression and throws an exception if the sequence fails to match.</summary>
+        /// <typeparam name="TOtherGenerex">
+        ///     The type of the <paramref name="expectation"/>. (This is either <see cref="Generex{T}"/> or <see
         ///     cref="Stringerex"/>.)</typeparam>
         /// <typeparam name="TOtherGenerexMatch">
-        ///     The type of the match object <paramref name="expectation"/>. (This is either <see cref="GenerexMatch{T}"/> or
-        ///     <see cref="StringerexMatch"/>.)</typeparam>
+        ///     The type of the match object of the <paramref name="expectation"/>. (This is either <see
+        ///     cref="GenerexMatch{T}"/> or <see cref="StringerexMatch"/>.)</typeparam>
         /// <param name="expectation">
         ///     The regular expression that is expected to match after the current one.</param>
         /// <param name="exceptionGenerator">
@@ -699,8 +701,7 @@ namespace RT.Generexes
             where TOtherGenerex : GenerexNoResultBase<T, TOtherGenerex, TOtherGenerexMatch>
             where TOtherGenerexMatch : GenerexMatch<T>
         {
-            return thenExpect<TOtherGenerex, int, TOtherGenerexMatch, TGenerex, TMatch, TGenerexMatch>(
-                expectation, (input, startIndex, match) => exceptionGenerator(createMatch(input, startIndex, match)), (input, startIndex, m1, m2) => add(m1, m2));
+            return ThenExpect(exceptionGenerator, new[] { expectation });
         }
 
         /// <summary>
@@ -718,7 +719,7 @@ namespace RT.Generexes
         ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
         public TGenerex ThenExpect(Func<TGenerexMatch, Exception> exceptionGenerator, params T[] elements)
         {
-            return ThenExpect(new Generex<T>(elements), exceptionGenerator);
+            return ThenExpect(exceptionGenerator, new Generex<T>(elements));
         }
 
         /// <summary>
@@ -813,6 +814,36 @@ namespace RT.Generexes
         public TGenerex ThenExpect(T element, Func<TGenerexMatch, Exception> exceptionGenerator)
         {
             return ThenExpect(new Generex<T>(element), exceptionGenerator);
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches this regular expression, uses a specified <paramref
+        ///     name="selector"/> to create a new regular expression from the match, attempts to match the new regular
+        ///     expression and throws an exception if the new regular expression fails to match.</summary>
+        /// <typeparam name="TOtherGenerex">
+        ///     Type of the regular expression generated by the <paramref name="selector"/>.</typeparam>
+        /// <typeparam name="TOtherMatch">
+        ///     Type of internal match information used by <typeparamref name="TOtherGenerex"/> (i.e. <c>int</c> or
+        ///     <c>LengthAndResult&lt;T&gt;</c>).</typeparam>
+        /// <typeparam name="TOtherGenerexMatch">
+        ///     Type of match object returned by matches of <typeparamref name="TOtherGenerex"/>.</typeparam>
+        /// <param name="selector">
+        ///     A delegate that creates a new regular expression from a match of the current regular expression.</param>
+        /// <param name="exceptionGenerator">
+        ///     A selector which, in case of no match, generates the exception object to be thrown.</param>
+        /// <returns>
+        ///     The resulting regular expression.</returns>
+        /// <remarks>
+        ///     Regular expressions created by this method cannot match backwards. The full set of affected methods is listed
+        ///     at <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.Then{TOtherGenerex, TOtherMatch,
+        ///     TOtherGenerexMatch}(Func{TGenerexMatch, GenerexBase{T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch}})"/>.</remarks>
+        public TOtherGenerex ThenExpect<TOtherGenerex, TOtherMatch, TOtherGenerexMatch>(Func<TGenerexMatch, GenerexBase<T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch>> selector, Func<TGenerexMatch, Exception> exceptionGenerator)
+            where TOtherGenerex : GenerexBase<T, TOtherMatch, TOtherGenerex, TOtherGenerexMatch>
+            where TOtherGenerexMatch : GenerexMatch<T>
+        {
+            if (selector == null)
+                throw new ArgumentNullException("selector");
+            return then<TOtherGenerex, TOtherMatch, TOtherGenerexMatch, TGenerexMatch>(m => selector(m).expect(() => exceptionGenerator(m)), createMatch);
         }
 
         /// <summary>
