@@ -13,7 +13,8 @@
     <FileAlignment>512</FileAlignment>
     <OutputPath>..\Builds\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>..\Builds\$(Configuration)\obj-$(AssemblyName)\</IntermediateOutputPath>
-    <BaseIntermediateOutputPath>..\Builds\$(Configuration)\obj-$(AssemblyName)\</BaseIntermediateOutputPath></PropertyGroup>
+    <BaseIntermediateOutputPath>..\Builds\$(Configuration)\obj-$(AssemblyName)\</BaseIntermediateOutputPath>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>

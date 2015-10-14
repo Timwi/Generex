@@ -225,7 +225,7 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, followed by the specified one, and
-        ///     generates a match object that combines the result of this regular expression with the match of the other.</summary>
+        ///     generates a result object that combines the result of this regular expression with the match of the other.</summary>
         public Stringerex<TCombined> Then<TCombined>(Stringerex other, Func<TResult, StringerexMatch, TCombined> selector)
         {
             return then<Stringerex, StringerexMatch, Stringerex<TCombined>, StringerexMatch<TCombined>, TCombined>(other, selector);
@@ -233,7 +233,7 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, followed by the specified one, and
-        ///     generates a match object that combines the result of this regular expression with the match of the other.</summary>
+        ///     generates a result object that combines the result of this regular expression with the match of the other.</summary>
         public Stringerex<TCombined> Then<TOther, TCombined>(Stringerex<TOther> other, Func<TResult, StringerexMatch<TOther>, TCombined> selector)
         {
             return then<Stringerex<TOther>, StringerexMatch<TOther>, TOther, Stringerex<TCombined>, StringerexMatch<TCombined>, TCombined>(other, selector);
@@ -248,7 +248,7 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, followed by the specified one, and
-        ///     generates a match object that combines the original two matches.</summary>
+        ///     generates a result object that combines the original two matches.</summary>
         public Stringerex<TCombined> ThenRaw<TOther, TCombined>(Stringerex<TOther> other, Func<TResult, TOther, TCombined> selector)
         {
             return thenRaw<Stringerex<TOther>, StringerexMatch<TOther>, TOther, Stringerex<TCombined>, StringerexMatch<TCombined>, TCombined>(other, selector);
@@ -256,8 +256,8 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, then attempts to match the specified other
-        ///     regular expression and throws an exception if the second regular expression fails to match; otherwise, a match
-        ///     object is generated from the current match object and the second match.</summary>
+        ///     regular expression and throws an exception if the second regular expression fails to match; otherwise, a
+        ///     result object is generated from the current result object and the second match.</summary>
         /// <typeparam name="TCombined">
         ///     Type of the result object for the resulting regular expression.</typeparam>
         /// <param name="expectation">
@@ -282,8 +282,8 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, then attempts to match the specified other
-        ///     regular expression and throws an exception if the second regular expression fails to match; otherwise, a match
-        ///     object is generated from the current match object and the second match.</summary>
+        ///     regular expression and throws an exception if the second regular expression fails to match; otherwise, a
+        ///     result object is generated from the current result object and the second match.</summary>
         /// <typeparam name="TOther">
         ///     Type of the result object of the <paramref name="expectation"/>.</typeparam>
         /// <typeparam name="TCombined">
@@ -310,8 +310,8 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, then attempts to match the specified other
-        ///     regular expression and throws an exception if the second regular expression fails to match; otherwise, a match
-        ///     object is generated from the match objects of the two matches.</summary>
+        ///     regular expression and throws an exception if the second regular expression fails to match; otherwise, a
+        ///     result object is generated from the result objects of the two matches.</summary>
         /// <typeparam name="TOther">
         ///     Type of the result object of the <paramref name="expectation"/>.</typeparam>
         /// <typeparam name="TCombined">

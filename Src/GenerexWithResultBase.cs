@@ -223,7 +223,7 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, followed by the specified one, and
-        ///     generates a match object that combines the original two matches.</summary>
+        ///     generates a result object that combines the original two matches.</summary>
         protected TCombinedGenerex thenRaw<TOtherGenerex, TOtherGenerexMatch, TOtherResult, TCombinedGenerex, TCombinedGenerexMatch, TCombinedResult>(
             GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch> other, Func<TResult, TOtherResult, TCombinedResult> selector)
             where TOtherGenerex : GenerexWithResultBase<T, TOtherResult, TOtherGenerex, TOtherGenerexMatch>

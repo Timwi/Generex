@@ -58,7 +58,7 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, followed by the specified one, and
-        ///     generates a match object that combines the result of this regular expression with the match of the other.</summary>
+        ///     generates a result object that combines the result of this regular expression with the match of the other.</summary>
         public Generex<T, TCombined> Then<TCombined>(Generex<T> other, Func<TResult, GenerexMatch<T>, TCombined> selector)
         {
             return then<Generex<T>, GenerexMatch<T>, Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(other, selector);
@@ -66,7 +66,7 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, followed by the specified one, and
-        ///     generates a match object that combines the result of this regular expression with the match of the other.</summary>
+        ///     generates a result object that combines the result of this regular expression with the match of the other.</summary>
         public Generex<T, TCombined> Then<TOther, TCombined>(Generex<T, TOther> other, Func<TResult, GenerexMatch<T, TOther>, TCombined> selector)
         {
             return then<Generex<T, TOther>, GenerexMatch<T, TOther>, TOther, Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(other, selector);
@@ -74,7 +74,7 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, followed by the specified one, and
-        ///     generates a match object that combines the original two matches.</summary>
+        ///     generates a result object that combines the original two matches.</summary>
         public Generex<T, TCombined> ThenRaw<TOther, TCombined>(Generex<T, TOther> other, Func<TResult, TOther, TCombined> selector)
         {
             return thenRaw<Generex<T, TOther>, GenerexMatch<T, TOther>, TOther, Generex<T, TCombined>, GenerexMatch<T, TCombined>, TCombined>(other, selector);
@@ -82,8 +82,8 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, then attempts to match the specified other
-        ///     regular expression and throws an exception if the second regular expression fails to match; otherwise, a match
-        ///     object is generated from the current match object and the second match.</summary>
+        ///     regular expression and throws an exception if the second regular expression fails to match; otherwise, a
+        ///     result object is generated from the current result object and the second match.</summary>
         /// <typeparam name="TCombined">
         ///     Type of the result object for the resulting regular expression.</typeparam>
         /// <param name="expectation">
@@ -108,8 +108,8 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, then attempts to match the specified other
-        ///     regular expression and throws an exception if the second regular expression fails to match; otherwise, a match
-        ///     object is generated from the current match object and the second match.</summary>
+        ///     regular expression and throws an exception if the second regular expression fails to match; otherwise, a
+        ///     result object is generated from the current result object and the second match.</summary>
         /// <typeparam name="TOther">
         ///     Type of the result object of the <paramref name="expectation"/>.</typeparam>
         /// <typeparam name="TCombined">
@@ -136,8 +136,8 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression, then attempts to match the specified other
-        ///     regular expression and throws an exception if the second regular expression fails to match; otherwise, a match
-        ///     object is generated from the match objects of the two matches.</summary>
+        ///     regular expression and throws an exception if the second regular expression fails to match; otherwise, a
+        ///     result object is generated from the result objects of the two matches.</summary>
         /// <typeparam name="TOther">
         ///     Type of the result object of the <paramref name="expectation"/>.</typeparam>
         /// <typeparam name="TCombined">
@@ -252,7 +252,7 @@ namespace RT.Generexes
         ///     The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see
         ///     cref="Stringerex{TResult}"/>.)</typeparam>
         /// <typeparam name="TOtherGenerexMatch">
-        ///     The type of the match object for the other regular expression. (This is either <see
+        ///     The type of the result object associated with the other regular expression. (This is either <see
         ///     cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
         /// <typeparam name="TCombinedResult">
         ///     The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
@@ -286,7 +286,7 @@ namespace RT.Generexes
         ///     The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see
         ///     cref="Stringerex{TResult}"/>.)</typeparam>
         /// <typeparam name="TOtherGenerexMatch">
-        ///     The type of the match object for the other regular expression. (This is either <see
+        ///     The type of the result object associated with the other regular expression. (This is either <see
         ///     cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
         /// <typeparam name="TCombinedResult">
         ///     The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
@@ -320,7 +320,7 @@ namespace RT.Generexes
         ///     The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see
         ///     cref="Stringerex{TResult}"/>.)</typeparam>
         /// <typeparam name="TOtherGenerexMatch">
-        ///     The type of the match object for the other regular expression. (This is either <see
+        ///     The type of the result object associated with the other regular expression. (This is either <see
         ///     cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
         /// <typeparam name="TCombinedResult">
         ///     The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
@@ -354,7 +354,7 @@ namespace RT.Generexes
         ///     The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see
         ///     cref="Stringerex{TResult}"/>.)</typeparam>
         /// <typeparam name="TOtherGenerexMatch">
-        ///     The type of the match object for the other regular expression. (This is either <see
+        ///     The type of the result object associated with the other regular expression. (This is either <see
         ///     cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
         /// <typeparam name="TCombinedResult">
         ///     The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
@@ -383,7 +383,7 @@ namespace RT.Generexes
         ///     The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see
         ///     cref="Stringerex{TResult}"/>.)</typeparam>
         /// <typeparam name="TOtherGenerexMatch">
-        ///     The type of the match object for the other regular expression. (This is either <see
+        ///     The type of the result object associated with the other regular expression. (This is either <see
         ///     cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
         /// <typeparam name="TCombinedResult">
         ///     The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
@@ -412,7 +412,7 @@ namespace RT.Generexes
         ///     The type of the other regular expression. (This is either <see cref="Generex{T,TResult}"/> or <see
         ///     cref="Stringerex{TResult}"/>.)</typeparam>
         /// <typeparam name="TOtherGenerexMatch">
-        ///     The type of the match object for the other regular expression. (This is either <see
+        ///     The type of the result object associated with the other regular expression. (This is either <see
         ///     cref="GenerexMatch{T,TResult}"/> or <see cref="StringerexMatch{TResult}"/>.)</typeparam>
         /// <typeparam name="TCombinedResult">
         ///     The type of the combined result object returned by <paramref name="selector"/>.</typeparam>
