@@ -22,25 +22,25 @@ namespace RT.Generexes.Tests
             Assert.Throws<ArgumentNullException>(() => { _g.ThenExpect(_excGen, elements: (IEnumerable<int>) null); });
             Assert.Throws<ArgumentNullException>(() => { _g.ThenExpect(_excGen, comparer: null, elements: new int[] { }); });
             Assert.Throws<ArgumentNullException>(() => { _g.ThenExpect(_excGen, comparer: null, elements: (IEnumerable<int>) new int[] { }); });
-            Assert.Throws<ArgumentNullException>(() => { _g.ThenExpect(_excGen, comparer: new Mod7IntEqualityComparer(), elements: (int[]) null); });
-            Assert.Throws<ArgumentNullException>(() => { _g.ThenExpect(_excGen, comparer: new Mod7IntEqualityComparer(), elements: (IEnumerable<int>) null); });
+            Assert.Throws<ArgumentNullException>(() => { _g.ThenExpect(_excGen, comparer: _mod7, elements: (int[]) null); });
+            Assert.Throws<ArgumentNullException>(() => { _g.ThenExpect(_excGen, comparer: _mod7, elements: (IEnumerable<int>) null); });
 
             Assert.Throws<ArgumentNullException>(() => { _gr.ThenExpect(_excGen, elements: (int[]) null); });
             Assert.Throws<ArgumentNullException>(() => { _gr.ThenExpect(_excGen, elements: (IEnumerable<int>) null); });
             Assert.Throws<ArgumentNullException>(() => { _gr.ThenExpect(_excGen, comparer: null, elements: new int[] { }); });
             Assert.Throws<ArgumentNullException>(() => { _gr.ThenExpect(_excGen, comparer: null, elements: (IEnumerable<int>) new int[] { }); });
-            Assert.Throws<ArgumentNullException>(() => { _gr.ThenExpect(_excGen, comparer: new Mod7IntEqualityComparer(), elements: (int[]) null); });
-            Assert.Throws<ArgumentNullException>(() => { _gr.ThenExpect(_excGen, comparer: new Mod7IntEqualityComparer(), elements: (IEnumerable<int>) null); });
+            Assert.Throws<ArgumentNullException>(() => { _gr.ThenExpect(_excGen, comparer: _mod7, elements: (int[]) null); });
+            Assert.Throws<ArgumentNullException>(() => { _gr.ThenExpect(_excGen, comparer: _mod7, elements: (IEnumerable<int>) null); });
 
             AssertMatches(_g.ThenExpect(_excGen, 24567837, 1701), _input, True, False, InvOp, True, InvOp, new object[] { 0, 3 }, new object[] { 0, 3 }, _expectInvOp, 1, _expInvOp);
             AssertMatches(_g.ThenExpect(_excGen, (IEnumerable<int>) new[] { 24567837, 1701 }), _input, True, False, InvOp, True, InvOp, new object[] { 0, 3 }, new object[] { 0, 3 }, _expectInvOp, 1, _expInvOp);
-            AssertMatches(_g.ThenExpect(_excGen, new Mod7IntEqualityComparer(), 0, 0), _input, True, False, InvOp, True, InvOp, new object[] { 0, 3 }, new object[] { 0, 3 }, _expectInvOp, 1, _expInvOp);
-            AssertMatches(_g.ThenExpect(_excGen, new Mod7IntEqualityComparer(), (IEnumerable<int>) new[] { 0, 0 }), _input, True, False, InvOp, True, InvOp, new object[] { 0, 3 }, new object[] { 0, 3 }, _expectInvOp, 1, _expInvOp);
+            AssertMatches(_g.ThenExpect(_excGen, _mod7, 0, 0), _input, True, False, InvOp, True, InvOp, new object[] { 0, 3 }, new object[] { 0, 3 }, _expectInvOp, 1, _expInvOp);
+            AssertMatches(_g.ThenExpect(_excGen, _mod7, (IEnumerable<int>) new[] { 0, 0 }), _input, True, False, InvOp, True, InvOp, new object[] { 0, 3 }, new object[] { 0, 3 }, _expectInvOp, 1, _expInvOp);
 
             AssertMatches(_gr.ThenExpect(_excGen, 24567837, 1701), _input, True, False, InvOp, True, InvOp, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, _expectInvOp, 1, _expInvOp);
             AssertMatches(_gr.ThenExpect(_excGen, (IEnumerable<int>) new[] { 24567837, 1701 }), _input, True, False, InvOp, True, InvOp, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, _expectInvOp, 1, _expInvOp);
-            AssertMatches(_gr.ThenExpect(_excGen, new Mod7IntEqualityComparer(), 0, 0), _input, True, False, InvOp, True, InvOp, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, _expectInvOp, 1, _expInvOp);
-            AssertMatches(_gr.ThenExpect(_excGen, new Mod7IntEqualityComparer(), (IEnumerable<int>) new[] { 0, 0 }), _input, True, False, InvOp, True, InvOp, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, _expectInvOp, 1, _expInvOp);
+            AssertMatches(_gr.ThenExpect(_excGen, _mod7, 0, 0), _input, True, False, InvOp, True, InvOp, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, _expectInvOp, 1, _expInvOp);
+            AssertMatches(_gr.ThenExpect(_excGen, _mod7, (IEnumerable<int>) new[] { 0, 0 }), _input, True, False, InvOp, True, InvOp, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, _expectInvOp, 1, _expInvOp);
         }
 
         [Test]

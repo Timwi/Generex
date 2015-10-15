@@ -55,8 +55,8 @@ namespace RT.Generexes.Tests
             AssertMatches(Generex.InAnyOrder(24567837, 47), _input, True, False, False, True, True, new object[] { 0, 2 }, new object[] { 0, 2 }, new object[] { 0, 2 }, 1, 1);
             AssertMatches(Generex.InAnyOrder(new Generex<int>(i => i % 7 == 5), new Generex<int>(i => i % 7 == 0)), _input, True, False, False, True, True, new object[] { 0, 2 }, new object[] { 0, 2 }, new object[] { 0, 2 }, 1, 1);
             AssertMatches(Generex.InAnyOrder(new Generex<int>(i => i % 7 == 0), new Generex<int>(i => i % 7 == 5)), _input, True, False, False, True, True, new object[] { 0, 2 }, new object[] { 0, 2 }, new object[] { 0, 2 }, 1, 1);
-            AssertMatches(Generex.InAnyOrder(new Mod7IntEqualityComparer(), 5, 0), _input, True, False, False, True, True, new object[] { 0, 2 }, new object[] { 0, 2 }, new object[] { 0, 2 }, 1, 1);
-            AssertMatches(Generex.InAnyOrder(new Mod7IntEqualityComparer(), 0, 5), _input, True, False, False, True, True, new object[] { 0, 2 }, new object[] { 0, 2 }, new object[] { 0, 2 }, 1, 1);
+            AssertMatches(Generex.InAnyOrder(_mod7, 5, 0), _input, True, False, False, True, True, new object[] { 0, 2 }, new object[] { 0, 2 }, new object[] { 0, 2 }, 1, 1);
+            AssertMatches(Generex.InAnyOrder(_mod7, 0, 5), _input, True, False, False, True, True, new object[] { 0, 2 }, new object[] { 0, 2 }, new object[] { 0, 2 }, 1, 1);
         }
 
         [Test]
@@ -82,11 +82,11 @@ namespace RT.Generexes.Tests
             Assert.Throws<ArgumentNullException>(() => { Generex.New<int>(generexes: null); });
             Assert.Throws<ArgumentNullException>(() => { Generex.New<int>(predicate: null); });
             Assert.Throws<ArgumentNullException>(() => { Generex.New<int>(comparer: null, elements: new[] { 1 }); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.New<int>(comparer: new Mod7IntEqualityComparer(), elements: null); });
+            Assert.Throws<ArgumentNullException>(() => { Generex.New<int>(comparer: _mod7, elements: null); });
             AssertMatches(Generex.New(47, 24567837), _input, True, False, False, True, True, new object[] { 0, 2 }, new object[] { 0, 2 }, new object[] { 0, 2 }, 1, 1);
             AssertMatches(Generex.New(new Generex<int>(i => i % 7 == 5), new Generex<int>(i => i % 7 == 0)), _input, True, False, False, True, True, new object[] { 0, 2 }, new object[] { 0, 2 }, new object[] { 0, 2 }, 1, 1);
             AssertMatches(Generex.New<int>(i => i % 7 == 5), _input, True, False, True, False, True, new object[] { 0, 1 }, null, new object[] { 0, 1 }, 1, 1);
-            AssertMatches(Generex.New(new Mod7IntEqualityComparer(), 5, 0), _input, True, False, False, True, True, new object[] { 0, 2 }, new object[] { 0, 2 }, new object[] { 0, 2 }, 1, 1);
+            AssertMatches(Generex.New(_mod7, 5, 0), _input, True, False, False, True, True, new object[] { 0, 2 }, new object[] { 0, 2 }, new object[] { 0, 2 }, 1, 1);
         }
 
         [Test]
@@ -94,46 +94,9 @@ namespace RT.Generexes.Tests
         {
             Assert.Throws<ArgumentNullException>(() => { Generex.Not<int>(elements: null); });
             Assert.Throws<ArgumentNullException>(() => { Generex.Not<int>(comparer: null, elements: new[] { 1 }); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.Not<int>(comparer: new Mod7IntEqualityComparer(), elements: null); });
+            Assert.Throws<ArgumentNullException>(() => { Generex.Not<int>(comparer: _mod7, elements: null); });
             AssertMatches(Generex.Not(0, 1, 2, 3), _input, True, True, True, False, True, new object[] { 0, 1 }, null, new object[] { 1, 1 }, 2, 2);
-            AssertMatches(Generex.Not(new Mod7IntEqualityComparer(), 0, 1, 2, 3), _input, True, False, True, False, True, new object[] { 0, 1 }, null, new object[] { 0, 1 }, 1, 1);
-        }
-
-        [Test]
-        public void TestOrDefault()
-        {
-            // OrDefault, OrDefaultGreedy, OrNull, OrNullGreedy
-            Assert.Throws<ArgumentNullException>(() => { Generex.OrDefault<int, int>(inner: null); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.OrDefaultGreedy<int, int>(inner: null); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.OrNull<int, int>(inner: null); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.OrNullGreedy<int, int>(inner: null); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.OrDefault<int>(inner: null); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.OrDefaultGreedy<int>(inner: null); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.OrNull<int>(inner: null); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.OrNullGreedy<int>(inner: null); });
-            AssertMatches(Generex.New(47).Process(m => 1).OrDefault(), _input, True, True, True, False, True, new object[] { 0, 0, 0 }, null, new object[] { 2, 0, 0 }, 3, 3);
-            AssertMatches(Generex.New(47).Process(m => 1).OrDefaultGreedy(), _input, True, True, True, False, True, new object[] { 0, 1, 1 }, null, new object[] { 2, 0, 0 }, 3, 3);
-            AssertMatches(Generex.New(47).Process(m => 1).OrNull(), _input, True, True, True, False, True, new object[] { 0, 0, null }, null, new object[] { 2, 0, null }, 3, 3);
-            AssertMatches(Generex.New(47).Process(m => 1).OrNullGreedy(), _input, True, True, True, False, True, new object[] { 0, 1, 1 }, null, new object[] { 2, 0, null }, 3, 3);
-            AssertMatches(Stringerex.New('M').Process(m => 1).OrDefault(), "MLP", True, True, True, False, True, new object[] { 0, 0, 0 }, null, new object[] { 3, 0, 0 }, 4, 4);
-            AssertMatches(Stringerex.New('M').Process(m => 1).OrDefaultGreedy(), "MLP", True, True, True, False, True, new object[] { 0, 1, 1 }, null, new object[] { 3, 0, 0 }, 4, 4);
-            AssertMatches(Stringerex.New('M').Process(m => 1).OrNull(), "MLP", True, True, True, False, True, new object[] { 0, 0, null }, null, new object[] { 3, 0, null }, 4, 4);
-            AssertMatches(Stringerex.New('M').Process(m => 1).OrNullGreedy(), "MLP", True, True, True, False, True, new object[] { 0, 1, 1 }, null, new object[] { 3, 0, null }, 4, 4);
-        }
-
-        [Test]
-        public void TestOrs()
-        {
-            Assert.Throws<ArgumentNullException>(() => { Generex.Ors((Generex<int>) null); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.Ors((Generex<int>[]) null); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.Ors((IEnumerable<Generex<int>>) null); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.Ors((Generex<int, int>) null); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.Ors((Generex<int, int>[]) null); });
-            Assert.Throws<ArgumentNullException>(() => { Generex.Ors((IEnumerable<Generex<int, int>>) null); });
-            AssertMatches(Generex.Ors(Generex.New(47), Generex.New(666)), _input, True, False, True, False, True, new object[] { 0, 1 }, null, new object[] { 0, 1 }, 1, 1);
-            AssertMatches(Generex.Ors((IEnumerable<Generex<int>>) new[] { Generex.New(47), Generex.New(666) }), _input, True, False, True, False, True, new object[] { 0, 1 }, null, new object[] { 0, 1 }, 1, 1);
-            AssertMatches(Generex.Ors(Generex.New(47).Process(m => 1), Generex.New(666).Process(m => 2)), _input, True, False, True, False, True, new object[] { 0, 1, 1 }, null, new object[] { 0, 1, 1 }, 1, 1);
-            AssertMatches(Generex.Ors((IEnumerable<Generex<int, int>>) new[] { Generex.New(47).Process(m => 1), Generex.New(666).Process(m => 2) }), _input, True, False, True, False, True, new object[] { 0, 1, 1 }, null, new object[] { 0, 1, 1 }, 1, 1);
+            AssertMatches(Generex.Not(_mod7, 0, 1, 2, 3), _input, True, False, True, False, True, new object[] { 0, 1 }, null, new object[] { 0, 1 }, 1, 1);
         }
 
         [Test]
@@ -146,7 +109,7 @@ namespace RT.Generexes.Tests
             Assert.AreEqual(1, g.RawMatchReverseNullable(_input));
             Assert.AreEqual(1, g.RawMatchReverseNullable(_input, 1));
             Assert.AreEqual(null, g.RawMatchReverseNullable(_input, 0));
-            var s = Stringerex.New('M').Process(m => 1);
+            var s = new Stringerex('M').Process(m => 1);
             Assert.AreEqual(1, s.RawMatchNullable("MLP"));
             Assert.AreEqual(null, s.RawMatchNullable("MLP", 1));
             Assert.AreEqual(1, s.RawMatchReverseNullable("MLP"));

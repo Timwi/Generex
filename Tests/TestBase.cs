@@ -29,6 +29,13 @@ namespace RT.Generexes.Tests
         protected Generex<int, int> _gr = new Generex<int>(47).Process(_ => 1);
         protected Stringerex _s = new Stringerex('M');
         protected Stringerex<int> _sr = new Stringerex('M').Process(_ => 1);
+        protected Generex<int> _gn = new Generex<int>(666);
+        protected Generex<int, int> _gnr = new Generex<int>(666).Process(_ => 2);
+        protected Stringerex _sn = new Stringerex('Q');
+        protected Stringerex<int> _snr = new Stringerex('Q').Process(_ => 2);
+
+        protected IEqualityComparer<int> _mod7 = new Mod7IntEqualityComparer();
+        protected IEqualityComparer<char> _ci = new CaseInsensitiveCharEqualityComparer();
 
         protected int[] _input = new int[] { 47, 24567837, 1701 };
 

@@ -41,11 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestOr.cs" />
     <Compile Include="TestMatches.cs" />
     <Compile Include="TestOperators.cs" />
     <Compile Include="TestPolymorphism.cs" />
     <Compile Include="TestThenExpect.cs" />
-    <Compile Include="Mod7IntEqualityComparer.cs" />
+    <Compile Include="Comparers.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="Expectation.cs" />
     <Compile Include="ExpectedException.cs" />

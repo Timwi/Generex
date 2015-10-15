@@ -18,25 +18,25 @@ namespace RT.Generexes.Tests
             Assert.Throws<ArgumentNullException>(() => { _g.Then(elements: (IEnumerable<int>) null); });
             Assert.Throws<ArgumentNullException>(() => { _g.Then(comparer: null, elements: new int[] { }); });
             Assert.Throws<ArgumentNullException>(() => { _g.Then(comparer: null, elements: (IEnumerable<int>) new int[] { }); });
-            Assert.Throws<ArgumentNullException>(() => { _g.Then(comparer: new Mod7IntEqualityComparer(), elements: (int[]) null); });
-            Assert.Throws<ArgumentNullException>(() => { _g.Then(comparer: new Mod7IntEqualityComparer(), elements: (IEnumerable<int>) null); });
+            Assert.Throws<ArgumentNullException>(() => { _g.Then(comparer: _mod7, elements: (int[]) null); });
+            Assert.Throws<ArgumentNullException>(() => { _g.Then(comparer: _mod7, elements: (IEnumerable<int>) null); });
 
             Assert.Throws<ArgumentNullException>(() => { _gr.Then(elements: (int[]) null); });
             Assert.Throws<ArgumentNullException>(() => { _gr.Then(elements: (IEnumerable<int>) null); });
             Assert.Throws<ArgumentNullException>(() => { _gr.Then(comparer: null, elements: new int[] { }); });
             Assert.Throws<ArgumentNullException>(() => { _gr.Then(comparer: null, elements: (IEnumerable<int>) new int[] { }); });
-            Assert.Throws<ArgumentNullException>(() => { _gr.Then(comparer: new Mod7IntEqualityComparer(), elements: (int[]) null); });
-            Assert.Throws<ArgumentNullException>(() => { _gr.Then(comparer: new Mod7IntEqualityComparer(), elements: (IEnumerable<int>) null); });
+            Assert.Throws<ArgumentNullException>(() => { _gr.Then(comparer: _mod7, elements: (int[]) null); });
+            Assert.Throws<ArgumentNullException>(() => { _gr.Then(comparer: _mod7, elements: (IEnumerable<int>) null); });
 
             AssertMatches(_g.Then(24567837, 1701), _input, True, False, False, True, True, new object[] { 0, 3 }, new object[] { 0, 3 }, new object[] { 0, 3 }, 1, 1);
             AssertMatches(_g.Then((IEnumerable<int>) new[] { 24567837, 1701 }), _input, True, False, False, True, True, new object[] { 0, 3 }, new object[] { 0, 3 }, new object[] { 0, 3 }, 1, 1);
-            AssertMatches(_g.Then(new Mod7IntEqualityComparer(), 0, 0), _input, True, False, False, True, True, new object[] { 0, 3 }, new object[] { 0, 3 }, new object[] { 0, 3 }, 1, 1);
-            AssertMatches(_g.Then(new Mod7IntEqualityComparer(), (IEnumerable<int>) new[] { 0, 0 }), _input, True, False, False, True, True, new object[] { 0, 3 }, new object[] { 0, 3 }, new object[] { 0, 3 }, 1, 1);
+            AssertMatches(_g.Then(_mod7, 0, 0), _input, True, False, False, True, True, new object[] { 0, 3 }, new object[] { 0, 3 }, new object[] { 0, 3 }, 1, 1);
+            AssertMatches(_g.Then(_mod7, (IEnumerable<int>) new[] { 0, 0 }), _input, True, False, False, True, True, new object[] { 0, 3 }, new object[] { 0, 3 }, new object[] { 0, 3 }, 1, 1);
 
             AssertMatches(_gr.Then(24567837, 1701), _input, True, False, False, True, True, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, 1, 1);
             AssertMatches(_gr.Then((IEnumerable<int>) new[] { 24567837, 1701 }), _input, True, False, False, True, True, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, 1, 1);
-            AssertMatches(_gr.Then(new Mod7IntEqualityComparer(), 0, 0), _input, True, False, False, True, True, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, 1, 1);
-            AssertMatches(_gr.Then(new Mod7IntEqualityComparer(), (IEnumerable<int>) new[] { 0, 0 }), _input, True, False, False, True, True, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, 1, 1);
+            AssertMatches(_gr.Then(_mod7, 0, 0), _input, True, False, False, True, True, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, 1, 1);
+            AssertMatches(_gr.Then(_mod7, (IEnumerable<int>) new[] { 0, 0 }), _input, True, False, False, True, True, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, new object[] { 0, 3, 1 }, 1, 1);
         }
 
         [Test]
