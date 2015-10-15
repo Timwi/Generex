@@ -18,9 +18,9 @@ namespace RT.Generexes.Tests
             Assert.Throws<ArgumentNullException>(() => { _g.Throw<string>(null); });
             Assert.Throws<ArgumentNullException>(() => { _gr.Throw(null); });
 
-            Assert.Throws<ExpectedException>(() => { _g.Throw(m => { throw new ExpectedException(); }).Match(_input); });
-            Assert.Throws<ExpectedException>(() => { _g.Throw<string>(m => { throw new ExpectedException(); }).Match(_input); });
-            Assert.Throws<ExpectedException>(() => { _gr.Throw(m => { throw new ExpectedException(); }).Match(_input); });
+            Assert.Throws<ExpectedException>(() => { _g.Throw(m => new ExpectedException()).Match(_input); });
+            Assert.Throws<ExpectedException>(() => { _g.Throw<string>(m => new ExpectedException()).Match(_input); });
+            Assert.Throws<ExpectedException>(() => { _gr.Throw(m => new ExpectedException()).Match(_input); });
         }
     }
 }
