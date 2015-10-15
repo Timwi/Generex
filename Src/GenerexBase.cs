@@ -43,6 +43,21 @@ namespace RT.Generexes
             }
         }
 
+        /// <summary>
+        ///     Returns a regular expression that never matches (cf. <c>(?!)</c> in traditional regular expression syntax).</summary>
+        /// <seealso cref="Generex.CreateFailGenerex"/>
+        public static TGenerex Fail
+        {
+            get
+            {
+                if (_failCache != null)
+                    return _failCache;
+                matcher matcher = (input, startIndex) => Enumerable.Empty<TMatch>();
+                return (_failCache = Constructor(matcher, matcher));
+            }
+        }
+        private static TGenerex _failCache;
+
         /// <summary>Retrieves the length of the specified <paramref name="match"/>.</summary>
         internal abstract int getLength(TMatch match);
         /// <summary>
@@ -886,7 +901,7 @@ namespace RT.Generexes
         {
             if (other == null || other.Contains(null))
                 throw new ArgumentNullException("other");
-            return other.Aggregate((prev, next) => prev.Or(next));
+            return other.Length == 0 ? Fail : other.Aggregate((prev, next) => prev.Or(next));
         }
 
         /// <summary>
