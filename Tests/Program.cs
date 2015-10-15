@@ -13,7 +13,8 @@ namespace RT.Generexes.Tests
     {
         static void Main(string[] args)
         {
-            Console.OutputEncoding = Encoding.UTF8;
+            try { Console.OutputEncoding = Encoding.UTF8; }
+            catch { }
 
             NUnitDirect.RunTestsOnAssembly(typeof(TestsProgram).Assembly);
 

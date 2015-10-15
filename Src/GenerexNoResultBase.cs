@@ -673,18 +673,37 @@ namespace RT.Generexes
         }
 
         /// <summary>Returns a regular expression that matches the first regular expression followed by the second.</summary>
-        public static TGenerex operator +(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, GenerexNoResultBase<T, TGenerex, TGenerexMatch> two) { return one.Then(two); }
+        public static TGenerex operator +(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, GenerexNoResultBase<T, TGenerex, TGenerexMatch> two)
+        {
+            if (one == null)
+                throw new ArgumentNullException("one");
+            if (two == null)
+                throw new ArgumentNullException("two");
+            return one.Then(two);
+        }
 
         /// <summary>
         ///     Returns a regular expression that matches the specified regular expression (first operand) followed by the
         ///     specified element (second operand).</summary>
-        public static TGenerex operator +(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, T two) { return one.Then(two); }
+        public static TGenerex operator +(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, T two)
+        {
+            if (one == null)
+                throw new ArgumentNullException("one");
+            if (two == null)
+                throw new ArgumentNullException("two");
+            return one.Then(two);
+        }
 
         /// <summary>
         ///     Returns a regular expression that matches the specified element (first operand) followed by the specified
         ///     regular expression (second operand).</summary>
         public static TGenerex operator +(T one, GenerexNoResultBase<T, TGenerex, TGenerexMatch> two)
         {
+            if (one == null)
+                throw new ArgumentNullException("one");
+            if (two == null)
+                throw new ArgumentNullException("two");
+            
             return Constructor(
                 then(elementMatcher(one, EqualityComparer<T>.Default, false), two._forwardMatcher),
                 then(two._backwardMatcher, elementMatcher(one, EqualityComparer<T>.Default, true)));
@@ -693,13 +712,25 @@ namespace RT.Generexes
         /// <summary>
         ///     Returns a regular expression that matches the specified regular expression (first operand) followed by the
         ///     specified element (second operand).</summary>
-        public static TGenerex operator +(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, Predicate<T> two) { return one.Then(two); }
+        public static TGenerex operator +(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, Predicate<T> two)
+        {
+            if (one == null)
+                throw new ArgumentNullException("one");
+            if (two == null)
+                throw new ArgumentNullException("two");
+            return one.Then(two);
+        }
 
         /// <summary>
         ///     Returns a regular expression that matches the specified element (first operand) followed by the specified
         ///     regular expression (second operand).</summary>
         public static TGenerex operator +(Predicate<T> one, GenerexNoResultBase<T, TGenerex, TGenerexMatch> two)
         {
+            if (one == null)
+                throw new ArgumentNullException("one");
+            if (two == null)
+                throw new ArgumentNullException("two");
+            
             return Constructor(
                 then(forwardPredicateMatcher(one), two._forwardMatcher),
                 then(two._backwardMatcher, backwardPredicateMatcher(one)));
@@ -708,18 +739,33 @@ namespace RT.Generexes
         /// <summary>
         ///     Returns a regular expression that matches either one of the specified regular expressions (cf. <c>|</c> in
         ///     traditional regular expression syntax).</summary>
-        public static TGenerex operator |(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, TGenerex two) { return one.Or(two); }
+        public static TGenerex operator |(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, TGenerex two)
+        {
+            if (one == null)
+                throw new ArgumentNullException("one");
+            if (two == null)
+                throw new ArgumentNullException("two");
+            return one.Or(two);
+        }
 
         /// <summary>
         ///     Returns a regular expression that matches either the specified regular expression (first operand) or the
         ///     specified element (second operand) (cf. <c>|</c> in traditional regular expression syntax).</summary>
-        public static TGenerex operator |(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, T two) { return one.Or(two); }
+        public static TGenerex operator |(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, T two)
+        {
+            if (one == null)
+                throw new ArgumentNullException("one");
+            return one.Or(two);
+        }
 
         /// <summary>
         ///     Returns a regular expression that matches either the specified element (first operand) or the specified
         ///     regular expression (second operand) (cf. <c>|</c> in traditional regular expression syntax).</summary>
         public static TGenerex operator |(T one, GenerexNoResultBase<T, TGenerex, TGenerexMatch> two)
         {
+            if (two == null)
+                throw new ArgumentNullException("two");
+            
             return Constructor(
                 or(elementMatcher(one, EqualityComparer<T>.Default, false), two._forwardMatcher),
                 or(elementMatcher(one, EqualityComparer<T>.Default, true), two._backwardMatcher));
@@ -729,7 +775,14 @@ namespace RT.Generexes
         ///     Returns a regular expression that matches either the specified regular expression (first operand) or a single
         ///     element that satisfies the specified predicate (second operand) (cf. <c>|</c> in traditional regular
         ///     expression syntax).</summary>
-        public static TGenerex operator |(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, Predicate<T> two) { return one.Or(two); }
+        public static TGenerex operator |(GenerexNoResultBase<T, TGenerex, TGenerexMatch> one, Predicate<T> two)
+        {
+            if (one == null)
+                throw new ArgumentNullException("one");
+            if (two == null)
+                throw new ArgumentNullException("two");
+            return one.Or(two);
+        }
 
         /// <summary>
         ///     Returns a regular expression that matches either a single element that satisfies the specified predicate
@@ -737,6 +790,11 @@ namespace RT.Generexes
         ///     expression syntax).</summary>
         public static TGenerex operator |(Predicate<T> one, GenerexNoResultBase<T, TGenerex, TGenerexMatch> two)
         {
+            if (one == null)
+                throw new ArgumentNullException("one");
+            if (two == null)
+                throw new ArgumentNullException("two");
+            
             return Constructor(
                 or(forwardPredicateMatcher(one), two._forwardMatcher),
                 or(backwardPredicateMatcher(one), two._backwardMatcher));

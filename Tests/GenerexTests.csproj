@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="TestMatches.cs" />
+    <Compile Include="TestOperators.cs" />
     <Compile Include="TestPolymorphism.cs" />
     <Compile Include="TestThenExpect.cs" />
     <Compile Include="Mod7IntEqualityComparer.cs" />
