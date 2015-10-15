@@ -687,7 +687,7 @@ namespace RT.Generexes
         {
             return Constructor(
                 then(elementMatcher(one, EqualityComparer<T>.Default, false), two._forwardMatcher),
-                then(elementMatcher(one, EqualityComparer<T>.Default, true), two._backwardMatcher));
+                then(two._backwardMatcher, elementMatcher(one, EqualityComparer<T>.Default, true)));
         }
 
         /// <summary>
@@ -702,7 +702,7 @@ namespace RT.Generexes
         {
             return Constructor(
                 then(forwardPredicateMatcher(one), two._forwardMatcher),
-                then(backwardPredicateMatcher(one), two._backwardMatcher));
+                then(two._backwardMatcher, backwardPredicateMatcher(one)));
         }
 
         /// <summary>
