@@ -443,6 +443,103 @@ namespace RT.Generexes
         }
 
         /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or a single element that satisfies
+        ///     the specified predicate (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        /// <param name="predicate">
+        ///     The predicate to match a single element against.</param>
+        /// <param name="selector">
+        ///     A selector that returns the result object for the new regular expression based on the element matched by the
+        ///     <paramref name="predicate"/>.</param>
+        public Generex<T, TResult> Or(Predicate<T> predicate, Func<GenerexMatch<T>, TResult> selector)
+        {
+            return Or(new Generex<T>(predicate).Process(selector));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or a single element (cf. <c>|</c> in
+        ///     traditional regular expression syntax).</summary>
+        /// <param name="element">
+        ///     The element to match.</param>
+        /// <param name="selector">
+        ///     A selector that returns the result object for the new regular expression based on the <paramref
+        ///     name="element"/> matched.</param>
+        public Generex<T, TResult> Or(T element, Func<GenerexMatch<T>, TResult> selector)
+        {
+            return Or(new Generex<T>(element).Process(selector));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or a single element using the
+        ///     specified equality comparer (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        /// <param name="element">
+        ///     The element to match.</param>
+        /// <param name="selector">
+        ///     A selector that returns the result object for the new regular expression based on the <paramref
+        ///     name="element"/> matched.</param>
+        /// <param name="comparer">
+        ///     An optional equality comparer to use against the <paramref name="element"/>.</param>
+        public Generex<T, TResult> Or(T element, Func<GenerexMatch<T>, TResult> selector, IEqualityComparer<T> comparer)
+        {
+            return Or(new Generex<T>(comparer, element).Process(selector));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or the specified sequence of elements
+        ///     (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        /// <param name="selector">
+        ///     A selector that returns the result object for the new regular expression based on the sequence matched by the
+        ///     <paramref name="elements"/>.</param>
+        /// <param name="elements">
+        ///     The sequence of elements to match.</param>
+        public Generex<T, TResult> Or(Func<GenerexMatch<T>, TResult> selector, IEnumerable<T> elements)
+        {
+            return Or(new Generex<T>(elements).Process(selector));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or the specified sequence of elements
+        ///     using the specified equality comparer (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        /// <param name="selector">
+        ///     A selector that returns the result object for the new regular expression based on the sequence matched by the
+        ///     <paramref name="elements"/>.</param>
+        /// <param name="comparer">
+        ///     An optional equality comparer to use against the elements in <paramref name="elements"/>.</param>
+        /// <param name="elements">
+        ///     The sequence of elements to match.</param>
+        public Generex<T, TResult> Or(Func<GenerexMatch<T>, TResult> selector, IEqualityComparer<T> comparer, IEnumerable<T> elements)
+        {
+            return Or(new Generex<T>(comparer, elements).Process(selector));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or the specified sequence of elements
+        ///     (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        /// <param name="selector">
+        ///     A selector that returns the result object for the new regular expression based on the sequence matched by the
+        ///     <paramref name="elements"/>.</param>
+        /// <param name="elements">
+        ///     The sequence of elements to match.</param>
+        public Generex<T, TResult> Or(Func<GenerexMatch<T>, TResult> selector, params T[] elements)
+        {
+            return Or(new Generex<T>(elements).Process(selector));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or the specified sequence of elements
+        ///     using the specified equality comparer (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        /// <param name="selector">
+        ///     A selector that returns the result object for the new regular expression based on the sequence matched by the
+        ///     <paramref name="elements"/>.</param>
+        /// <param name="comparer">
+        ///     An optional equality comparer to use against the elements in <paramref name="elements"/>.</param>
+        /// <param name="elements">
+        ///     The sequence of elements to match.</param>
+        public Generex<T, TResult> Or(Func<GenerexMatch<T>, TResult> selector, IEqualityComparer<T> comparer, params T[] elements)
+        {
+            return Or(new Generex<T>(comparer, elements).Process(selector));
+        }
+
+        /// <summary>
         ///     Returns a regular expression that matches the first regular expression followed by the second and retains the
         ///     result object generated by each match of the first regular expression.</summary>
         public static Generex<T, TResult> operator +(Generex<T, TResult> one, Generex<T> two)

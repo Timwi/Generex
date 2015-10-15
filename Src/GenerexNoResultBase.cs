@@ -267,13 +267,25 @@ namespace RT.Generexes
         }
 
         /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or the specified single element (cf.
+        ///     <c>|</c> in traditional regular expression syntax).</summary>
+        /// <seealso cref="Or(T,IEqualityComparer{T})"/>
+        /// <seealso cref="Or(Predicate{T})"/>
+        public TGenerex Or(T element)
+        {
+            return Or(element, EqualityComparer<T>.Default);
+        }
+
+        /// <summary>
         ///     Returns a regular expression that matches either this regular expression or the specified single element using
         ///     the specified equality comparer (cf. <c>|</c> in traditional regular expression syntax).</summary>
-        /// <seealso cref="Or(IEnumerable{T},IEqualityComparer{T})"/>
+        /// <seealso cref="Or(T)"/>
+        /// <seealso cref="Or(IEqualityComparer{T},IEnumerable{T})"/>
         /// <seealso cref="Or(Predicate{T})"/>
-        public TGenerex Or(T element, IEqualityComparer<T> comparer = null)
+        public TGenerex Or(T element, IEqualityComparer<T> comparer)
         {
-            comparer = comparer ?? EqualityComparer<T>.Default;
+            if (comparer == null)
+                throw new ArgumentNullException("comparer");
             return Or(Constructor(
                 elementMatcher(element, comparer, backward: false),
                 elementMatcher(element, comparer, backward: true)
@@ -282,16 +294,54 @@ namespace RT.Generexes
 
         /// <summary>
         ///     Returns a regular expression that matches either this regular expression or the specified sequence of elements
+        ///     (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).</summary>
+        /// <seealso cref="Or(T,IEqualityComparer{T})"/>
+        /// <seealso cref="Or(Predicate{T})"/>
+        public TGenerex Or(IEnumerable<T> elements)
+        {
+            if (elements == null)
+                throw new ArgumentNullException("elements");
+            return Or((elements as T[]) ?? elements.ToArray());
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or the specified sequence of elements
         ///     using the specified equality comparer (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).</summary>
         /// <seealso cref="Or(T,IEqualityComparer{T})"/>
         /// <seealso cref="Or(Predicate{T})"/>
-        public TGenerex Or(IEnumerable<T> elements, IEqualityComparer<T> comparer = null)
+        public TGenerex Or(IEqualityComparer<T> comparer, IEnumerable<T> elements)
         {
-            var array = (elements as T[]) ?? elements.ToArray();
-            comparer = comparer ?? EqualityComparer<T>.Default;
+            if (elements == null)
+                throw new ArgumentNullException("elements");
+            return Or(comparer, (elements as T[]) ?? elements.ToArray());
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or the specified sequence of elements
+        ///     (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).</summary>
+        /// <seealso cref="Or(T,IEqualityComparer{T})"/>
+        /// <seealso cref="Or(Predicate{T})"/>
+        public TGenerex Or(params T[] elements)
+        {
+            if (elements == null)
+                throw new ArgumentNullException("elements");
+            return Or(EqualityComparer<T>.Default, elements);
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or the specified sequence of elements
+        ///     using the specified equality comparer (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).</summary>
+        /// <seealso cref="Or(T,IEqualityComparer{T})"/>
+        /// <seealso cref="Or(Predicate{T})"/>
+        public TGenerex Or(IEqualityComparer<T> comparer, params T[] elements)
+        {
+            if (comparer == null)
+                throw new ArgumentNullException("comparer");
+            if (elements == null)
+                throw new ArgumentNullException("elements");
             return Or(Constructor(
-                elementsMatcher(array, comparer, false),
-                elementsMatcher(array, comparer, true)
+                elementsMatcher(elements, comparer, false),
+                elementsMatcher(elements, comparer, true)
             ));
         }
 
@@ -299,7 +349,7 @@ namespace RT.Generexes
         ///     Returns a regular expression that matches either this regular expression or a single element that satisfies
         ///     the specified predicate (cf. <c>|</c> in traditional regular expression syntax).</summary>
         /// <seealso cref="Or(T,IEqualityComparer{T})"/>
-        /// <seealso cref="Or(IEnumerable{T},IEqualityComparer{T})"/>
+        /// <seealso cref="Or(IEqualityComparer{T},IEnumerable{T})"/>
         public TGenerex Or(Predicate<T> predicate)
         {
             return Or(Constructor(forwardPredicateMatcher(predicate), backwardPredicateMatcher(predicate)));
@@ -688,7 +738,7 @@ namespace RT.Generexes
                 throw new ArgumentNullException("one");
             if (two == null)
                 throw new ArgumentNullException("two");
-            
+
             return Constructor(
                 then(elementMatcher(one, EqualityComparer<T>.Default, false), two._forwardMatcher),
                 then(two._backwardMatcher, elementMatcher(one, EqualityComparer<T>.Default, true)));
@@ -715,7 +765,7 @@ namespace RT.Generexes
                 throw new ArgumentNullException("one");
             if (two == null)
                 throw new ArgumentNullException("two");
-            
+
             return Constructor(
                 then(forwardPredicateMatcher(one), two._forwardMatcher),
                 then(two._backwardMatcher, backwardPredicateMatcher(one)));
@@ -750,7 +800,7 @@ namespace RT.Generexes
         {
             if (two == null)
                 throw new ArgumentNullException("two");
-            
+
             return Constructor(
                 or(elementMatcher(one, EqualityComparer<T>.Default, false), two._forwardMatcher),
                 or(elementMatcher(one, EqualityComparer<T>.Default, true), two._backwardMatcher));
@@ -779,7 +829,7 @@ namespace RT.Generexes
                 throw new ArgumentNullException("one");
             if (two == null)
                 throw new ArgumentNullException("two");
-            
+
             return Constructor(
                 or(forwardPredicateMatcher(one), two._forwardMatcher),
                 or(backwardPredicateMatcher(one), two._backwardMatcher));

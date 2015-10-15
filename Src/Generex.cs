@@ -51,37 +51,46 @@ namespace RT.Generexes
         ///     traditional regular expression syntax).</summary>
         /// <typeparam name="T">
         ///     Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <typeparam name="TMatch">
+        ///     See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerex">
+        ///     See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerexMatch">
+        ///     See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
         /// <param name="generexes">
         ///     Collection of regular expressions, one of which is matched at a time.</param>
-        public static Generex<T> Ors<T>(IEnumerable<Generex<T>> generexes) { return Generex<T>.Ors(generexes); }
+        public static TGenerex Ors<T, TMatch, TGenerex, TGenerexMatch>(IEnumerable<GenerexBase<T, TMatch, TGenerex, TGenerexMatch>> generexes)
+            where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
+            where TGenerexMatch : GenerexMatch<T>
+        {
+            if (generexes == null)
+                throw new ArgumentNullException("generexes");
+            return Ors(generexes.ToArray());
+        }
+
         /// <summary>
         ///     Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in
         ///     traditional regular expression syntax).</summary>
         /// <typeparam name="T">
         ///     Type of the objects in the collection against which the regular expression will be matched.</typeparam>
+        /// <typeparam name="TMatch">
+        ///     See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerex">
+        ///     See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
+        /// <typeparam name="TGenerexMatch">
+        ///     See <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}"/>.</typeparam>
         /// <param name="generexes">
         ///     Collection of regular expressions, one of which is matched at a time.</param>
-        public static Generex<T> Ors<T>(params Generex<T>[] generexes) { return Generex<T>.Ors(generexes); }
-        /// <summary>
-        ///     Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in
-        ///     traditional regular expression syntax).</summary>
-        /// <typeparam name="T">
-        ///     Type of the objects in the collection against which the regular expression will be matched.</typeparam>
-        /// <typeparam name="TResult">
-        ///     Type of the result object associated with each match of the regular expression.</typeparam>
-        /// <param name="generexes">
-        ///     Collection of regular expressions, one of which is matched at a time.</param>
-        public static Generex<T, TResult> Ors<T, TResult>(IEnumerable<Generex<T, TResult>> generexes) { return Generex<T, TResult>.Ors(generexes); }
-        /// <summary>
-        ///     Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in
-        ///     traditional regular expression syntax).</summary>
-        /// <typeparam name="T">
-        ///     Type of the objects in the collection against which the regular expression will be matched.</typeparam>
-        /// <typeparam name="TResult">
-        ///     Type of the result object associated with each match of the regular expression.</typeparam>
-        /// <param name="generexes">
-        ///     Collection of regular expressions, one of which is matched at a time.</param>
-        public static Generex<T, TResult> Ors<T, TResult>(params Generex<T, TResult>[] generexes) { return Generex<T, TResult>.Ors(generexes); }
+        public static TGenerex Ors<T, TMatch, TGenerex, TGenerexMatch>(params GenerexBase<T, TMatch, TGenerex, TGenerexMatch>[] generexes)
+            where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
+            where TGenerexMatch : GenerexMatch<T>
+        {
+            if (generexes == null || generexes.Contains(null))
+                throw new ArgumentNullException("generexes");
+            if (generexes.Length == 0)
+                return GenerexBase<T, TMatch, TGenerex, TGenerexMatch>.Fail;
+            return (TGenerex) generexes.Aggregate((prev, next) => prev.Or(next));
+        }
 
         /// <summary>
         ///     Returns a regular expression that matches a single element which is none of the specified elements.</summary>
@@ -538,7 +547,7 @@ namespace RT.Generexes
         /// <param name="input">
         ///     The value of this parameter is ignored, but can be used for type inference to enable matching of collections
         ///     of anonymous types.</param>
-        /// <seealso cref="GenerexNoResultBase{T,TGenerex,TGenerexMatch}.Fail"/>
+        /// <seealso cref="GenerexBase{T,TMatch,TGenerex,TGenerexMatch}.Fail"/>
         public static Generex<T> CreateFailGenerex<T>(this T[] input) { return Generex<T>.Fail; }
 
         /// <summary>

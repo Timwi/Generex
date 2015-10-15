@@ -427,22 +427,6 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        ///     Returns a regular expression that matches either this regular expression or the specified string (cf. <c>|</c>
-        ///     in traditional regular expression syntax).</summary>
-        /// <param name="str">
-        ///     The string to match.</param>
-        /// <param name="selector">
-        ///     A selector that returns the result object for the new regular expression based on the string matched by
-        ///     <paramref name="str"/>.</param>
-        /// <param name="comparer">
-        ///     An optional equality comparer to use against <paramref name="str"/>.</param>
-        public Stringerex<TResult> Or(string str, Func<StringerexMatch, TResult> selector, IEqualityComparer<char> comparer = null)
-        {
-            var other = new Stringerex(str, comparer ?? EqualityComparer<char>.Default).Process(selector);
-            return Or(Constructor(new matcher(other._forwardMatcher), new matcher(other._backwardMatcher)));
-        }
-
-        /// <summary>
         ///     Returns a regular expression that matches this regular expression zero times or once. Once is prioritised (cf.
         ///     <c>?</c> in traditional regular expression syntax).</summary>
         public Stringerex<IEnumerable<TResult>> OptionalGreedy() { return repeatBetween<Stringerex<IEnumerable<TResult>>, StringerexMatch<IEnumerable<TResult>>>(0, 1, greedy: true); }
@@ -709,6 +693,75 @@ namespace RT.Generexes
             where TOtherGenerexMatch : StringerexMatch<TOtherResult>
         {
             return and<TOtherResult, TOtherGenerex, TOtherGenerexMatch, TCombinedResult, Stringerex<TCombinedResult>, StringerexMatch<TCombinedResult>>(substring => other.MatchReverse(substring), (result, otherMatch) => selector(result, otherMatch.Result));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or a single element that satisfies
+        ///     the specified predicate (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        /// <param name="predicate">
+        ///     The predicate to match a single element against.</param>
+        /// <param name="selector">
+        ///     A selector that returns the result object for the new regular expression based on the element matched by the
+        ///     <paramref name="predicate"/>.</param>
+        public Stringerex<TResult> Or(Predicate<char> predicate, Func<StringerexMatch, TResult> selector)
+        {
+            return Or(new Stringerex(predicate).Process(selector));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or a single element (cf. <c>|</c> in
+        ///     traditional regular expression syntax).</summary>
+        /// <param name="element">
+        ///     The element to match.</param>
+        /// <param name="selector">
+        ///     A selector that returns the result object for the new regular expression based on the <paramref
+        ///     name="element"/> matched.</param>
+        public Stringerex<TResult> Or(char element, Func<StringerexMatch, TResult> selector)
+        {
+            return Or(new Stringerex(element).Process(selector));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or a single element using the
+        ///     specified equality comparer (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        /// <param name="element">
+        ///     The element to match.</param>
+        /// <param name="selector">
+        ///     A selector that returns the result object for the new regular expression based on the <paramref
+        ///     name="element"/> matched.</param>
+        /// <param name="comparer">
+        ///     An optional equality comparer to use against the <paramref name="element"/>.</param>
+        public Stringerex<TResult> Or(char element, Func<StringerexMatch, TResult> selector, IEqualityComparer<char> comparer)
+        {
+            return Or(new Stringerex(element, comparer).Process(selector));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or the specified sequence of elements
+        ///     (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        /// <param name="elements">
+        ///     The sequence of elements to match.</param>
+        /// <param name="selector">
+        ///     A selector that returns the result object for the new regular expression based on the sequence matched by the
+        ///     <paramref name="elements"/>.</param>
+        public Stringerex<TResult> Or(string elements, Func<StringerexMatch, TResult> selector)
+        {
+            return Or(new Stringerex(elements).Process(selector));
+        }
+
+        /// <summary>
+        ///     Returns a regular expression that matches either this regular expression or the specified sequence of elements
+        ///     using the specified equality comparer (cf. <c>|</c> in traditional regular expression syntax).</summary>
+        /// <param name="elements">
+        ///     The sequence of elements to match.</param>
+        /// <param name="selector">
+        ///     A selector that returns the result object for the new regular expression based on the sequence matched by the
+        ///     <paramref name="elements"/>.</param>
+        /// <param name="comparer">
+        ///     An optional equality comparer to use against the elements in <paramref name="elements"/>.</param>
+        public Stringerex<TResult> Or(string elements, Func<StringerexMatch, TResult> selector, IEqualityComparer<char> comparer)
+        {
+            return Or(new Stringerex(elements, comparer).Process(selector));
         }
 
         /// <summary>

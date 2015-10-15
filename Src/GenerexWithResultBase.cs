@@ -356,52 +356,6 @@ namespace RT.Generexes
         }
 
         /// <summary>
-        ///     Returns a regular expression that matches either this regular expression or a single element that satisfies
-        ///     the specified predicate (cf. <c>|</c> in traditional regular expression syntax).</summary>
-        /// <param name="predicate">
-        ///     The predicate to match a single element against.</param>
-        /// <param name="selector">
-        ///     A selector that returns the result object for the new regular expression based on the element matched by the
-        ///     <paramref name="predicate"/>.</param>
-        public TGenerex Or(Predicate<T> predicate, Func<GenerexMatch<T>, TResult> selector)
-        {
-            var other = new Generex<T>(predicate).Process(selector);
-            return Or(Constructor(new matcher(other._forwardMatcher), new matcher(other._backwardMatcher)));
-        }
-
-        /// <summary>
-        ///     Returns a regular expression that matches either this regular expression or a single element using the
-        ///     specified equality comparer (cf. <c>|</c> in traditional regular expression syntax).</summary>
-        /// <param name="element">
-        ///     The element to match.</param>
-        /// <param name="selector">
-        ///     A selector that returns the result object for the new regular expression based on the <paramref
-        ///     name="element"/> matched.</param>
-        /// <param name="comparer">
-        ///     An optional equality comparer to use against the <paramref name="element"/>.</param>
-        public TGenerex Or(T element, Func<GenerexMatch<T>, TResult> selector, IEqualityComparer<T> comparer = null)
-        {
-            var other = new Generex<T>(comparer ?? EqualityComparer<T>.Default, element).Process(selector);
-            return Or(Constructor(new matcher(other._forwardMatcher), new matcher(other._backwardMatcher)));
-        }
-
-        /// <summary>
-        ///     Returns a regular expression that matches either this regular expression or the specified sequence of elements
-        ///     (cf. <c>|</c> in traditional regular expression syntax).</summary>
-        /// <param name="elements">
-        ///     The sequence of elements to match.</param>
-        /// <param name="selector">
-        ///     A selector that returns the result object for the new regular expression based on the sequence matched by the
-        ///     <paramref name="elements"/>.</param>
-        /// <param name="comparer">
-        ///     An optional equality comparer to use against the elements in <paramref name="elements"/>.</param>
-        public TGenerex Or(IEnumerable<T> elements, Func<GenerexMatch<T>, TResult> selector, IEqualityComparer<T> comparer = null)
-        {
-            var other = new Generex<T>(comparer ?? EqualityComparer<T>.Default, elements).Process(selector);
-            return Or(Constructor(new matcher(other._forwardMatcher), new matcher(other._backwardMatcher)));
-        }
-
-        /// <summary>
         ///     Returns a regular expression that matches this regular expression zero or more times.</summary>
         /// <param name="greedy">
         ///     <c>true</c> to prioritise longer matches (“greedy” matching); <c>false</c> to prioritise shorter matches
@@ -410,7 +364,7 @@ namespace RT.Generexes
             where TManyGenerex : GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>
             where TManyGenerexMatch : GenerexMatch<T, IEnumerable<TResult>>
         {
-            var createRepeatInfiniteMatcher = InternalExtensions.Lambda((matcher inner) =>
+            Func<matcher, GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>.matcher> createRepeatInfiniteMatcher = (matcher inner) =>
             {
                 GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>.matcher newMatcher = null;
                 if (greedy)
@@ -422,7 +376,7 @@ namespace RT.Generexes
                         .Concat(inner(input, startIndex).SelectMany(m => newMatcher(input, startIndex + m.Length)
                         .Select(m2 => new LengthAndResult<IEnumerable<TResult>>(m.Result.Concat(m2.Result), m.Length + m2.Length))));
                 return newMatcher;
-            });
+            };
             return GenerexWithResultBase<T, IEnumerable<TResult>, TManyGenerex, TManyGenerexMatch>.Constructor(
                 createRepeatInfiniteMatcher(_forwardMatcher),
                 createRepeatInfiniteMatcher(_backwardMatcher));

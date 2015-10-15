@@ -116,6 +116,12 @@ namespace RT.Generexes
             return true;
         }
 
-        public static Func<T, TResult> Lambda<T, TResult>(Func<T, TResult> func) { return func; }
+        /// <summary>Throws <c>ArgumentNullException</c> if the object is <c>null</c>.</summary>
+        public static T ThrowIfNull<T>(this T obj, string parameterName)
+        {
+            if (obj == null)
+                throw new ArgumentNullException(parameterName);
+            return obj;
+        }
     }
 }

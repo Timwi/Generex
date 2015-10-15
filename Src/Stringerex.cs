@@ -24,20 +24,29 @@ namespace RT.Generexes
         /// <summary>Instantiates an empty regular expression (always matches).</summary>
         public Stringerex() : base(emptyMatch, emptyMatch) { }
 
+        /// <summary>Instantiates a regular expression that matches a specified character.</summary>
+        public Stringerex(char ch) : base(new[] { ch }, EqualityComparer<char>.Default) { }
+
+        /// <summary>Instantiates a regular expression that matches a sequence of consecutive characters.</summary>
+        public Stringerex(string elements) : base(elements.ThrowIfNull("elements").ToCharArray(), EqualityComparer<char>.Default) { }
+
+        /// <summary>Instantiates a regular expression that matches a sequence of consecutive characters.</summary>
+        public Stringerex(IEnumerable<char> elements) : base(elements.ThrowIfNull("elements").ToArray(), EqualityComparer<char>.Default) { }
+
         /// <summary>
         ///     Instantiates a regular expression that matches a specified character using the specified optional equality
         ///     comparer.</summary>
-        public Stringerex(char ch, IEqualityComparer<char> comparer = null) : base(new[] { ch }, comparer ?? EqualityComparer<char>.Default) { }
+        public Stringerex(char ch, IEqualityComparer<char> comparer) : base(new[] { ch }, comparer) { }
 
         /// <summary>
-        ///     Instantiates a regular expression that matches a sequence of consecutive elements using the specified optional
-        ///     equality comparer.</summary>
-        public Stringerex(string elements, IEqualityComparer<char> comparer = null) : base(elements.ToCharArray(), comparer ?? EqualityComparer<char>.Default) { }
+        ///     Instantiates a regular expression that matches a sequence of consecutive characters using the specified
+        ///     optional equality comparer.</summary>
+        public Stringerex(string elements, IEqualityComparer<char> comparer) : base(elements.ThrowIfNull("elements").ToCharArray(), comparer) { }
 
         /// <summary>
-        ///     Instantiates a regular expression that matches a sequence of consecutive elements using the specified optional
-        ///     equality comparer.</summary>
-        public Stringerex(IEnumerable<char> elements, IEqualityComparer<char> comparer = null) : base(elements.ToArray(), comparer ?? EqualityComparer<char>.Default) { }
+        ///     Instantiates a regular expression that matches a sequence of consecutive characters using the specified
+        ///     optional equality comparer.</summary>
+        public Stringerex(IEnumerable<char> elements, IEqualityComparer<char> comparer) : base(elements.ThrowIfNull("elements").ToArray(), comparer) { }
 
         /// <summary>
         ///     Instantiates a regular expression that matches a single character that satisfies the given predicate (cf.
@@ -247,7 +256,7 @@ namespace RT.Generexes
         /// <summary>
         ///     Returns a regular expression that matches either this regular expression or the specified string using the
         ///     specified equality comparer (cf. <c>|</c> or <c>[...]</c> in traditional regular expression syntax).</summary>
-        public Stringerex Or(string str, IEqualityComparer<char> comparer = null) { return base.Or(str.ToCharArray(), comparer ?? EqualityComparer<char>.Default); }
+        public Stringerex Or(string str, IEqualityComparer<char> comparer = null) { return base.Or(comparer ?? EqualityComparer<char>.Default, str.ToCharArray()); }
 
         /// <summary>
         ///     Returns a regular expression that matches this regular expression followed by the specified string, using the
@@ -261,34 +270,6 @@ namespace RT.Generexes
         /// <param name="selector">
         ///     Function to process a regular expression match.</param>
         public Stringerex<TResult> Process<TResult>(Func<StringerexMatch, TResult> selector) { return process<Stringerex<TResult>, StringerexMatch<TResult>, TResult>(selector); }
-
-        /// <summary>
-        ///     Instantiates a regular expression that matches the specified character using the specified optional equality
-        ///     comparer.</summary>
-        public static Stringerex New(char ch, IEqualityComparer<char> comparer = null) { return new Stringerex(ch, comparer); }
-        /// <summary>
-        ///     Instantiates a regular expression that matches the specified string using the specified optional equality
-        ///     comparer.</summary>
-        public static Stringerex New(string str, IEqualityComparer<char> comparer = null) { return new Stringerex(str, comparer); }
-        /// <summary>
-        ///     Instantiates a regular expression that matches the specified sequence of characters using the specified
-        ///     optional equality comparer.</summary>
-        public static Stringerex New(IEnumerable<char> elements, IEqualityComparer<char> comparer = null) { return new Stringerex(elements, comparer); }
-        /// <summary>
-        ///     Instantiates a regular expression that matches a single character that satisfies the given predicate (cf.
-        ///     <c>[...]</c> in traditional regular expression syntax).</summary>
-        public static Stringerex New(Predicate<char> predicate) { return new Stringerex(predicate); }
-        /// <summary>Instantiates a regular expression that matches a sequence of consecutive regular expressions.</summary>
-        public static Stringerex New(params Stringerex[] stringerexes) { return new Stringerex(stringerexes); }
-
-        /// <summary>
-        ///     Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in
-        ///     traditional regular expression syntax).</summary>
-        public static Stringerex<TResult> Ors<TResult>(IEnumerable<Stringerex<TResult>> stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
-        /// <summary>
-        ///     Returns a regular expression that matches any of the specified regular expressions (cf. <c>|</c> in
-        ///     traditional regular expression syntax).</summary>
-        public static Stringerex<TResult> Ors<TResult>(params Stringerex<TResult>[] stringerexes) { return stringerexes.Aggregate((prev, next) => prev.Or(next)); }
 
         /// <summary>
         ///     Generates a recursive regular expression, i.e. one that can contain itself, allowing the matching of
@@ -314,7 +295,7 @@ namespace RT.Generexes
                 thenner: (prev, next) => prev.Then(next),
                 orer: (one, two) => one.Or(two),
                 constructor: () => new Stringerex(),
-                generexes: characters.Select(ch => Stringerex.New(ch, comparer)).ToArray());
+                generexes: characters.Select(ch => new Stringerex(ch, comparer)).ToArray());
         }
 
         /// <summary>
@@ -414,7 +395,7 @@ namespace RT.Generexes
         ///     expression does not match.</summary>
         public static Stringerex Expect(string elements, Func<StringerexMatch, Exception> exceptionGenerator)
         {
-            return Stringerex.Ors(new Stringerex(elements), new Stringerex().Throw(exceptionGenerator)).Atomic();
+            return new Stringerex(elements).Or(new Stringerex().Throw(exceptionGenerator)).Atomic();
         }
 
         /// <summary>
@@ -422,7 +403,7 @@ namespace RT.Generexes
         ///     generated by the specified code if the regular expression does not match.</summary>
         public static Stringerex Expect(string elements, IEqualityComparer<char> comparer, Func<StringerexMatch, Exception> exceptionGenerator)
         {
-            return Stringerex.Ors(new Stringerex(elements, comparer), new Stringerex().Throw(exceptionGenerator)).Atomic();
+            return new Stringerex(elements, comparer).Or(new Stringerex().Throw(exceptionGenerator)).Atomic();
         }
 
         /// <summary>
@@ -430,7 +411,7 @@ namespace RT.Generexes
         ///     if the regular expression does not match.</summary>
         public static Stringerex Expect(IEnumerable<char> elements, Func<StringerexMatch, Exception> exceptionGenerator)
         {
-            return Stringerex.Ors(new Stringerex(elements), new Stringerex().Throw(exceptionGenerator)).Atomic();
+            return new Stringerex(elements).Or(new Stringerex().Throw(exceptionGenerator)).Atomic();
         }
 
         /// <summary>
@@ -438,7 +419,7 @@ namespace RT.Generexes
         ///     exception generated by the specified code if the regular expression does not match.</summary>
         public static Stringerex Expect(IEnumerable<char> elements, IEqualityComparer<char> comparer, Func<StringerexMatch, Exception> exceptionGenerator)
         {
-            return Stringerex.Ors(new Stringerex(elements, comparer), new Stringerex().Throw(exceptionGenerator)).Atomic();
+            return new Stringerex(elements, comparer).Or(new Stringerex().Throw(exceptionGenerator)).Atomic();
         }
 
         /// <summary>
@@ -446,7 +427,7 @@ namespace RT.Generexes
         ///     the regular expression does not match.</summary>
         public static Stringerex<TResult> Expect<TResult>(Stringerex<TResult> stringerex, Func<StringerexMatch, Exception> exceptionGenerator)
         {
-            return Stringerex.Ors(stringerex, new Stringerex().Throw<TResult>(exceptionGenerator)).Atomic();
+            return stringerex.Or(new Stringerex().Throw<TResult>(exceptionGenerator)).Atomic();
         }
     }
 }
