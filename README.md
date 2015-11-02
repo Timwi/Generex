@@ -1,4 +1,6 @@
-﻿Flexible Regular Expressions
+﻿Full documentation: http://docs.timwi.de/RT.Generexes
+
+Flexible Regular Expressions
 =
 
 The goal of Generex is to allow the same kind of pattern matching, analysis, parsing and searching as typical regular expression engines, but instead of limiting itself to matching characters in a string, it can match against any array of objects.
