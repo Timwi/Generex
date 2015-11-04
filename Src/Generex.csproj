@@ -38,6 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Documentation.cs" />
     <Compile Include="Generex.cs" />
     <Compile Include="Generex1.cs" />
     <Compile Include="Generex2.cs" />

@@ -142,7 +142,7 @@ namespace RT.Generexes
         ///     Optional maximum number of replacements to make (null for infinite).</param>
         /// <returns>
         ///     The resulting sequence containing the replacements.</returns>
-        public T[] Replace(T[] input, Func<TResult, IEnumerable<T>> replaceWithRaw, int startAt = 0, int? maxReplace = null)
+        public T[] ReplaceRaw(T[] input, Func<TResult, IEnumerable<T>> replaceWithRaw, int startAt = 0, int? maxReplace = null)
         {
             return replace(input, startAt, (index, match) => replaceWithRaw(match.Result), maxReplace, backward: false);
         }
@@ -160,7 +160,7 @@ namespace RT.Generexes
         ///     Optional maximum number of replacements to make (null for infinite).</param>
         /// <returns>
         ///     The resulting sequence containing the replacements.</returns>
-        public T[] ReplaceReverse(T[] input, Func<TResult, IEnumerable<T>> replaceWithRaw, int? endAt = null, int? maxReplace = null)
+        public T[] ReplaceReverseRaw(T[] input, Func<TResult, IEnumerable<T>> replaceWithRaw, int? endAt = null, int? maxReplace = null)
         {
             return replace(input, endAt ?? input.Length, (index, match) => replaceWithRaw(match.Result), maxReplace, backward: true);
         }

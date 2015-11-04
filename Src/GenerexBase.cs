@@ -276,7 +276,7 @@ namespace RT.Generexes
         ///     Optional maximum number of replacements to make (null for infinite).</param>
         /// <returns>
         ///     The resulting sequence containing the replacements.</returns>
-        public T[] ReplaceReverse(T[] input, Func<TGenerexMatch, T[]> replaceWith, int? endAt = null, int? maxReplace = null)
+        public T[] ReplaceReverse(T[] input, Func<TGenerexMatch, IEnumerable<T>> replaceWith, int? endAt = null, int? maxReplace = null)
         {
             return replace(input, endAt ?? input.Length, (index, match) => replaceWith(createBackwardsMatch(input, index, match)), maxReplace, backward: true);
         }
@@ -587,12 +587,12 @@ namespace RT.Generexes
         ///             <list type="bullet">
         ///                 <item><description>
         ///                     <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.ReplaceReverse(T[],
-        ///                     Func{TGenerexMatch,T[]}, int?, int?)"/></description></item>
+        ///                     Func{TGenerexMatch,IEnumerable{T}}, int?, int?)"/></description></item>
         ///                 <item><description>
         ///                     <see cref="GenerexBase{T, TMatch, TGenerex, TGenerexMatch}.ReplaceReverse(T[], IEnumerable{T},
         ///                     int?, int?)"/></description></item>
         ///                 <item><description>
-        ///                     <see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.ReplaceReverse(T[],
+        ///                     <see cref="GenerexWithResultBase{T, TResult, TGenerex, TGenerexMatch}.ReplaceReverseRaw(T[],
         ///                     Func{TResult, IEnumerable{T}}, int?, int?)"/></description></item></list></description></item></list>
         ///     <para>
         ///         The overloads affected by this restriction are:</para>
