@@ -1,4 +1,4 @@
-﻿Full documentation: http://docs.timwi.de/RT.Generexes
+﻿Full documentation: https://docs.timwi.de/RT.Generex/RT.Generexes
 
 Flexible Regular Expressions
 =
@@ -121,7 +121,7 @@ We want Generex to instantiate and populate this class for us. For this, we use 
                 {
                     Character = ch,
                     InnerParentheses = innerMatch.Result    // type Parenthesis[]
-                }                               
+                }
             )                   // The result object is now a Parenthesis object.
             .Then(')')
             .RepeatGreedy()     // The result object is now IEnumerable<Parenthesis>.

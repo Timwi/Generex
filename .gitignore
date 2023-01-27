@@ -3,3 +3,5 @@ syntax: glob
 *.suo
 *.csproj.user
 Builds
+packages/
+.vs/
