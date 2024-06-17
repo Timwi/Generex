@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace RT.Generexes.Tests
@@ -124,11 +121,11 @@ namespace RT.Generexes.Tests
             if (expected != null && expected.Length > 1)
             {
                 var result = getActual().Result;
-                if (expected[2] is IEnumerable)
+                if (expected[2] is IEnumerable exp)
                 {
                     Assert.IsTrue(result is IEnumerable);
-                    Assert.IsTrue(((IEnumerable) expected[2]).Cast<object>().SequenceEqual(((IEnumerable) result).Cast<object>()));
-                    Assert.IsTrue(((IEnumerable) expected[2]).Cast<object>().SequenceEqual(((IEnumerable) getActualRaw()).Cast<object>()));
+                    Assert.IsTrue(exp.Cast<object>().SequenceEqual(((IEnumerable) result).Cast<object>()));
+                    Assert.IsTrue(exp.Cast<object>().SequenceEqual(((IEnumerable) getActualRaw()).Cast<object>()));
                 }
                 else
                 {
