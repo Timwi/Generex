@@ -6,3 +6,4 @@ Builds
 packages/
 .vs/
 *.nupkg
+Src/obj
