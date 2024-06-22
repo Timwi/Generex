@@ -3,7 +3,6 @@ syntax: glob
 *.suo
 *.csproj.user
 Builds
+Publish
 packages/
 .vs/
-*.nupkg
-Src/obj

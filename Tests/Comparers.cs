@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace RT.Generexes.Tests
+﻿namespace RT.Generexes.Tests
 {
     sealed class Mod7IntEqualityComparer : IEqualityComparer<int>
     {

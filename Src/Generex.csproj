@@ -1,15 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net5.0;net7.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <BaseOutputPath>..\Builds\</BaseOutputPath>
+    <LangVersion>10.0</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>RT.Generex</PackageId>
+    <Version>2.1.0</Version>
+    <Authors>Timwi</Authors>
+    <Description>Flexible regular expressions on arbitrary object collections</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+	<PackageProjectUrl>https://github.com/Timwi/Generex</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="RT.CommandLine" Version="2.1.163" />
     <PackageReference Include="RT.Util.Core" Version="2.0.1768" />
+    <None Include="..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

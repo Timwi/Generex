@@ -1,4 +1,7 @@
-﻿Full documentation: https://docs.timwi.de/RT.Generex/RT.Generexes
+﻿Full documentation
+=
+
+Full documentation: https://docs.timwi.de/RT.Generex/RT.Generexes
 
 Flexible Regular Expressions
 =
@@ -164,3 +167,8 @@ Here are a few Generex operators that do not exist in typical regular expression
 * `a.Where(...)`: Put an extra condition on a match.
 * `a.ThenExpect(b, ...)`: Every time `a` matches, `b` must match after it, otherwise an exception is thrown. This is useful when you parse structures and wish to report invalid input properly with index and reason (instead of just rejecting the whole input as “not a match”).
 * `a.Throw(...)`: Throw whenever `a` matches. Again, this is useful for generating user-friendly errors in parsers.
+
+Full documentation
+=
+
+Full documentation: https://docs.timwi.de/RT.Generex/RT.Generexes

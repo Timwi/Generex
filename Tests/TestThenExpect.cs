@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace RT.Generexes.Tests
 {
     [TestFixture]
     class TestThenExpect : TestBase
     {
-        Func<GenerexMatch<int>, Exception> _excGen = m => new ExpectedException();
-        Func<GenerexMatch<char>, Exception> _excGenS = m => new ExpectedException();
-        Func<int, Exception> _excGenRaw = m => new ExpectedException();
+        private readonly Func<GenerexMatch<int>, Exception> _excGen = m => new ExpectedException();
+        private readonly Func<GenerexMatch<char>, Exception> _excGenS = m => new ExpectedException();
+        private readonly Func<int, Exception> _excGenRaw = m => new ExpectedException();
 
         [Test]
         public void TestThenExpectElements()

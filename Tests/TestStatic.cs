@@ -1,29 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace RT.Generexes.Tests
 {
     [TestFixture]
     sealed class TestStatic : TestBase
     {
-        new int[] _input = new int[] { 47, 24567837 };
+        private new readonly int[] _input = [47, 24567837];
 
         [Test]
         public void TestCreateExtensionMethods()
         {
-            Assert.DoesNotThrow(() =>
-            {
-                ((int[]) null).CreateAnyGenerex();
-                ((int[]) null).CreateAnythingGenerex();
-                ((int[]) null).CreateAnythingGreedyGenerex();
-                ((int[]) null).CreateEmptyGenerex();
-                ((int[]) null).CreateEndGenerex();
-                ((int[]) null).CreateFailGenerex();
-                ((int[]) null).CreateGenerex(i => i == 47);
-                ((int[]) null).CreateRecursiveGenerex(expr => expr);
-                ((int[]) null).CreateStartGenerex();
-            });
+            // Test that these do not throw
+            ((int[]) null).CreateAnyGenerex();
+            ((int[]) null).CreateAnythingGenerex();
+            ((int[]) null).CreateAnythingGreedyGenerex();
+            ((int[]) null).CreateEmptyGenerex();
+            ((int[]) null).CreateEndGenerex();
+            ((int[]) null).CreateFailGenerex();
+            ((int[]) null).CreateGenerex(i => i == 47);
+            ((int[]) null).CreateRecursiveGenerex(expr => expr);
+            ((int[]) null).CreateStartGenerex();
 
             Assert.Throws<ArgumentNullException>(() => { ((int[]) null).CreateGenerex(predicate: null); });
             Assert.Throws<ArgumentNullException>(() => { ((int[]) null).CreateRecursiveGenerex(generator: null); });

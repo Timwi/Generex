@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
 using NUnit.Framework;
 
 namespace RT.Generexes.Tests
 {
     class TestBase
     {
-        protected static object[] _expectException = new object[] { new ExpectedException() };
-        protected static object[] _expectInvOp = new object[] { new InvalidOperationException() };
-        protected static object[] _expectInvCast = new object[] { new InvalidCastException() };
+        protected static object[] _expectException = [new ExpectedException()];
+        protected static object[] _expectInvOp = [new InvalidOperationException()];
+        protected static object[] _expectInvCast = [new InvalidCastException()];
 
         protected const int _expException = -1;
         protected const int _expInvOp = -2;
@@ -22,19 +19,19 @@ namespace RT.Generexes.Tests
         protected static Expectation InvOp = Expectation.InvalidOperationException;
         protected static Expectation InvCast = Expectation.InvalidCastException;
 
-        protected Generex<int> _g = new Generex<int>(47);
+        protected Generex<int> _g = new(47);
         protected Generex<int, int> _gr = new Generex<int>(47).Process(_ => 1);
-        protected Stringerex _s = new Stringerex('M');
+        protected Stringerex _s = new('M');
         protected Stringerex<int> _sr = new Stringerex('M').Process(_ => 1);
-        protected Generex<int> _gn = new Generex<int>(666);
+        protected Generex<int> _gn = new(666);
         protected Generex<int, int> _gnr = new Generex<int>(666).Process(_ => 2);
-        protected Stringerex _sn = new Stringerex('Q');
+        protected Stringerex _sn = new('Q');
         protected Stringerex<int> _snr = new Stringerex('Q').Process(_ => 2);
 
         protected IEqualityComparer<int> _mod7 = new Mod7IntEqualityComparer();
         protected IEqualityComparer<char> _ci = new CaseInsensitiveCharEqualityComparer();
 
-        protected int[] _input = new int[] { 47, 24567837, 1701 };
+        protected int[] _input = [47, 24567837, 1701];
 
         public static void AssertMatches<TGenerex, TGenerexMatch>(GenerexNoResultBase<char, TGenerex, TGenerexMatch> generex, string input, Expectation isMatch, Expectation isMatchAt1, Expectation isMatchUpTo1, Expectation isMatchExact, Expectation isMatchReverse, object[] match, object[] matchExact, object[] matchReverse, int matches, int matchesReverse)
             where TGenerex : GenerexNoResultBase<char, TGenerex, TGenerexMatch>
@@ -105,9 +102,9 @@ namespace RT.Generexes.Tests
         {
             switch (expected)
             {
-                case _expException: Assert.Throws<ExpectedException>(() => { getActual(); }); break;
-                case _expInvOp: Assert.Throws<InvalidOperationException>(() => { getActual(); }); break;
-                case _expInvCast: Assert.Throws<InvalidCastException>(() => { getActual(); }); break;
+                case _expException: Assert.Throws<ExpectedException>(() => getActual()); break;
+                case _expInvOp: Assert.Throws<InvalidOperationException>(() => getActual()); break;
+                case _expInvCast: Assert.Throws<InvalidCastException>(() => getActual()); break;
                 default: Assert.AreEqual(expected, getActual()); break;
             }
         }
@@ -153,7 +150,7 @@ namespace RT.Generexes.Tests
             if (expected != null && expected.Length == 1)
             {
                 // Expect exception
-                Assert.Throws(expected[0].GetType(), () => { getActual(); });
+                Assert.Throws(expected[0].GetType(), () => getActual());
                 return;
             }
 
@@ -172,9 +169,9 @@ namespace RT.Generexes.Tests
             {
                 case Expectation.True: Assert.IsTrue(action()); break;
                 case Expectation.False: Assert.IsFalse(action()); break;
-                case Expectation.ExpectedException: Assert.Throws<ExpectedException>(() => { action(); }); break;
-                case Expectation.InvalidCastException: Assert.Throws<InvalidCastException>(() => { action(); }); break;
-                case Expectation.InvalidOperationException: Assert.Throws<InvalidOperationException>(() => { action(); }); break;
+                case Expectation.ExpectedException: Assert.Throws<ExpectedException>(() => action()); break;
+                case Expectation.InvalidCastException: Assert.Throws<InvalidCastException>(() => action()); break;
+                case Expectation.InvalidOperationException: Assert.Throws<InvalidOperationException>(() => action()); break;
             }
         }
     }

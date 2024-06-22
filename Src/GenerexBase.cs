@@ -18,7 +18,9 @@ namespace RT.Generexes
         where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
         where TGenerexMatch : GenerexMatch<T>
     {
+#pragma warning disable CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
         internal delegate IEnumerable<TMatch> matcher(T[] input, int startIndex);
+#pragma warning restore CS8981 // The type name only contains lower-cased ascii characters. Such names may become reserved for the language.
         internal matcher _forwardMatcher, _backwardMatcher;
 
         private static Func<matcher, matcher, TGenerex> _constructor;
