@@ -6,3 +6,4 @@ Builds
 Publish
 packages/
 .vs/
+mknuget.bat
