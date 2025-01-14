@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace RT.Generexes
+﻿namespace RT.Generexes
 {
     /// <summary>
     ///     Provides static factory methods to generate <see cref="Generex{T}"/> and <see cref="Generex{T,TResult}"/> objects.</summary>
@@ -248,9 +244,10 @@ namespace RT.Generexes
         ///     The regular expression to match.</param>
         /// <param name="startAt">
         ///     Optional index at which to start the search. Matches that start before this index are not included.</param>
-        public static bool IsMatch<T, TMatch, TGenerex, TGenerexMatch>(this  T[] input, GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, int startAt = 0)
+        public static bool IsMatch<T, TMatch, TGenerex, TGenerexMatch>(this T[] input, GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, int startAt = 0)
             where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<T> { return generex.IsMatch(input, startAt); }
+            where TGenerexMatch : GenerexMatch<T>
+        { return generex.IsMatch(input, startAt); }
 
         /// <summary>
         ///     Determines whether the given input sequence matches this regular expression at a specific index.</summary>
@@ -273,7 +270,8 @@ namespace RT.Generexes
         ///     the sequence); otherwise, <c>false</c>.</returns>
         public static bool IsMatchAt<T, TMatch, TGenerex, TGenerexMatch>(this T[] input, GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, int mustStartAt = 0)
             where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<T> { return generex.IsMatchAt(input, mustStartAt); }
+            where TGenerexMatch : GenerexMatch<T>
+        { return generex.IsMatchAt(input, mustStartAt); }
 
         /// <summary>
         ///     Determines whether the given input sequence matches this regular expression up to a specific index.</summary>
@@ -296,7 +294,8 @@ namespace RT.Generexes
         ///     sequence); otherwise, <c>false</c>.</returns>
         public static bool IsMatchUpTo<T, TMatch, TGenerex, TGenerexMatch>(this T[] input, GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, int? mustEndAt = null)
             where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<T> { return generex.IsMatchUpTo(input, mustEndAt); }
+            where TGenerexMatch : GenerexMatch<T>
+        { return generex.IsMatchUpTo(input, mustEndAt); }
 
         /// <summary>
         ///     Determines whether the given input sequence matches this regular expression exactly.</summary>
@@ -320,7 +319,8 @@ namespace RT.Generexes
         ///     <c>true</c> if a match starting and ending at the specified indexes exists; otherwise, <c>false</c>.</returns>
         public static bool IsMatchExact<T, TMatch, TGenerex, TGenerexMatch>(this T[] input, GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, int mustStartAt = 0, int? mustEndAt = null)
             where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<T> { return generex.IsMatchExact(input, mustStartAt, mustEndAt); }
+            where TGenerexMatch : GenerexMatch<T>
+        { return generex.IsMatchExact(input, mustStartAt, mustEndAt); }
 
         /// <summary>
         ///     Determines whether the given input sequence contains a match for this regular expression that ends before the
@@ -342,7 +342,8 @@ namespace RT.Generexes
         ///     then proceeds towards the start of the input sequence.</param>
         public static bool IsMatchReverse<T, TMatch, TGenerex, TGenerexMatch>(this T[] input, GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, int? endAt = null)
             where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<T> { return generex.IsMatchReverse(input, endAt); }
+            where TGenerexMatch : GenerexMatch<T>
+        { return generex.IsMatchReverse(input, endAt); }
 
         /// <summary>
         ///     Determines whether the given input sequence matches this regular expression, and if so, returns information
@@ -365,7 +366,8 @@ namespace RT.Generexes
         ///     An object describing a regular expression match in case of success; <c>null</c> if no match.</returns>
         public static TGenerexMatch Match<T, TMatch, TGenerex, TGenerexMatch>(this T[] input, GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, int startAt = 0)
             where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<T> { return generex.Match(input, startAt); }
+            where TGenerexMatch : GenerexMatch<T>
+        { return generex.Match(input, startAt); }
 
         /// <summary>
         ///     Determines whether the given input sequence matches this regular expression exactly, and if so, returns
@@ -390,7 +392,8 @@ namespace RT.Generexes
         ///     An object describing the regular expression match in case of success; <c>null</c> if no match.</returns>
         public static TGenerexMatch MatchExact<T, TMatch, TGenerex, TGenerexMatch>(this T[] input, GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, int mustStartAt = 0, int? mustEndAt = null)
             where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<T> { return generex.MatchExact(input, mustStartAt, mustEndAt); }
+            where TGenerexMatch : GenerexMatch<T>
+        { return generex.MatchExact(input, mustStartAt, mustEndAt); }
 
         /// <summary>
         ///     Determines whether the given input sequence matches this regular expression, and if so, returns information
@@ -414,7 +417,8 @@ namespace RT.Generexes
         ///     An object describing a regular expression match in case of success; <c>null</c> if no match.</returns>
         public static TGenerexMatch MatchReverse<T, TMatch, TGenerex, TGenerexMatch>(this T[] input, GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, int? endAt = null)
             where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<T> { return generex.MatchReverse(input, endAt); }
+            where TGenerexMatch : GenerexMatch<T>
+        { return generex.MatchReverse(input, endAt); }
 
         /// <summary>
         ///     Returns a sequence of non-overlapping regular expression matches going backwards (starting at the end of the
@@ -435,7 +439,8 @@ namespace RT.Generexes
         ///     Optional index at which to begin the reverse search. Matches that end at or after this index are not included.</param>
         public static IEnumerable<TGenerexMatch> MatchesReverse<T, TMatch, TGenerex, TGenerexMatch>(this T[] input, GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, int? endAt = null)
             where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<T> { return generex.MatchesReverse(input, endAt); }
+            where TGenerexMatch : GenerexMatch<T>
+        { return generex.MatchesReverse(input, endAt); }
 
         /// <summary>
         ///     Returns a sequence of non-overlapping regular expression matches, optionally starting the search at the
@@ -460,7 +465,8 @@ namespace RT.Generexes
         ///     false.</remarks>
         public static IEnumerable<TGenerexMatch> Matches<T, TMatch, TGenerex, TGenerexMatch>(this T[] input, GenerexBase<T, TMatch, TGenerex, TGenerexMatch> generex, int startAt = 0)
             where TGenerex : GenerexBase<T, TMatch, TGenerex, TGenerexMatch>
-            where TGenerexMatch : GenerexMatch<T> { return generex.Matches(input, startAt); }
+            where TGenerexMatch : GenerexMatch<T>
+        { return generex.Matches(input, startAt); }
 
         /// <summary>
         ///     Returns a regular expression that always matches and returns a zero-width match.</summary>

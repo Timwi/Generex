@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace RT.Generexes
+﻿namespace RT.Generexes
 {
     /// <summary>
     ///     Abstract base class for all Generex regular expressions.</summary>

@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 
 namespace RT.Generexes
 {
     /// <summary>Provides regular-expression functionality for strings.</summary>
-    public sealed class Stringerex : GenerexNoResultBase<char, Stringerex, StringerexMatch>
+    public class Stringerex : GenerexNoResultBase<char, Stringerex, StringerexMatch>
     {
         /// <summary>
         ///     Instantiates a <see cref="GenerexMatch{T}"/> object from an index and length.</summary>

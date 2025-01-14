@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace RT.Generexes
+﻿namespace RT.Generexes
 {
     /// <summary>
     ///     Provides regular-expression functionality for strings.</summary>
@@ -9,7 +6,7 @@ namespace RT.Generexes
     ///     Type of the result object associated with each match of the regular expression.</typeparam>
     /// <remarks>
     ///     This type is not directly instantiated; use <see cref="Stringerex.Process"/>.</remarks>
-    public sealed class Stringerex<TResult> : GenerexWithResultBase<char, TResult, Stringerex<TResult>, StringerexMatch<TResult>>
+    public class Stringerex<TResult> : GenerexWithResultBase<char, TResult, Stringerex<TResult>, StringerexMatch<TResult>>
     {
         /// <summary>
         ///     Instantiates a <see cref="GenerexMatch{T}"/> object from an index, length and result object.</summary>

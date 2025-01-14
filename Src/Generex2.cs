@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace RT.Generexes
+﻿namespace RT.Generexes
 {
     /// <summary>
     ///     Provides regular-expression functionality for collections of arbitrary objects.</summary>
@@ -11,7 +8,7 @@ namespace RT.Generexes
     ///     Type of the result object associated with each match of the regular expression.</typeparam>
     /// <remarks>
     ///     This type is not directly instantiated; use <see cref="Generex{T}.Process"/>.</remarks>
-    public sealed class Generex<T, TResult> : GenerexWithResultBase<T, TResult, Generex<T, TResult>, GenerexMatch<T, TResult>>
+    public class Generex<T, TResult> : GenerexWithResultBase<T, TResult, Generex<T, TResult>, GenerexMatch<T, TResult>>
     {
         /// <summary>
         ///     Instantiates a <see cref="GenerexMatch{T}"/> object from an index, length and result object.</summary>

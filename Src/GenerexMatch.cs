@@ -1,5 +1,4 @@
-﻿
-namespace RT.Generexes
+﻿namespace RT.Generexes
 {
     /// <summary>
     ///     Represents the result of a regular expression match using <see cref="Generex{T}"/>.</summary>

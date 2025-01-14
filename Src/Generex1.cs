@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace RT.Generexes
+﻿namespace RT.Generexes
 {
     /// <summary>
     ///     Provides regular-expression functionality for collections of arbitrary objects.</summary>
     /// <typeparam name="T">
     ///     Type of the objects in the collection.</typeparam>
-    public sealed class Generex<T> : GenerexNoResultBase<T, Generex<T>, GenerexMatch<T>>
+    public class Generex<T> : GenerexNoResultBase<T, Generex<T>, GenerexMatch<T>>
     {
         /// <summary>
         ///     Instantiates a <see cref="GenerexMatch{T}"/> object from an index and length.</summary>
